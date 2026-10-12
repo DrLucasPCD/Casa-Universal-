@@ -1,14 +1,10 @@
 import argparse
-import hmac
 import ipaddress
 import json
 import mimetypes
 import os
-import secrets
 import socket
 import ssl
-import time
-from http.cookies import SimpleCookie
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlsplit, parse_qs
 
@@ -27,8 +23,6 @@ class CasaServer(ThreadingHTTPServer):
         from .generic_remote import GenericRemotes
         self.generic_remotes = GenericRemotes(self.controller)
         self.cloud = None
-        self.sessions = {}
-        self.attempts = {}
         self.use_tls = False
         self.allowed_hosts = {"localhost", "127.0.0.1"}
         try:
@@ -49,7 +43,7 @@ class Handler(BaseHTTPRequestHandler):
     def local(self):
         return ipaddress.ip_address(self.client_address[0]).is_loopback
 
-    def send(self, status, body, content_type="application/json", cookie=None):
+    def send(self, status, body, content_type="application/json"):
         data = json.dumps(body, ensure_ascii=False).encode() if content_type == "application/json" else body
         self.send_response(status)
         self.send_header("Content-Type", content_type)
@@ -58,8 +52,6 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header("Content-Security-Policy", "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'")
-        if cookie:
-            self.send_header("Set-Cookie", cookie)
         self.end_headers()
         try:
             self.wfile.write(data)
@@ -73,31 +65,13 @@ class Handler(BaseHTTPRequestHandler):
         except ValueError:
             return False
 
-    def authenticated(self):
-        try:
-            cookie = SimpleCookie(self.headers.get("Cookie", ""))
-            value = cookie["casa_session"].value
-            return self.server.sessions.get(value, 0) > time.time()
-        except (KeyError, ValueError):
-            return False
-
-    def session(self):
-        now = time.time()
-        self.server.sessions = {k: v for k, v in self.server.sessions.items() if v > now}
-        key = secrets.token_urlsafe(32)
-        self.server.sessions[key] = now + 8 * 3600
-        secure = "; Secure" if self.server.use_tls else ""
-        self.send(200, {"authenticated": True}, cookie=f"casa_session={key}; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800{secure}")
-
     def do_GET(self):
         if not self.valid_host():
             return self.send(403, {"error": "Endereço do painel não autorizado."})
         path = urlsplit(self.path).path
         if path == "/api/session":
-            return self.send(200, {"authenticated": self.authenticated(), "local": self.local})
+            return self.send(200, {"authenticated": True, "local": self.local})
         if path.startswith("/api/"):
-            if not self.authenticated():
-                return self.send(401, {"error": "Entre no painel para continuar."})
             controller = self.server.controller
             if path == "/api/devices":
                 return self.send(200, {"devices": controller.devices()})
@@ -125,8 +99,6 @@ class Handler(BaseHTTPRequestHandler):
                 enabled = self.server.server_address[0] == "0.0.0.0"
                 urls = [f"{scheme}://{ip}:{self.server.server_port}" for ip in self.server.allowed_hosts if ip not in ("localhost", "127.0.0.1")]
                 return self.send(200, {"lan": enabled, "urls": sorted(urls), "tls": self.server.use_tls, "local": self.local})
-            if path == "/api/access" and self.local:
-                return self.send(200, {"key": controller.store.setting("access_key")})
             return self.send(404, {"error": "Rota não encontrada."})
         files = {"/": "index.html", "/index.html": "index.html", "/app.js": "app.js", "/style.css": "style.css", "/manifest.webmanifest": "manifest.webmanifest", "/sw.js": "sw.js", "/icon.svg": "icon.svg", "/apple-touch-icon.png": "apple-touch-icon.png", "/icon-192.png": "icon-192.png", "/icon-512.png": "icon-512.png"}
         name = files.get(path)
@@ -156,29 +128,7 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(payload, dict):
                 raise DeviceError("Envie um objeto JSON.")
             path = urlsplit(self.path).path
-            if path == "/api/local-session":
-                if not self.local or self.headers.get("Host", "").split(":")[0] not in ("localhost", "127.0.0.1"):
-                    return self.send(403, {"error": "Use o código de acesso exibido no Mac."})
-                return self.session()
-            if path == "/api/login":
-                address = self.client_address[0]
-                now = time.time()
-                attempts = [t for t in self.server.attempts.get(address, []) if now - t < 60]
-                self.server.attempts[address] = attempts
-                if len(attempts) >= 5:
-                    return self.send(429, {"error": "Aguarde um minuto antes de tentar novamente."})
-                key = payload.get("key", "")
-                if not isinstance(key, str) or not hmac.compare_digest(key, self.server.controller.store.setting("access_key")):
-                    attempts.append(now)
-                    return self.send(401, {"error": "Código de acesso incorreto."})
-                return self.session()
-            if not self.authenticated():
-                return self.send(401, {"error": "Entre no painel para continuar."})
             controller = self.server.controller
-            if path == "/api/logout":
-                cookie = SimpleCookie(self.headers.get("Cookie", ""))
-                self.server.sessions.pop(cookie["casa_session"].value, None)
-                return self.send(200, {"authenticated": False}, cookie="casa_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0")
             if path == "/api/cloud/sync":
                 if not self.local or not self.server.cloud:
                     return self.send(403,{"error":"Gerencie a sincronização neste Mac."})
@@ -224,7 +174,7 @@ class Handler(BaseHTTPRequestHandler):
 def main():
     os.umask(0o077)
     parser = argparse.ArgumentParser(description="Painel Casa Universal")
-    parser.add_argument("--lan", action="store_true", help="Permite acesso no Wi-Fi de casa, com código de acesso")
+    parser.add_argument("--lan", action="store_true", help="Permite acesso direto no Wi-Fi de casa")
     parser.add_argument("--port", type=int, default=8787)
     parser.add_argument("--open", action="store_true", help="Abre o painel no navegador")
     parser.add_argument("--cert", help="Certificado TLS para HTTPS")

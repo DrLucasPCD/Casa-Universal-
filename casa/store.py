@@ -23,8 +23,7 @@ class Store:
             db.execute("CREATE TABLE IF NOT EXISTS cloud_saved (id TEXT PRIMARY KEY, hash TEXT NOT NULL)")
             db.execute("CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY, value TEXT NOT NULL)")
             db.execute("CREATE TABLE IF NOT EXISTS audit (id INTEGER PRIMARY KEY, timestamp TEXT DEFAULT CURRENT_TIMESTAMP, device TEXT, action TEXT, result TEXT)")
-            for key in ("access_key", "confirmation_key"):
-                db.execute("INSERT OR IGNORE INTO settings VALUES (?, ?)", (key, secrets.token_urlsafe(32)))
+            db.execute("INSERT OR IGNORE INTO settings VALUES (?, ?)", ("confirmation_key", secrets.token_urlsafe(32)))
             defaults = [
                 ("tv", "Samsung DU8000 · 50″", "Sala", "tv"),
                 ("broadlink", "Controle BroadLink", "Sala", "remote"),

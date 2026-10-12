@@ -68,13 +68,13 @@ O IP público informado anteriormente para a cortina não foi consultado. A cone
 
 ## No iPhone, sem conta de desenvolvedor
 
-Abra **No iPhone** no painel do Mac: ele mostra o endereço da rede local e o botão **Mostrar código de acesso**. No iPhone conectado ao mesmo Wi-Fi, abra esse endereço no Safari, entre com o código e escolha **Compartilhar → Adicionar à Tela de Início**. Essa instalação é uma web app e não exige App Store nem conta de desenvolvedor. [Guia Apple](https://support.apple.com/pt-br/guide/iphone/iphea86e5236/ios)
+Abra **No iPhone** no painel do Mac: ele mostra o endereço da rede local. No iPhone conectado ao mesmo Wi-Fi, abra esse endereço no Safari e escolha **Compartilhar → Adicionar à Tela de Início**. Essa instalação é uma web app e não exige App Store nem conta de desenvolvedor. [Guia Apple](https://support.apple.com/pt-br/guide/iphone/iphea86e5236/ios)
 
 O Bluetooth é operado pelo Mac; Safari/iOS não disponibiliza Web Bluetooth. No Mac, permita Bluetooth para o aplicativo que está executando o Python/Terminal/Codex quando o sistema solicitar. Acorde a fechadura e aproxime o Mac. Anúncios sem nome também aparecem, e nem todo Bluetooth é uma fechadura.
 
 Como o Mac ficará ligado apenas durante os testes, o painel também funciona apenas nesse período. O uso permanente de todos os protocolos requer uma ponte sempre ligada, com Bluetooth ao alcance da fechadura. Não há central permanente instalada neste projeto. Para acesso fora da rede de casa, será necessária uma conexão privada com essa ponte. Não abra a porta do painel na internet.
 
-O modo Wi-Fi de testes usa HTTP com código e sessão. Para HTTPS, o servidor aceita `--cert certificado.pem --key chave.pem`; use um certificado confiável nos aparelhos. O cache offline exige HTTPS e guarda apenas a interface, nunca comandos pendentes ou respostas de dispositivos. A interface não controla dispositivos com a ponte desligada.
+O modo Wi-Fi de testes usa HTTP e abre os controles diretamente, sem código de acesso. Para HTTPS, o servidor aceita `--cert certificado.pem --key chave.pem`; use um certificado confiável nos aparelhos. O cache offline exige HTTPS e guarda apenas a interface, nunca comandos pendentes ou respostas de dispositivos. A interface não controla dispositivos com a ponte desligada.
 
 ## Controle pelo assistente
 
@@ -100,7 +100,7 @@ O painel de ar-condicionado separa temperatura ambiente, ajuste escolhido e esta
 
 O projeto Firebase `controle-universal-db135` está configurado em `firebase/config.json`. A ponte autentica sua identidade persistente no Firebase Authentication e usa a API REST oficial do Firestore. Cada controle fica em `casas/{uid}/controles/{id}`. A configuração web do Firebase identifica o projeto; não é uma credencial de administrador. O aplicativo não depende de importar o SDK no navegador nem permite acesso público ao banco.
 
-Nomes, cômodos, informações de conexão sem credenciais, perfis, botões personalizados e sinais IR são salvos. O campo `data` contém JSON compactado com zlib e codificado em Base64 para acomodar perfis grandes dentro do limite por documento. `name`, `room`, `kind`, `digest` e `savedAt` identificam o registro. Compactação não é criptografia; as regras privadas controlam o acesso. Tokens de TV/central, `local_key`, `device_key`, código de acesso do painel, identidade/refresh token Firebase, histórico e leituras ao vivo não são enviados.
+Nomes, cômodos, informações de conexão sem credenciais, perfis, botões personalizados e sinais IR são salvos. O campo `data` contém JSON compactado com zlib e codificado em Base64 para acomodar perfis grandes dentro do limite por documento. `name`, `room`, `kind`, `digest` e `savedAt` identificam o registro. Compactação não é criptografia; as regras privadas controlam o acesso. Tokens de TV/central, `local_key`, `device_key`, identidade/refresh token Firebase, histórico e leituras ao vivo não são enviados.
 
 O SQLite continua sendo a cópia local. A alteração e a fila de envio são gravadas na mesma transação. A ponte verifica a fila a cada cinco segundos; falhas de internet são tentadas novamente após 45 segundos, sem exigir nova configuração. Apenas configurações alteradas são enviadas, não cada consulta de estado. Alterações feitas por MCP usam a mesma fila. A sincronização funciona enquanto a ponte HTTP estiver ligada. Em Conexões, a seção “Seus controles, salvos” mostra pendências e a última sincronização.
 

@@ -4,10 +4,10 @@ import threading
 import unittest
 import urllib.error
 import urllib.request
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, PropertyMock, patch
 
 from casa.controller import Controller, DeviceError
-from casa.server import CasaServer
+from casa.server import CasaServer, Handler
 from casa.sonoff import decrypt_data, encrypt_payload
 from casa.store import Store
 
@@ -140,15 +140,30 @@ class HttpTests(unittest.TestCase):
         req=urllib.request.Request(self.base+path,data=None if data is None else json.dumps(data).encode(),headers=headers)
         return urllib.request.urlopen(req,timeout=5)
 
-    def test_api_is_protected_and_cookie_bootstrap_is_local(self):
-        with self.assertRaises(urllib.error.HTTPError) as ctx:self.request('/api/devices')
-        self.assertEqual(ctx.exception.code,401)
-        with self.request('/api/local-session',{}) as r:cookie=r.headers['Set-Cookie'].split(';')[0]
-        with self.request('/api/devices',Cookie=cookie) as r:self.assertEqual(len(json.load(r)['devices']),8)
+    def test_devices_open_without_code_or_cookie_on_mac_and_lan(self):
+        with self.request('/api/devices') as r:self.assertEqual(len(json.load(r)['devices']),8)
+        with patch.object(Handler, 'local', new_callable=PropertyMock, return_value=False):
+            with self.request('/api/devices') as r:self.assertEqual(len(json.load(r)['devices']),8)
+            with self.request('/api/network') as r:self.assertFalse(json.load(r)['local'])
 
-    def test_cross_origin_bootstrap_blocked(self):
-        with self.assertRaises(urllib.error.HTTPError) as ctx:self.request('/api/local-session',{},Origin='https://evil.example')
+    def test_lan_actions_work_without_code_and_configuration_stays_local(self):
+        with patch.object(Handler, 'local', new_callable=PropertyMock, return_value=False), patch.object(self.server.controller, 'execute', return_value={'sent':True}) as execute:
+            with self.request('/api/action',{'id':'tuya','action':'on'}) as r:self.assertTrue(json.load(r)['sent'])
+            execute.assert_called_once_with('tuya','on',source='panel',confirmation='')
+            with self.assertRaises(urllib.error.HTTPError) as ctx:self.request('/api/configure',{'id':'tuya'})
+            self.assertEqual(ctx.exception.code,403)
+
+    def test_cross_origin_action_blocked(self):
+        with patch.object(self.server.controller, 'execute') as execute:
+            with self.assertRaises(urllib.error.HTTPError) as ctx:self.request('/api/action',{'id':'tuya','action':'on'},Origin='https://evil.example')
+            execute.assert_not_called()
         self.assertEqual(ctx.exception.code,403)
+
+    def test_access_code_routes_removed(self):
+        for path,data in [('/api/access',None),('/api/login',{}),('/api/local-session',{})]:
+            with self.subTest(path=path):
+                with self.assertRaises(urllib.error.HTTPError) as ctx:self.request(path,data)
+                self.assertEqual(ctx.exception.code,404)
 
     def test_dns_rebinding_host_blocked(self):
         with self.assertRaises(urllib.error.HTTPError) as ctx:self.request('/api/session',Host=f'evil.example:{self.server.server_port}')

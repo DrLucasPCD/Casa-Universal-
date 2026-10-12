@@ -13,7 +13,7 @@ O build copia apenas os nove arquivos públicos da interface. SQLite, chaves de 
 
 ## Usar no iPhone
 
-Inicie **Iniciar no Wi-Fi.command** no Mac. No painel local, abra **No iPhone** e consulte o endereço da central e o código de acesso. No site Netlify, informe esse endereço, por exemplo `http://192.168.1.100:8787`, e toque em **Abrir minha central**. O navegador navega para o painel local, onde você entra com o código. Isso não cria um proxy entre o Netlify e sua casa. O acesso HTTP local é o modo de testes já existente; para HTTPS, configure certificado confiável na central.
+Inicie **Iniciar no Wi-Fi.command** no Mac. No painel local, abra **No iPhone** e consulte o endereço da central. No site Netlify, informe esse endereço, por exemplo `http://192.168.1.100:8787`, e toque em **Abrir minha central**. O navegador navega para o painel local, que abre os controles diretamente, sem código de acesso. Isso não cria um proxy entre o Netlify e sua casa. O acesso HTTP local é o modo de testes já existente; para HTTPS, configure certificado confiável na central.
 
 O endereço é salvo somente no navegador. Não há descoberta automática da central pelo site, leitura direta do Firestore, sincronização de sessões entre origens nem comando real no modo de demonstração. Adicione o endereço **da central** à Tela de Início para abrir os controles diretamente. Salvar o site Netlify na Tela de Início abre a entrada pública.
 

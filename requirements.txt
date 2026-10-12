@@ -1,0 +1,7 @@
+broadlink==0.19.0
+tinytuya==1.20.0
+samsungtvws==3.0.6
+mcp==2.3.0
+bleak==3.0.2
+zeroconf==0.151.5
+cryptography==50.0.2

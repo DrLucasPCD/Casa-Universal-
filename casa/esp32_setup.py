@@ -7,6 +7,9 @@ import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import serial
+from .remote_setup import prepare, DIRECTORY, SITE
+import urllib.request
+import urllib.error
 
 ROOT=Path(__file__).resolve().parent.parent
 PAGE='''<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Casa · Configurar ESP32</title>
@@ -14,10 +17,13 @@ PAGE='''<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="view
 <main><small>CASA UNIVERSAL · CENTRAL ESP32</small><h1>Sua casa, sem o Mac ligado.</h1><p>Conecte a placa ao Wi-Fi de casa. Os dados são enviados somente pelo USB para seu ESP32.</p>
 <section><h2>Wi-Fi de casa</h2><form id="wifi"><label>Nome da rede (2,4 GHz)<input name="ssid" autocomplete="off" maxlength="32" required></label><label>Senha do Wi-Fi<input type="password" name="password" autocomplete="new-password" maxlength="63"></label><button>Conectar a central</button></form><p id="msg" role="status"></p></section>
 <section><h2>Seu painel</h2><p id="status">Consultando a placa…</p><div id="link"></div><details><summary>Mostrar chave de conexão MCP</summary><p id="code">—</p></details><small>Esta chave é usada pelo cliente MCP. O painel abre diretamente, sem código. Os controles salvos permanecem na placa ao desligar o Mac.</small></section>
+<section><h2>Casa Universal no ChatGPT</h2><p>Ative uma vez a conexão remota. Depois, o ESP32 funciona sem o Mac ligado.</p><ol><li>Clique em <b>Preparar conexão</b>.</li><li>Baixe o arquivo privado e importe no Netlify: <b>Project configuration → Environment variables → Add a variable → Import from a .env file</b>. Use o contexto <b>Production</b> e o escopo <b>Functions</b> (ou All scopes).</li><li>Faça um novo deploy no Netlify e clique em <b>Ativar no ESP32</b>.</li><li>No ChatGPT pelo navegador, adicione <b>https://casa-universal.netlify.app/mcp</b> com autenticação OAuth. Na autorização, use a chave ChatGPT abaixo.</li></ol><button id="prepare">Preparar conexão</button><div id="remote-files" hidden><p><a class="button" href="/remote/env" download="casa-netlify.env">Baixar configuração privada do Netlify</a></p><details><summary>Mostrar chave ChatGPT</summary><input id="pairing-key" type="password" readonly autocomplete="off"><button id="show-key" type="button">Mostrar</button><p>Use esta chave somente na página de autorização da Casa Universal. Ela é diferente da chave MCP local.</p></details><p><button id="enable">Ativar no ESP32</button> <button id="disable">Desativar conexão remota</button></p></div><p id="remote-message" role="status"></p><small>O arquivo contém chaves privadas desta conexão. Importe somente no seu projeto Netlify; ele não deve ir para o GitHub. O painel local continua abrindo sem código.</small></section>
 <p>Samsung e BroadLink têm drivers locais. Fechadura HAHA, Tuya e Sonoff permanecem pendentes nesta primeira versão. O catálogo possui 387 perfis para testar e confirmar no aparelho.</p></main>
 <script src="/setup.js"></script></html>'''
 SCRIPT='''let busy=false;async function info(){if(busy)return;try{const r=await fetch('/info'),d=await r.json();if(!r.ok)throw new Error(d.error);document.querySelector('#code').textContent=d.access_key;document.querySelector('#status').textContent=d.wifi_connected?'Central conectada: '+d.ip+' · '+d.devices+' aparelhos cadastrados':'A placa está pronta. Preencha o Wi-Fi acima.';const link=document.querySelector('#link');link.replaceChildren();if(d.wifi_connected){const a=document.createElement('a');a.href='http://'+d.ip;a.className='button';a.textContent='Abrir Casa Universal';link.append(a);}}catch(e){document.querySelector('#status').textContent=e.message;}}
-document.querySelector('#wifi').addEventListener('submit',async e=>{e.preventDefault();busy=true;const b=e.target.querySelector('button');b.disabled=true;try{const r=await fetch('/wifi',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ssid:e.target.ssid.value,password:e.target.password.value})}),d=await r.json();if(!r.ok)throw new Error(d.error);e.target.password.value='';document.querySelector('#msg').textContent='Dados enviados pelo USB. Aguardando conexão com o roteador…';}catch(error){document.querySelector('#msg').textContent=error.message;}finally{busy=false;b.disabled=false;info();}});info();setInterval(info,3000);'''
+document.querySelector('#wifi').addEventListener('submit',async e=>{e.preventDefault();busy=true;const b=e.target.querySelector('button');b.disabled=true;try{const r=await fetch('/wifi',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ssid:e.target.ssid.value,password:e.target.password.value})}),d=await r.json();if(!r.ok)throw new Error(d.error);e.target.password.value='';document.querySelector('#msg').textContent='Dados enviados pelo USB. Aguardando conexão com o roteador…';}catch(error){document.querySelector('#msg').textContent=error.message;}finally{busy=false;b.disabled=false;info();}});info();setInterval(info,3000);
+async function remote(op){busy=true;const msg=document.querySelector('#remote-message');msg.textContent='Verificando conexão…';try{const r=await fetch('/remote/'+op,{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}),d=await r.json();if(!r.ok)throw new Error(d.error);if(d.pairing_key){document.querySelector('#pairing-key').value=d.pairing_key;document.querySelector('#remote-files').hidden=false;}msg.textContent=d.message;}catch(e){msg.textContent=e.message;}finally{busy=false;}}
+document.querySelector('#prepare').addEventListener('click',()=>remote('prepare'));document.querySelector('#enable').addEventListener('click',()=>remote('enable'));document.querySelector('#disable').addEventListener('click',()=>remote('disable'));document.querySelector('#show-key').addEventListener('click',e=>{const input=document.querySelector('#pairing-key');input.type=input.type==='password'?'text':'password';e.target.textContent=input.type==='password'?'Mostrar':'Ocultar';});'''
 
 class USB:
     def __init__(self,port):
@@ -59,6 +65,14 @@ class Handler(BaseHTTPRequestHandler):
         if not self.allowed():return self.send(403,{'error':'Abra a configuração neste Mac.'})
         if self.path=='/':return self.send(200,PAGE,'text/html; charset=utf-8')
         if self.path=='/setup.js':return self.send(200,SCRIPT,'application/javascript')
+        if self.path=='/remote/env':
+            if self.headers.get('Sec-Fetch-Site')=='cross-site':return self.send(403,{'error':'Use a página local de configuração.'})
+            path=DIRECTORY/'netlify.env'
+            if not path.exists():return self.send(404,{'error':'Prepare a conexão primeiro.'})
+            return self.send(200,path.read_text(),'text/plain; charset=utf-8')
+        if self.path=='/remote/status':
+            try:return self.send(200,self.server.usb.request({'op':'remote_status'}))
+            except (ValueError,serial.SerialException):return self.send(503,{'error':'A placa ainda não respondeu pelo USB.'})
         if self.path=='/info':
             try:
                 info=self.server.usb.request({'op':'info'})
@@ -72,6 +86,27 @@ class Handler(BaseHTTPRequestHandler):
         if not self.allowed() or self.headers.get('Origin')!='http://'+self.headers.get('Host','') or self.headers.get('Content-Type')!='application/json':return self.send(403,{'error':'Use o formulário local.'})
         try:
             size=int(self.headers.get('Content-Length','0'))
+            if self.path.startswith('/remote/'):
+                if not 0<size<2048:raise ValueError('Solicitação inválida.')
+                json.loads(self.rfile.read(size))
+                if self.path=='/remote/prepare':
+                    settings=prepare()
+                    return self.send(200,{'pairing_key':settings['pairing_key'],'message':'Arquivo privado pronto. Importe no Netlify e faça um novo deploy antes de ativar a placa.'})
+                if self.path=='/remote/disable':
+                    self.server.usb.request({'op':'remote','enabled':False})
+                    return self.send(200,{'message':'Conexão remota desativada. O painel local continua disponível.'})
+                if self.path=='/remote/enable':
+                    settings=prepare()
+                    request=urllib.request.Request(SITE+'/bridge/status',headers={'Authorization':'Bearer '+settings['token']})
+                    try:
+                        with urllib.request.urlopen(request,timeout=12) as response:
+                            state=json.load(response)
+                        if not state.get('configured'):raise ValueError('Ponte ainda não está pronta.')
+                    except (urllib.error.URLError,ValueError,TimeoutError):
+                        return self.send(409,{'error':'O Netlify ainda não confirmou a configuração. Importe o arquivo privado nas variáveis de Production/Functions e faça um novo deploy.'})
+                    self.server.usb.request({'op':'remote','enabled':True,'url':SITE,'token':settings['token']})
+                    return self.send(200,{'message':'ESP32 ativado. Aguarde até 15 segundos e conecte Casa Universal no ChatGPT com OAuth.'})
+                raise ValueError('Operação inválida.')
             if self.path!='/wifi' or not 0<size<2048:raise ValueError('Solicitação inválida.')
             payload=json.loads(self.rfile.read(size));ssid=payload['ssid'];password=payload['password']
             if not isinstance(ssid,str) or not 1<=len(ssid.encode())<=32 or not isinstance(password,str) or len(password)>63:raise ValueError('Confira nome e senha da rede.')

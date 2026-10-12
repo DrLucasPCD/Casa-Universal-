@@ -70,6 +70,8 @@ O painel local usa HTTP e não tem cache offline de PWA. Ao abrir o site Netlify
 
 ## MCP no cliente local
 
+Para conectar diretamente no **ChatGPT**, com o Mac desligado depois da instalação, siga [Casa Universal no ChatGPT](../../docs/chatgpt.md). A ponte do Netlify precisa das variáveis privadas e da autorização OAuth; ela não é ativada apenas ao publicar o site.
+
 Use o exemplo [docs/mcp-esp32.example.toml](../../docs/mcp-esp32.example.toml) com o IP e a chave privada do MCP. O endpoint é `http://IP_DA_PLACA/mcp`; o cabeçalho é `Authorization: Bearer CHAVE`. O cliente MCP precisa estar na rede de casa, mesmo que o painel de entrada esteja hospedado no Netlify. A placa mantém painel e MCP ligados sem Mac; o assistente precisa de um cliente capaz de alcançar esse endereço.
 
 As ferramentas de consulta distinguem **estado desconhecido** de desligado. Abertura de fechadura não está disponível. Testes IR enviam sinais reais e a associação de botões exige a confirmação do resultado observado no aparelho.

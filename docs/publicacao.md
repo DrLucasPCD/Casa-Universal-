@@ -13,6 +13,8 @@ O build copia apenas os nove arquivos públicos da interface. SQLite, chaves de 
 
 ## Usar no iPhone
 
+Para comandos pelo **ChatGPT**, consulte [o guia da conexão remota](chatgpt.md). O endpoint `https://casa-universal.netlify.app/mcp` é uma função autenticada e precisa das variáveis privadas de produção; não encaminhe o endereço HTTP local como URL pública do ChatGPT.
+
 Com o ESP32 ligado e o iPhone no mesmo Wi-Fi, abra o site Netlify. Ele abre automaticamente o painel pelo nome `casa-universal.local`. O firmware anuncia esse nome por mDNS; a rede precisa permitir sua resolução. Isso dispensa preencher o IP, mas não faz uma varredura da rede nem cria um proxy entre o Netlify e sua casa.
 
 Para outra central, como o servidor de testes do Mac, ou quando a rede não resolve nomes `.local`, abra `SEU_SITE_NETLIFY/?configurar=1`. Nessa tela você pode informar outro endereço e salvá-lo neste navegador; nas próximas aberturas ele também será usado automaticamente. **Usar conexão automática** remove essa escolha e volta ao nome do ESP32. Se a central estiver desligada ou o iPhone estiver fora de casa, o navegador poderá mostrar uma falha de conexão. A entrada pública não consegue verificar antecipadamente uma central HTTP a partir do site HTTPS.

@@ -1,5 +1,6 @@
 #include "common.h"
 #include "cloud.h"
+#include "remote.h"
 #include <WebServer.h>
 #include <LittleFS.h>
 #include <Preferences.h>
@@ -101,6 +102,7 @@ static bool route(const String& path,JsonObject p,Doc& result) {
   lastError="";
   if(path=="/api/devices"||path=="/api/status") {auto arr=result.createNestedArray("devices");for(auto d:house["devices"].as<JsonArray>())publicDevice(d,arr.createNestedObject(),path.endsWith("status"));return true;}
   if(path=="/api/network") {result["local"]=true;result["backend"]="esp32";result["controller"]="ESP32-S3";result["lan"]=WiFi.status()==WL_CONNECTED;result["tls"]=false;auto urls=result.createNestedArray("urls");if(WiFi.status()==WL_CONNECTED)urls.add("http://"+WiFi.localIP().toString());result["flash_bytes"]=ESP.getFlashChipSize();result["psram_bytes"]=ESP.getPsramSize();result["free_psram"]=ESP.getFreePsram();return true;}
+  if(path=="/api/remote"){remoteStatus(result);return true;}
   if(path=="/api/cloud"||path=="/api/cloud/sync"){if(path.endsWith("sync"))cloudChanged();cloudStatus(result);return true;}
   if(path=="/api/access"){result["key"]=accessKey;return true;}
   if(path=="/api/history"){result.set(history);return true;}
@@ -139,6 +141,22 @@ static bool route(const String& path,JsonObject p,Doc& result) {
     d["adapter"]=adapter;if(!saveHouse())return false;publicDevice(d,result.to<JsonObject>());return true;
   }
   lastError="Função ainda indisponível nesta central.";return false;
+}
+bool runRemoteTool(const String& name,JsonObject args,Doc& result){
+  lastError="";String path;Doc mapped(2048);mapped.set(args);mapped["id"]=args["device_id"];
+  if(name=="listar_dispositivos")path="/api/devices";
+  else if(name=="consultar_casa"||name=="consultar_dispositivo")path="/api/status";
+  else if(name=="consultar_historico")path="/api/history";
+  else if(name=="controlar_dispositivo")path="/api/action";
+  else {lastError="Ferramenta indisponível na conexão remota.";return false;}
+  bool ok=route(path,mapped.as<JsonObject>(),result);if(!ok)return false;
+  // LAN addresses, credentials and arbitrary configuration stay local.
+  for(auto device:result["devices"].as<JsonArray>())device.as<JsonObject>().remove("config");
+  if(name=="consultar_dispositivo"){
+    Doc one(16384);bool found=false;for(auto device:result["devices"].as<JsonArray>())if(device["id"]==args["device_id"]){one.set(device);found=true;break;}
+    result.set(one);if(!found)lastError="Aparelho não encontrado.";return found;
+  }
+  return !result.overflowed();
 }
 static void mcp() {
   if(web.header("Origin").length()&&web.header("Origin")!="http://"+web.hostHeader()){error(403,"Origem não autorizada.");return;}
@@ -210,6 +228,8 @@ static void serialLoop() {
   while(Serial.available()){char c=Serial.read();if(c!='\n'){if(serialInput.length()<4096)serialInput+=c;else serialInput="";continue;}Doc command(8192),result(8192);auto err=deserializeJson(command,serialInput);serialInput="";if(err)continue;String op=command["op"]|"";
     if(op=="wifi"){String ssid=command["ssid"]|"",password=command["password"]|"";if(ssid.length()<1||ssid.length()>32||password.length()>63){result["error"]="Dados Wi-Fi inválidos.";}else{prefs.putString("ssid",ssid);prefs.putString("wifi_pass",password);WiFi.begin(ssid.c_str(),password.c_str());result["ok"]=true;}}
     else if(op=="info"){result["ok"]=true;result["wifi_connected"]=WiFi.status()==WL_CONNECTED;result["ip"]=WiFi.localIP().toString();result["ap_ssid"]=apName;result["ap_password"]=apPassword;result["access_key"]=accessKey;result["devices"]=house["devices"].size();result["flash_bytes"]=ESP.getFlashChipSize();result["psram_bytes"]=ESP.getPsramSize();result["free_heap"]=ESP.getFreeHeap();result["free_psram"]=ESP.getFreePsram();result["firmware"]="Casa Universal ESP32 0.2.0";}
+    else if(op=="remote"){result["ok"]=remoteConfigure(command.as<JsonObject>());if(!result["ok"].as<bool>())result["error"]=lastError;}
+    else if(op=="remote_status"){remoteStatus(result);result["ok"]=true;}
     else {result["error"]="Operação USB desconhecida.";}
     Serial.print("CASA_JSON:");serializeJson(result,Serial);Serial.println();
   }
@@ -220,9 +240,9 @@ void setup() {
   auto file=LittleFS.open("/state.json");if(!file||deserializeJson(house,file)){house.clear();file=LittleFS.open("/state.previous");if(!file||deserializeJson(house,file)){Serial.println("CASA_FATAL: cadastros inválidos; cópia do Mac preservada.");return;}}file.close();history.createNestedArray("history");
   prefs.begin("casa",false);accessKey=prefs.getString("access_key","");if(!accessKey.length()){accessKey=randomToken();prefs.putString("access_key",accessKey);}apPassword=prefs.getString("ap_password","");if(!apPassword.length()){apPassword=randomToken(8);prefs.putString("ap_password",apPassword);}
   WiFi.mode(WIFI_AP_STA);String mac=WiFi.macAddress();mac.replace(":","");apName="Casa-Universal-"+mac.substring(mac.length()-4);WiFi.softAP(apName.c_str(),apPassword.c_str());String ssid=prefs.getString("ssid","");if(ssid.length())WiFi.begin(ssid.c_str(),prefs.getString("wifi_pass","").c_str());
-  cloudInit();const char* collected[]={"Cookie","Origin","Content-Type","Authorization"};web.collectHeaders(collected,4);web.onNotFound(handle);web.begin();Serial.println("CASA_READY: use a configuração USB local para conectar ao Wi-Fi.");
+  cloudInit();remoteInit();const char* collected[]={"Cookie","Origin","Content-Type","Authorization"};web.collectHeaders(collected,4);web.onNotFound(handle);web.begin();Serial.println("CASA_READY: use a configuração USB local para conectar ao Wi-Fi.");
 }
 void loop() {
   serialLoop();web.handleClient();samsungLoop();if(WiFi.status()==WL_CONNECTED&&!mdnsStarted){mdnsStarted=MDNS.begin("casa-universal");if(mdnsStarted)MDNS.addService("http","tcp",80);}
-  if(WiFi.status()==WL_CONNECTED&&WiFi.softAPgetStationNum()==0&&millis()>120000)WiFi.softAPdisconnect(true);cloudPoll();delay(2);
+  if(WiFi.status()==WL_CONNECTED&&WiFi.softAPgetStationNum()==0&&millis()>120000)WiFi.softAPdisconnect(true);cloudPoll();remotePoll();delay(2);
 }

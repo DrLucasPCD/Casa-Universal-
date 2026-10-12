@@ -62,7 +62,7 @@ cp .tools/mklittlefs-src/mklittlefs .tools/platformio/packages/tool-mklittlefs/m
 
 Abra `http://127.0.0.1:8866/` neste Mac. Preencha o Wi-Fi de **2,4 GHz** e sua senha. O formulário envia os dados pelo USB e mostra o IP recebido do roteador. O nome e a senha ficam na NVS da placa; não são registrados em logs nem enviados ao Firebase.
 
-No Safari do iPhone, na mesma rede, abra `http://IP_DA_PLACA/`. O código para entrar fica na seção recolhida **Mostrar código de acesso da central** da tela USB. O painel mantém uma sessão por oito horas; o código persiste ao reiniciar a placa. O endereço `http://casa-universal.local/` também é anunciado por mDNS quando a rede permite. Reserve o IP da placa no roteador para evitar mudanças de endereço.
+No Safari do iPhone, na mesma rede, abra `http://IP_DA_PLACA/`. O painel abre diretamente, sem código de acesso. A chave de autenticação do MCP permanece privada e fica na seção recolhida **Mostrar chave de conexão MCP** da tela USB. O endereço `http://casa-universal.local/` também é anunciado por mDNS quando a rede permite. Reserve o IP da placa no roteador para evitar mudanças de endereço.
 
 Depois, alimente a placa com um carregador USB. O Mac e o servidor de configuração podem ser desligados. A placa não fornece energia ao BroadLink: ele continua conectado normalmente.
 
@@ -70,7 +70,7 @@ O painel local usa HTTP e não tem cache offline de PWA. No Netlify, informe o I
 
 ## MCP no cliente local
 
-Use o exemplo [docs/mcp-esp32.example.toml](../../docs/mcp-esp32.example.toml) com o IP e o código privados da central. O endpoint é `http://IP_DA_PLACA/mcp`; o cabeçalho é `Authorization: Bearer CODIGO`. O cliente MCP precisa estar na rede de casa, mesmo que o painel de entrada esteja hospedado no Netlify. A placa mantém painel e MCP ligados sem Mac; o assistente precisa de um cliente capaz de alcançar esse endereço.
+Use o exemplo [docs/mcp-esp32.example.toml](../../docs/mcp-esp32.example.toml) com o IP e a chave privada do MCP. O endpoint é `http://IP_DA_PLACA/mcp`; o cabeçalho é `Authorization: Bearer CHAVE`. O cliente MCP precisa estar na rede de casa, mesmo que o painel de entrada esteja hospedado no Netlify. A placa mantém painel e MCP ligados sem Mac; o assistente precisa de um cliente capaz de alcançar esse endereço.
 
 As ferramentas de consulta distinguem **estado desconhecido** de desligado. Abertura de fechadura não está disponível. Testes IR enviam sinais reais e a associação de botões exige a confirmação do resultado observado no aparelho.
 

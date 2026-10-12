@@ -22,10 +22,6 @@ def build():
         raw=(ROOT/'static'/name).read_bytes()
         if name=='app.js':
             text=raw.decode().replace('Mac','ESP32').replace('Ponte no ESP32','Central ESP32')
-            marker="main.append(node('p','loading','Conectando à ponte local…'));"
-            assert text.count(marker)==1
-            text=text.replace(marker,"try{const session=await api('/api/session');if(!session.authenticated){espLogin();return;}}catch(error){toast(error.message);return;}\n  "+marker)
-            text+='\n'+(ROOT/'firmware/esp32/web/auth.js').read_text()
             raw=text.encode()
         (target / (name+'.gz')).write_bytes(gzip.compress(raw,mtime=0))
     for name in ('index.json','LICENSE-SmartIR.txt'):

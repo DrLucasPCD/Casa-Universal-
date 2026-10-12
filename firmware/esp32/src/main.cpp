@@ -181,9 +181,10 @@ static void mcp() {
 static void handle() {
   if(!validHost()){error(403,"Endereço não autorizado.");return;}String path=web.uri();
   if(path=="/mcp"){mcp();return;}
+  if(path=="/api/access"&&!authenticated(true)){error(401,"A chave MCP é privada; consulte a configuração USB.");return;}
   if(web.method()==HTTP_GET){
-    if(path=="/api/session"){Doc d(256);d["authenticated"]=authenticated();d["local"]=false;reply(200,d.as<JsonVariantConst>());return;}
-    if(path.startsWith("/api/")){if(!authenticated()){error(401,"Entre com o código da central.");return;}
+    if(path=="/api/session"){Doc d(256);d["authenticated"]=true;d["local"]=true;reply(200,d.as<JsonVariantConst>());return;}
+    if(path.startsWith("/api/")){
       if(path=="/api/ir/catalog"){if(!streamFile("/catalog-index.json","application/json"))error(404,"Catálogo não encontrado.");return;}
       if(path=="/api/remotes/templates"){streamFile("/templates.json","application/json");return;}
       if(path=="/api/ir/profile"){String id=web.arg("id");if(id.length()>50||id.indexOf('/')>=0||id.indexOf('.')>=0||!streamFile("/profiles/"+id+".json.gz","application/json",true))error(404,"Perfil não encontrado.");return;}
@@ -201,7 +202,6 @@ static void handle() {
     if(millis()-badLoginAt>=60000){badLogins=0;badLoginAt=millis();}if(badLogins>=5){error(429,"Aguarde um minuto.");return;}
     if(!equalSecret(input["key"]|"",accessKey)){badLogins++;error(401,"Código incorreto.");return;}String key=randomToken();if(sessions.size()>=12)sessions.erase(sessions.begin());sessions.push_back({key,millis()+28800000});web.sendHeader("Set-Cookie","casa_session="+key+"; HttpOnly; SameSite=Strict; Path=/; Max-Age=28800");Doc d(256);d["authenticated"]=true;reply(200,d.as<JsonVariantConst>());return;
   }
-  if(!authenticated()){error(401,"Entre no painel.");return;}
   if(path=="/api/logout"){String cookie=web.header("Cookie");sessions.erase(std::remove_if(sessions.begin(),sessions.end(),[&](Session& s){return cookie.indexOf(s.key)>=0;}),sessions.end());web.sendHeader("Set-Cookie","casa_session=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0");Doc d(256);d["authenticated"]=false;reply(200,d.as<JsonVariantConst>());return;}
   Doc result(768000);if(route(path,input.as<JsonObject>(),result))reply(200,result.as<JsonVariantConst>());else error(400,lastError);
 }

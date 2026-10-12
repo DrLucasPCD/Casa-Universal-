@@ -1,0 +1,585 @@
+{
+  "rea_version": "6.4.0",
+  "rea_revision": "ec2d251c0ad8382e0665546be5ec8f5f1c175962",
+  "evidence": [
+    {
+      "file": "broadlink-control-class.json",
+      "evidence_id": "ev_b91184f353ebb0892546831e2331002a495dfed1c6830fe2af4c9050b370a3d3",
+      "operation": "inspect_android_class",
+      "subject_name": "BroadLink+-Universal+TV+Remote_1.8.40.c4f7cf3c1_APKPure.apk",
+      "digest": {
+        "sha256": "53515472ae20175d75d352f1140ab291e13131a7ae312a52b869a4c84957347f"
+      },
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 4096
+      },
+      "class_name": "cn.com.broadlink.sdk.result.BLControllerDNAControlResult"
+    },
+    {
+      "file": "broadlink-controller.json",
+      "evidence_id": "ev_7e99d30ab4c027c49cb76dc7ade38082d74ab6886cec787a8aeb76e934c792eb",
+      "operation": "inspect_android_class",
+      "subject_name": "BroadLink+-Universal+TV+Remote_1.8.40.c4f7cf3c1_APKPure.apk",
+      "digest": {
+        "sha256": "53515472ae20175d75d352f1140ab291e13131a7ae312a52b869a4c84957347f"
+      },
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 4096
+      },
+      "class_name": "cn.com.broadlink.sdk.BLLet.Controller"
+    },
+    {
+      "file": "broadlink-javascript.json",
+      "evidence_id": "ev_dfacf3a0ac7b70afd77ca5ad936d3e96eca1c5c1074033e266c50f4294639744",
+      "operation": "analyze_javascript_application",
+      "subject_name": "broadlink-js",
+      "digest": {
+        "sha256": "c87896683e9697e3bf497ff850f3c7a332ce9aeeeed983785151799b4385b88c"
+      },
+      "confidence": "derived",
+      "limitations": [
+        "CommonJS and ESM binding relationships were recovered from inert syntax and resolved only within the inventoried artifact container.",
+        "JavaScript and HTML were parsed as inert text; bundle bootstrap code was never executed.",
+        "Static imports, entrypoints, workers, endpoints, and storage relationships do not prove runtime execution.",
+        "Static paths and relationships may remain unresolved when expressions are dynamic or obfuscated.",
+        "Webpack/Rspack factories were recovered from AST literals; REA did not invoke push handlers or bundle bootstrap code."
+      ],
+      "statistics": {
+        "relevant_files": 2,
+        "nested_asar_containers": 0,
+        "text_bytes_read": 6275,
+        "invalid_utf8_files": 0,
+        "parsed_javascript_files": 2,
+        "visited_ast_nodes": 952,
+        "findings": 1,
+        "modules": 0,
+        "parse_failures": 0
+      }
+    },
+    {
+      "file": "broadlink-package.json",
+      "evidence_id": "ev_d7b7bd43d624eba243b8ea717efe85901c3fcf834fdcf6854f7687c20a385b9a",
+      "operation": "inspect_android_package",
+      "subject_name": "BroadLink+-Universal+TV+Remote_1.8.40.c4f7cf3c1_APKPure.apk",
+      "digest": {
+        "sha256": "53515472ae20175d75d352f1140ab291e13131a7ae312a52b869a4c84957347f"
+      },
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 2048
+      },
+      "class_count": 11202,
+      "package_name": "cn.com.broadlink.econtrol.international",
+      "version_name": "1.8.40.c4f7cf3c1"
+    },
+    {
+      "file": "broadlink-sdk.json",
+      "evidence_id": "ev_de16397235a3bc937116843b91fbef362b66c70133abd9315add49ea238bbe9f",
+      "operation": "inspect_android_class",
+      "subject_name": "BroadLink+-Universal+TV+Remote_1.8.40.c4f7cf3c1_APKPure.apk",
+      "digest": {
+        "sha256": "53515472ae20175d75d352f1140ab291e13131a7ae312a52b869a4c84957347f"
+      },
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 4096
+      },
+      "class_name": "cn.com.broadlink.sdk.BLLet"
+    },
+    {
+      "file": "ewelink-bridge.json",
+      "evidence_id": "ev_ad20804aff827c337b1e37f431be2becab5cb4ecfc063521124c936cceb4c0f4",
+      "operation": "inspect_android_method",
+      "subject_name": "ewelink.apk",
+      "digest": {
+        "sha256": "5de530887e92da934914b78eba331bea9e1a441ed44e147075d532e758f39b96"
+      },
+      "confidence": "derived",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 4096
+      },
+      "class_name": "com.pair.bluetooth.coolkit.BLEPairModule",
+      "method": {
+        "name": "getDeviceInfo",
+        "reported_signature": "getDeviceInfo(com.facebook.react.bridge.Promise): void",
+        "overload_index": 0,
+        "is_constructor": false,
+        "dex_descriptor": null
+      },
+      "body_status": "available"
+    },
+    {
+      "file": "ewelink-control-class.json",
+      "evidence_id": "ev_a2546d5f807c6f4c62616cb05285bb21fbc32189ab91c67aa1a84308a3714392",
+      "operation": "inspect_android_class",
+      "subject_name": "ewelink.apk",
+      "digest": {
+        "sha256": "5de530887e92da934914b78eba331bea9e1a441ed44e147075d532e758f39b96"
+      },
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 4096
+      },
+      "class_name": "com.pair.bluetooth.coolkit.BLEPairModule"
+    },
+    {
+      "file": "ewelink-javascript.json",
+      "evidence_id": "ev_29c24110998847dbbd5e62539f52810632a8171ec36cd511b5904ddf7aa79b47",
+      "operation": "analyze_javascript_application",
+      "subject_name": "ewelink-js",
+      "digest": {
+        "sha256": "057438928d5f99e74edb64183a10a7d4ea3012df794c46046f22015aa2f8cbba"
+      },
+      "confidence": "derived",
+      "limitations": [
+        "CommonJS and ESM binding relationships were recovered from inert syntax and resolved only within the inventoried artifact container.",
+        "Graph coverage is incomplete; unavailable facts remain explicit and must not be read as absence.",
+        "JavaScript and HTML were parsed as inert text; bundle bootstrap code was never executed.",
+        "Static imports, entrypoints, workers, endpoints, and storage relationships do not prove runtime execution.",
+        "Static paths and relationships may remain unresolved when expressions are dynamic or obfuscated.",
+        "Webpack/Rspack factories were recovered from AST literals; REA did not invoke push handlers or bundle bootstrap code."
+      ],
+      "statistics": {
+        "relevant_files": 1,
+        "nested_asar_containers": 0,
+        "text_bytes_read": 28572980,
+        "invalid_utf8_files": 1,
+        "parsed_javascript_files": 0,
+        "visited_ast_nodes": 0,
+        "findings": 0,
+        "modules": 0,
+        "parse_failures": 0
+      }
+    },
+    {
+      "file": "ewelink-package.json",
+      "evidence_id": "ev_e708e3d0acad93aba89216ed9908f1eb15b63560857cd239c9d469c5ebfe9985",
+      "operation": "inspect_android_package",
+      "subject_name": "ewelink.apk",
+      "digest": {
+        "sha256": "5de530887e92da934914b78eba331bea9e1a441ed44e147075d532e758f39b96"
+      },
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 2048
+      },
+      "class_count": 24219,
+      "package_name": "com.coolkit",
+      "version_name": "5.29.1"
+    },
+    {
+      "file": "haha-package.json",
+      "evidence_id": "ev_56788dbf67bde3fe9ab3738adedd3327572c371730e63df17de9991f4f735129",
+      "operation": "inspect_android_package",
+      "subject_name": "haha.apk",
+      "digest": {
+        "sha256": "d591caf6d5dd2bab78dbecf941b392074ac12a41b8073f6ef9458fc31106d944"
+      },
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 2048
+      },
+      "class_count": 3898,
+      "package_name": "uni.UNI70C4FE4",
+      "version_name": "1.1.5"
+    },
+    {
+      "file": "rea-haha.json",
+      "evidence_id": "ev_1bd95e2fac4a771d2862600bdfb7bcdade75824e787559963d5baedaff365e21",
+      "operation": "analyze_javascript_application",
+      "subject_name": "haha",
+      "digest": {
+        "sha256": "c9ef1adf7ded4ea508911240dfe299c4f64a36370069be99cd0fbd5364cf5b91"
+      },
+      "confidence": "derived",
+      "limitations": [
+        "CommonJS and ESM binding relationships were recovered from inert syntax and resolved only within the inventoried artifact container.",
+        "JavaScript and HTML were parsed as inert text; bundle bootstrap code was never executed.",
+        "Static imports, entrypoints, workers, endpoints, and storage relationships do not prove runtime execution.",
+        "Static paths and relationships may remain unresolved when expressions are dynamic or obfuscated.",
+        "Webpack/Rspack factories were recovered from AST literals; REA did not invoke push handlers or bundle bootstrap code."
+      ],
+      "statistics": {
+        "relevant_files": 3,
+        "nested_asar_containers": 0,
+        "text_bytes_read": 996066,
+        "invalid_utf8_files": 0,
+        "parsed_javascript_files": 2,
+        "visited_ast_nodes": 197519,
+        "findings": 35,
+        "modules": 0,
+        "parse_failures": 0
+      }
+    },
+    {
+      "file": "smartlife-control-class.json",
+      "evidence_id": "ev_d7fdab191a95e45b6f3e5f76fdfc2ffbae8cabd307f9b5083ca7304ec359718a",
+      "operation": "inspect_android_class",
+      "subject_name": "smartlife.apk",
+      "digest": {
+        "sha256": "fffee7cb5ca41c439c6f0e8cba051ebae4a117c2227ddbae11a14c9556117385"
+      },
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 4096
+      },
+      "class_name": "com.thingclips.sdk.device.bean.CloudControlBean2"
+    },
+    {
+      "file": "smartlife-device-api-correct.json",
+      "evidence_id": "ev_339f521b7840b1ad70805f7ff5050133848f1636ec33e81242a44012c20daab8",
+      "operation": "inspect_android_class",
+      "subject_name": "smartlife.apk",
+      "digest": {
+        "sha256": "fffee7cb5ca41c439c6f0e8cba051ebae4a117c2227ddbae11a14c9556117385"
+      },
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 4096
+      },
+      "class_name": "com.thingclips.smart.sdk.api.IThingDevice"
+    },
+    {
+      "file": "smartlife-javascript.json",
+      "evidence_id": "ev_606f651873fa1f72202980d35d7adf3be3c43e372fafa052794b94f9a75f7ff9",
+      "operation": "analyze_javascript_application",
+      "subject_name": "smartlife-js",
+      "digest": {
+        "sha256": "b401aa33f99879546a3b23a7e6c1e7dd79d4156234a63afa70d88db1b6ad76cf"
+      },
+      "confidence": "derived",
+      "limitations": [
+        "CommonJS and ESM binding relationships were recovered from inert syntax and resolved only within the inventoried artifact container.",
+        "Graph coverage is incomplete; unavailable facts remain explicit and must not be read as absence.",
+        "JavaScript and HTML were parsed as inert text; bundle bootstrap code was never executed.",
+        "Static imports, entrypoints, workers, endpoints, and storage relationships do not prove runtime execution.",
+        "Static paths and relationships may remain unresolved when expressions are dynamic or obfuscated.",
+        "Webpack/Rspack factories were recovered from AST literals; REA did not invoke push handlers or bundle bootstrap code.",
+        "miniapp_DeviceKit.js: Resource constraint during analyze_javascript_application: Semantic graph for miniapp_DeviceKit.js exceeds the parent's remaining result budget; static and module facts were retained"
+      ],
+      "statistics": {
+        "relevant_files": 2,
+        "nested_asar_containers": 0,
+        "text_bytes_read": 217531,
+        "invalid_utf8_files": 0,
+        "parsed_javascript_files": 2,
+        "visited_ast_nodes": 38606,
+        "findings": 2,
+        "modules": 0,
+        "parse_failures": 0
+      }
+    },
+    {
+      "file": "smartlife-local.json",
+      "evidence_id": "ev_1db334fcf5873fc3e86a1dfad8b1703bf8f6ee165094618a66b550b081bdac9a",
+      "operation": "inspect_android_class",
+      "subject_name": "smartlife.apk",
+      "digest": {
+        "sha256": "fffee7cb5ca41c439c6f0e8cba051ebae4a117c2227ddbae11a14c9556117385"
+      },
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 4096
+      },
+      "class_name": "com.thingclips.sdk.device.presenter.directgateway.DirectControlModel"
+    },
+    {
+      "file": "smartlife-package-4g.json",
+      "evidence_id": "ev_33e7ddc6e92c516afc234612c2d8c2f2a91047aafdbd57dd9b68027198288f3b",
+      "operation": "inspect_android_package",
+      "subject_name": "smartlife.apk",
+      "digest": {
+        "sha256": "fffee7cb5ca41c439c6f0e8cba051ebae4a117c2227ddbae11a14c9556117385"
+      },
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 4096
+      },
+      "class_count": 68685,
+      "package_name": "com.tuya.smartlife",
+      "version_name": "7.11.6"
+    },
+    {
+      "file": "smartthings-control-class.json",
+      "evidence_id": "ev_2f83f2e1a23d73660df0c6b5ec188d9fe512873c98946921ec000d62152b3ca9",
+      "operation": "inspect_android_class",
+      "subject_name": "SmartThings_1.8.51.30_APKPure.apk",
+      "digest": {
+        "sha256": "6c22459ad549fff248e6879052d17bfe5f370ed60a2f338420e1b52d2494fa35"
+      },
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 4096
+      },
+      "class_name": "com.samsung.android.oneconnect.webplugin.jsinterface.WebsocketsJsInterfaceImpl"
+    },
+    {
+      "file": "smartthings-javascript.json",
+      "evidence_id": "ev_b46bba3af3a47f4b3800cb864bdf6d1a1ec431bee84c268aeabf12f97d0de98e",
+      "operation": "analyze_javascript_application",
+      "subject_name": "smartthings-js",
+      "digest": {
+        "sha256": "b55d665f4c8b28c4a81c81e29a1d41f289c0781312facc2a783c72fdcd1d3524"
+      },
+      "confidence": "derived",
+      "limitations": [
+        "CommonJS and ESM binding relationships were recovered from inert syntax and resolved only within the inventoried artifact container.",
+        "Graph coverage is incomplete; unavailable facts remain explicit and must not be read as absence.",
+        "JavaScript and HTML were parsed as inert text; bundle bootstrap code was never executed.",
+        "Static imports, entrypoints, workers, endpoints, and storage relationships do not prove runtime execution.",
+        "Static paths and relationships may remain unresolved when expressions are dynamic or obfuscated.",
+        "Webpack/Rspack factories were recovered from AST literals; REA did not invoke push handlers or bundle bootstrap code.",
+        "index-DsARwuS8.js: Resource constraint during analyze_javascript_application: Owned JavaScript worker exhausted its heap while analyzing index-DsARwuS8.js during semantic"
+      ],
+      "statistics": {
+        "relevant_files": 1,
+        "nested_asar_containers": 0,
+        "text_bytes_read": 1124952,
+        "invalid_utf8_files": 0,
+        "parsed_javascript_files": 1,
+        "visited_ast_nodes": 331818,
+        "findings": 94,
+        "modules": 0,
+        "parse_failures": 0
+      }
+    },
+    {
+      "file": "smartthings-package-4g.json",
+      "evidence_id": "ev_62d0e29354537a51adb3704f74c3272613a051324076cfd34488f80d10041da5",
+      "operation": "inspect_android_package",
+      "subject_name": "SmartThings_1.8.51.30_APKPure.apk",
+      "digest": {
+        "sha256": "6c22459ad549fff248e6879052d17bfe5f370ed60a2f338420e1b52d2494fa35"
+      },
+      "confidence": "observed",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 4096
+      },
+      "class_count": 79493,
+      "package_name": "com.samsung.android.oneconnect",
+      "version_name": "1.8.51.30"
+    },
+    {
+      "file": "smartthings-socket-L.json",
+      "evidence_id": "ev_50f8b41ea378f921a04263461cf9d01b7adbc968a489d80f120948f2280d962a",
+      "operation": "inspect_android_method",
+      "subject_name": "SmartThings_1.8.51.30_APKPure.apk",
+      "digest": {
+        "sha256": "6c22459ad549fff248e6879052d17bfe5f370ed60a2f338420e1b52d2494fa35"
+      },
+      "confidence": "derived",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 4096
+      },
+      "class_name": "com.samsung.android.oneconnect.webplugin.jsinterface.WebsocketsJsInterfaceImpl",
+      "method": {
+        "name": "L",
+        "reported_signature": "L(org.json.JSONObject): void",
+        "overload_index": 0,
+        "is_constructor": false,
+        "dex_descriptor": null
+      },
+      "body_status": "available"
+    },
+    {
+      "file": "smartthings-websocket.json",
+      "evidence_id": "ev_eb28a87553c1a95096945c9274764a607bc0218c3301cb4080bbe8881e726712",
+      "operation": "inspect_android_method",
+      "subject_name": "SmartThings_1.8.51.30_APKPure.apk",
+      "digest": {
+        "sha256": "6c22459ad549fff248e6879052d17bfe5f370ed60a2f338420e1b52d2494fa35"
+      },
+      "confidence": "derived",
+      "limitations": [
+        "Static decompiler observations do not establish runtime behavior; the APK is never executed.",
+        "Method signatures use provider display types; exact DEX descriptors and instruction offsets are unavailable. Overload indices are local to this engine and artifact.",
+        "Class inventories use parsed metadata before code generation, including synthetic members that may be omitted from decompiled source. Source positions remain unknown.",
+        "Manifest summary fields are extracted by the upstream engine; decoded XML is retained for verification. APK signatures, split APKs, native libraries and Android runtime capture are not verified by this provider."
+      ],
+      "engine": {
+        "name": "jadx-headless-mcp",
+        "version": "0.7.1",
+        "artifact_sha256": "6e5eacf500b64292bfb73c49797c1958f6ee44646e43e868039ae7feb573ff75",
+        "source_revision": "5844800a486d2248fa949b74c9896285f5b54de2",
+        "worker_count": 1,
+        "heap_limit_mib": 4096
+      },
+      "class_name": "com.samsung.android.oneconnect.webplugin.jsinterface.WebsocketsJsInterfaceImpl",
+      "method": {
+        "name": "w",
+        "reported_signature": "w(): java.lang.String",
+        "overload_index": 0,
+        "is_constructor": false,
+        "dex_descriptor": null
+      },
+      "body_status": "available"
+    }
+  ]
+}

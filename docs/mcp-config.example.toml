@@ -1,0 +1,7 @@
+# Adjust these absolute paths to the location of your checkout.
+[mcp_servers.casa_universal]
+command = "/absolute/path/Casa-Universal-/.venv/bin/python"
+args = ["-m", "casa.mcp_server"]
+cwd = "/absolute/path/Casa-Universal-"
+startup_timeout_sec = 20
+tool_timeout_sec = 45

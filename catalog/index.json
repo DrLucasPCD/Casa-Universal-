@@ -1,0 +1,4543 @@
+{
+  "source_revision": "e4df2957ad915536f41ffb39daa96886d7cfe040",
+  "profiles": [
+    {
+      "id": "climate_1000",
+      "category": "climate",
+      "brand": "Toyotomi",
+      "models": [
+        "AKIRA GAN/GAG-A128 VL"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1000.json",
+      "source_sha256": "1c5ff76a9c761a360c9f3c8f3b188eae87fdeddfd31d4a5f437db8be52d354b3"
+    },
+    {
+      "id": "climate_1001",
+      "category": "climate",
+      "brand": "Toyotomi",
+      "models": [
+        "AKIRA GAN/GAG-A135FW-M"
+      ],
+      "command_count": 240,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1001.json",
+      "source_sha256": "02a246bb5ba0c1d344486f568b14de211f6f8b931c1ac506323548cd85139b9e"
+    },
+    {
+      "id": "climate_1020",
+      "category": "climate",
+      "brand": "Panasonic",
+      "models": [
+        "CS-CE7HKEW",
+        "CS-CE9HKEW",
+        "CS-CE12HKEW",
+        "CS-PC24MKF",
+        "CS-C24PKF"
+      ],
+      "command_count": 121,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1020.json",
+      "source_sha256": "629fc429716e328bbc40c8afd95905975d80c1884e965434e2be46aa1ff2060d"
+    },
+    {
+      "id": "climate_1021",
+      "category": "climate",
+      "brand": "Panasonic",
+      "models": [
+        "CS-RE9GKE",
+        "CS-RE12GKE",
+        "CS-RE9PKR",
+        "CSCU-Z25TKR"
+      ],
+      "command_count": 121,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1021.json",
+      "source_sha256": "e1a672074b46a7195c2bd7295b56a75d9b74ae91b96869adc2c05b246f586bc0"
+    },
+    {
+      "id": "climate_1022",
+      "category": "climate",
+      "brand": "Panasonic",
+      "models": [
+        "CS-Z25TK"
+      ],
+      "command_count": 349,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1022.json",
+      "source_sha256": "92c1bf3e8a608d54f31ee23f3be9960361191be24ed8b0d0e94fff3d441d341e"
+    },
+    {
+      "id": "climate_1023",
+      "category": "climate",
+      "brand": "Panasonic",
+      "models": [
+        "CS-HE9JKE",
+        "CS-HE12JKE",
+        "CS-HE9LKE"
+      ],
+      "command_count": 361,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1023.json",
+      "source_sha256": "77c23c5a1dc06dd7fdcebe1be2b0d494867512ec5c51631b2e5a8995b4d09d3b"
+    },
+    {
+      "id": "climate_1024",
+      "category": "climate",
+      "brand": "Panasonic",
+      "models": [
+        "CS-MRE7MKE"
+      ],
+      "command_count": 241,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1024.json",
+      "source_sha256": "c0bc78fc783d916939919f9d91483f425e8942d14562e627dc8ea5531511b4d4"
+    },
+    {
+      "id": "climate_1025",
+      "category": "climate",
+      "brand": "Panasonic",
+      "models": [
+        "CS-E18FKR"
+      ],
+      "command_count": 25,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1025.json",
+      "source_sha256": "ee2e0c5c43f661eb97b170ac366a1fdce1302348f964675294f6ade9d596c4b9"
+    },
+    {
+      "id": "climate_1026",
+      "category": "climate",
+      "brand": "Panasonic",
+      "models": [
+        "CS-PC12QKT"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1026.json",
+      "source_sha256": "f387c37d1a0c4d35190c43107ebf098f36324b67d1c6d435036cbf2f27f930bf"
+    },
+    {
+      "id": "climate_1027",
+      "category": "climate",
+      "brand": "Panasonic",
+      "models": [
+        "CS-SA9CKP"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1027.json",
+      "source_sha256": "fd55d1a63e4a6c77798365329e5e0ab3fcdf73602bf305a3f8fab43a5e196d3c"
+    },
+    {
+      "id": "climate_1028",
+      "category": "climate",
+      "brand": "Panasonic",
+      "models": [
+        "CS-U9RKR",
+        "CS-U12RKR"
+      ],
+      "command_count": 271,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1028.json",
+      "source_sha256": "27de2e8bc52bfd7afc4dc306755ecbf5e7e1d217e2a947368d68268c449b77b6"
+    },
+    {
+      "id": "climate_1029",
+      "category": "climate",
+      "brand": "Panasonic",
+      "models": [
+        "CS-LJ22~LJ90BA2(YA2)"
+      ],
+      "command_count": 361,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1029.json",
+      "source_sha256": "fc26fe2c74d8d211636d1e6bd1a3fc63e5f08a8e5731e9831d45686edbcd169b"
+    },
+    {
+      "id": "climate_1030",
+      "category": "climate",
+      "brand": "Panasonic",
+      "models": [
+        "CS-E12JKDW"
+      ],
+      "command_count": 2160,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1030.json",
+      "source_sha256": "79e4b3f475d1cfeb06f09e10ae179ea38352f781b8dfb28e56ca8a4cb2751fd0"
+    },
+    {
+      "id": "climate_1031",
+      "category": "climate",
+      "brand": "Panasonic",
+      "models": [
+        "SRK25ZMP-S, SRK35ZMP-S, SRK45ZMP-S"
+      ],
+      "command_count": 209,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1031.json",
+      "source_sha256": "5590ce4c954455a653028057ead3f91f7c68f2d823211d571846107f3dda4af4"
+    },
+    {
+      "id": "climate_1032",
+      "category": "climate",
+      "brand": "Panasonic",
+      "models": [
+        "CS-CU-HU18YKYF"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1032.json",
+      "source_sha256": "9f6395007f18d84290a682f6d97e1acaccbc0f82f63794baf86b7f8e53a8db4e"
+    },
+    {
+      "id": "climate_1040",
+      "category": "climate",
+      "brand": "Ggeneral Electric",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 205,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1040.json",
+      "source_sha256": "c08ab616aa5a0178761df7ac4d41f8a376977ee615505f24e042f8a14eb6b9dd"
+    },
+    {
+      "id": "climate_1041",
+      "category": "climate",
+      "brand": "Ggeneral Electric",
+      "models": [
+        "AE1PH09IWF",
+        "AE0PH09IWO",
+        "AE1PH12IWF",
+        "AE0PH12IWO",
+        "AE4PH18IWF",
+        "AE4PH18IWF",
+        "AE5PH18IWO"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1041.json",
+      "source_sha256": "da91bba61d90c53590f8de61525dfd7a1e252b74cfb1ca990668e788f5b8059d"
+    },
+    {
+      "id": "climate_1042",
+      "category": "climate",
+      "brand": "Ggeneral Electric",
+      "models": [
+        "ASHA09LCC"
+      ],
+      "command_count": 336,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1042.json",
+      "source_sha256": "566ae85f7652a1010c4bfed56cb70da53e1e5b35ffffbe77b1af5db6a9b68ec6"
+    },
+    {
+      "id": "climate_1043",
+      "category": "climate",
+      "brand": "General Electric",
+      "models": [
+        "ASWX09LECA"
+      ],
+      "command_count": 336,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1043.json",
+      "source_sha256": "ca91d6a5a5f99d05264c65f497bf11f71d7f2e28f7ce12dd926f90fec4e75b31"
+    },
+    {
+      "id": "climate_1044",
+      "category": "climate",
+      "brand": "General Electric",
+      "models": [
+        "AHD08LXW1"
+      ],
+      "command_count": 365,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1044.json",
+      "source_sha256": "d2861751adaf48843f2014fd6405d91f3706c11922eed9b3c9aab64356f827f7"
+    },
+    {
+      "id": "climate_1061",
+      "category": "climate",
+      "brand": "LG",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 359,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1061.json",
+      "source_sha256": "34af8a92d4f53a06e0c0cab895fe19783d7f22d835f6d3a042d88bdf380d488b"
+    },
+    {
+      "id": "climate_1062",
+      "category": "climate",
+      "brand": "LG",
+      "models": [
+        "P12RK",
+        "A06AWV"
+      ],
+      "command_count": 261,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1062.json",
+      "source_sha256": "9546bd58efde18e12e9cefd5412b2ece7a935254f23c8298369f6c885b3917b9"
+    },
+    {
+      "id": "climate_1063",
+      "category": "climate",
+      "brand": "LG",
+      "models": [
+        "P12EP1"
+      ],
+      "command_count": 391,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1063.json",
+      "source_sha256": "8d6f03c019157e231f98306d6a58cd4a84b77c33f9e6a236c8df08a3b1299afd"
+    },
+    {
+      "id": "climate_1064",
+      "category": "climate",
+      "brand": "LG",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 79,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1064.json",
+      "source_sha256": "c953c71b216aee75a9134c24d48e28d1d39e13ada4fa3e8cf0ae527c59cb3c1e"
+    },
+    {
+      "id": "climate_1065",
+      "category": "climate",
+      "brand": "LG",
+      "models": [
+        "LG080EC",
+        "LG100EC",
+        "LG150EC",
+        "LG200EC"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1065.json",
+      "source_sha256": "d3481ec7fbc3f62af54fb0c7545c97a6c79d9f78353d3830c925c97973481dc1"
+    },
+    {
+      "id": "climate_1066",
+      "category": "climate",
+      "brand": "LG",
+      "models": [
+        "LA090HYV",
+        "LA120HYV",
+        "LAN090HYV",
+        "LAN120HYV"
+      ],
+      "command_count": 391,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1066.json",
+      "source_sha256": "b5ade2a41bdac2e2eade62a2a22693e7220c184c40619577c7337715001c55b0"
+    },
+    {
+      "id": "climate_1068",
+      "category": "climate",
+      "brand": "LG",
+      "models": [
+        "AKB74295303"
+      ],
+      "command_count": 313,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1068.json",
+      "source_sha256": "204001a58989fc0994ea207549158ec9759ee666cf28d9b834c73818f1822c08"
+    },
+    {
+      "id": "climate_1069",
+      "category": "climate",
+      "brand": "LG",
+      "models": [
+        "AKB74295304"
+      ],
+      "command_count": 209,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1069.json",
+      "source_sha256": "f5e1d2bc905a6657f5df3362a0811223f666d579a1607b13ce900187ca2a29d1"
+    },
+    {
+      "id": "climate_1070",
+      "category": "climate",
+      "brand": "LG",
+      "models": [
+        "PC09SQ NSJ"
+      ],
+      "command_count": 261,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1070.json",
+      "source_sha256": "db8d285a39e8f4915aecc4ae176ac72ddc3a6b3d29235664c80d531da0ae5f54"
+    },
+    {
+      "id": "climate_1080",
+      "category": "climate",
+      "brand": "Hitachi",
+      "models": [
+        "RAC-50HK1"
+      ],
+      "command_count": 136,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1080.json",
+      "source_sha256": "408bb163359b4f24b1f03fa9803c24c736332e95d4076a30e10322ed9cece323"
+    },
+    {
+      "id": "climate_1081",
+      "category": "climate",
+      "brand": "Hitachi",
+      "models": [
+        "RAC-10EH1",
+        "RAC-18EH1",
+        "RAS-10EH1",
+        "RAS-10EH3",
+        "RAS-18EH1"
+      ],
+      "command_count": 137,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1081.json",
+      "source_sha256": "64a567b68b4e88803957914b01cd2d3f26bcea0c90548479e855b2b3935a9e95"
+    },
+    {
+      "id": "climate_1082",
+      "category": "climate",
+      "brand": "Hitachi",
+      "models": [
+        "RAS-25YHA",
+        "RAS-35YHA"
+      ],
+      "command_count": 341,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1082.json",
+      "source_sha256": "1e5090c678d6c6dd0a7e64478d78336c754a1ae9eac0e089a93ff599b5edc728"
+    },
+    {
+      "id": "climate_1083",
+      "category": "climate",
+      "brand": "LG",
+      "models": [
+        "RAS-32CNH2"
+      ],
+      "command_count": 205,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1083.json",
+      "source_sha256": "647e27c22c1ff441d62661b41f8182397b2af7f8eac7b1818f0e5315b565f651"
+    },
+    {
+      "id": "climate_1084",
+      "category": "climate",
+      "brand": "Hitachi",
+      "models": [
+        "RAS-DX18HDK",
+        "RAK-35RPC"
+      ],
+      "command_count": 358,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1084.json",
+      "source_sha256": "09393b6cf84ae53b8dede2cd2e6207ac7684b92ab5e00397d87d9993d1db6d98"
+    },
+    {
+      "id": "climate_1085",
+      "category": "climate",
+      "brand": "Hitachi",
+      "models": [
+        "RPA24B3BL"
+      ],
+      "command_count": 38,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1085.json",
+      "source_sha256": "c967cae3235696163604bfb4a72e2fd9bad5ce053147f03d5f824a2ac88d771c"
+    },
+    {
+      "id": "climate_1086",
+      "category": "climate",
+      "brand": "Hitachi",
+      "models": [
+        "RAC-28NK1",
+        "RAC-36NK1"
+      ],
+      "command_count": 48,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1086.json",
+      "source_sha256": "566d04c0a5371ef4461526238aa5c0aad5aeed2841b89afdc560337a348a81a9"
+    },
+    {
+      "id": "climate_1087",
+      "category": "climate",
+      "brand": "Hitachi",
+      "models": [
+        "RAS-E25YHAB",
+        "RAS-E35YHAB",
+        "RAS-E50YHAB"
+      ],
+      "command_count": 5,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1087.json",
+      "source_sha256": "e09abb486cbf553174ad255a97fb175cfa18e85b5874ab71eceff4ea08e6cc8c"
+    },
+    {
+      "id": "climate_1088",
+      "category": "climate",
+      "brand": "Hitachi",
+      "models": [
+        "RAF-25REX",
+        "RAF-35REX",
+        "RAF-50REX"
+      ],
+      "command_count": 426,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1088.json",
+      "source_sha256": "c573d75717429a654ebb2d7818c40dd21f49292dad18987cb3113aaa6edb688b"
+    },
+    {
+      "id": "climate_1089",
+      "category": "climate",
+      "brand": "Hitachi",
+      "models": [
+        "RAK-35RXE"
+      ],
+      "command_count": 358,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1089.json",
+      "source_sha256": "892741f993f68b0a7c3c001faeb3610d16e1934b6051658559a5b8dff5d9e323"
+    },
+    {
+      "id": "climate_1090",
+      "category": "climate",
+      "brand": "Hitachi",
+      "models": [
+        "RAK-50RPE"
+      ],
+      "command_count": 1,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1090.json",
+      "source_sha256": "1636d96919edee167c1a9d80ee906e04f65c4ac4101abc82d6654c297f3ff5ba"
+    },
+    {
+      "id": "climate_1091",
+      "category": "climate",
+      "brand": "Hitachi",
+      "models": [
+        "HSPE2700FCINV",
+        "HSPE3200FCINV",
+        "HSPE5400FCINV",
+        "HSPE6400FCINV"
+      ],
+      "command_count": 452,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1091.json",
+      "source_sha256": "23494743a271872a476cd415265ee489a195f19f3482a5696719103b1bae7059"
+    },
+    {
+      "id": "climate_1092",
+      "category": "climate",
+      "brand": "Hitachi",
+      "models": [
+        "RAS-E14HB"
+      ],
+      "command_count": 205,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1092.json",
+      "source_sha256": "eacfca80c68ba0370b7b66984bb8bdd67ef6ab5dbcd112f068d1f7d07d8928bc"
+    },
+    {
+      "id": "climate_1100",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "FTXS25CVMB",
+        "FTXS35CVMB",
+        "FTXS60BVMB",
+        "FVXS25BVMB"
+      ],
+      "command_count": 261,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1100.json",
+      "source_sha256": "10559ea8db43e8f38c473e24d55193d0fe03a64af99243fcce2b3da647d0c2fd"
+    },
+    {
+      "id": "climate_1101",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "FTXS20LVMA",
+        "FTXS25LVMA",
+        "FTXS35LVMA",
+        "FTXS46LVMA",
+        "FTXS50LVMA",
+        "FTXS60LVMA",
+        "FTXS71LVMA",
+        "FTXS85LVMA",
+        "FTXS95LVMA",
+        "FVXS50FV1B",
+        "FTXL35J2V1B",
+        "FTXM25UVMA",
+        "FTXM35UVMA",
+        "FTXD25DVMA",
+        "FTXS35G2V1B",
+        "FTXM71UVMA",
+        "FTM09PV2S"
+      ],
+      "command_count": 521,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1101.json",
+      "source_sha256": "28b73687ec5fede12fdaec622eaab4b6593aa2ae7652b0909eb5e921d23d34b2"
+    },
+    {
+      "id": "climate_1102",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "FTV20AXV14"
+      ],
+      "command_count": 271,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1102.json",
+      "source_sha256": "afff0316e3f88af76e2a73681733f73ccf9cc5d8be4472e5b73b5f14ff8a2276"
+    },
+    {
+      "id": "climate_1103",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 65,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1103.json",
+      "source_sha256": "bcd25cd56cde622441879792dd390d4333383e261046c119e5f613e473caadd0"
+    },
+    {
+      "id": "climate_1104",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "TF25DVM"
+      ],
+      "command_count": 316,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1104.json",
+      "source_sha256": "60797d613d57011ee7475657a2daa5f7bf0d512570e23081ba1b0d73da0fed2d"
+    },
+    {
+      "id": "climate_1105",
+      "category": "climate",
+      "brand": "Dalkin",
+      "models": [
+        "FTX12NMVJU"
+      ],
+      "command_count": 1035,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1105.json",
+      "source_sha256": "b69aaa1ab8e734685f02c1f8820d73aafd4c7e46f32f855709e30e7e2d5dc7e2"
+    },
+    {
+      "id": "climate_1106",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "ATX20KV1B",
+        "ATX25KV1B",
+        "ATX35KV1B"
+      ],
+      "command_count": 456,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1106.json",
+      "source_sha256": "b9d8ad3dc85f52ec3429a9ceb7572e5c243700f9a4c97ef57ccab8a4cbfd4653"
+    },
+    {
+      "id": "climate_1107",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "FTX25JAV1NB"
+      ],
+      "command_count": 313,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1107.json",
+      "source_sha256": "daebb490efb77d522aa87deb378ce34525fbbf5c2f80001f6c513c001a406a8a"
+    },
+    {
+      "id": "climate_1108",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "FTXG25EV1BS",
+        "FTXG35EV1BS",
+        "FTXG35EV1BW"
+      ],
+      "command_count": 601,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1108.json",
+      "source_sha256": "45421984206035a2fed00e6bd1dd951488c5253039d895fd44fee33266d0ea25"
+    },
+    {
+      "id": "climate_1109",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "BRC4C158"
+      ],
+      "command_count": 193,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1109.json",
+      "source_sha256": "9265feaf15cd34ed76e9ace1c53ea95031eec53b293b935c4c8c5ab2aafcee4b"
+    },
+    {
+      "id": "climate_1110",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "FTC15NV14",
+        "FTC20NV14",
+        "FTC25NV14",
+        "FTC35NV14"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1110.json",
+      "source_sha256": "375b073e15abbb720de2add4628e0bd9b08f67e0496f408b30f460e955915ad5"
+    },
+    {
+      "id": "climate_1111",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "FTE09NV25"
+      ],
+      "command_count": 67,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1111.json",
+      "source_sha256": "056168352d6a5e1011508e84e295d5d9346f2fb0e6715b32b7877b6aa1e3ae4f"
+    },
+    {
+      "id": "climate_1112",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "ATKC09TV2S",
+        "FTKQ12TV2S"
+      ],
+      "command_count": 361,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1112.json",
+      "source_sha256": "729d8f072d47023eceea8df698a712c3ed5ae1d8225d6905a5fabc11d82e7332"
+    },
+    {
+      "id": "climate_1113",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "FTXV35AV1B"
+      ],
+      "command_count": 598,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1113.json",
+      "source_sha256": "b0cd0e790af124dc17bc2d59712c816b7c79270b1cc4540d1bcb053597179996"
+    },
+    {
+      "id": "climate_1114",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "FTXM35UVMZ"
+      ],
+      "command_count": 520,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1114.json",
+      "source_sha256": "c37cc9423d94fb1e0d6b8f4bacbabaff1183a8f8ade52b8d3644c7e7f7845cab"
+    },
+    {
+      "id": "climate_1116",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "FCQ100KAVEA"
+      ],
+      "command_count": 205,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1116.json",
+      "source_sha256": "825965f91c811316c1f864d417129b08daab5b893c98f4323868911b20ce8242"
+    },
+    {
+      "id": "climate_1117",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "DTXF35TVMA"
+      ],
+      "command_count": 553,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1117.json",
+      "source_sha256": "9b2c299907de0a2cef367d592233f732843b5e80b053fa56a77b979b07d6ade4"
+    },
+    {
+      "id": "climate_1118",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "ARC452A21",
+        "FTXS09LVJU",
+        "FTXS12LVJU",
+        "FTXS15LVJU",
+        "FTXS18LVJU",
+        "FTXS24LVJU"
+      ],
+      "command_count": 85,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1118.json",
+      "source_sha256": "c167546586fbf8e799621c6dbbc4c138ca70051a80886db43401c1be28f00f9f"
+    },
+    {
+      "id": "climate_1119",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "FTXS60FVMA"
+      ],
+      "command_count": 43,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1119.json",
+      "source_sha256": "b04cae8683950642de51f41db9df81fdeceb19b67121238bdcdc63bcbc7491e3"
+    },
+    {
+      "id": "climate_1120",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "MSZ-GL25VGD",
+        "MSZ-GL35VGD",
+        "MSZ-GL42VGD",
+        "MSZ-GL50VGD",
+        "MSZ-GL60VGD",
+        "MSZ-GL71VGD",
+        "MSZ-GL80VGD"
+      ],
+      "command_count": 180,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1120.json",
+      "source_sha256": "e5bf2500773f020e3e4cfba9f1c7b5f70bac5e57eb4b771c61c5c818369a01b2"
+    },
+    {
+      "id": "climate_1121",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "MSZ-GA35VA"
+      ],
+      "command_count": 65,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1121.json",
+      "source_sha256": "35318f124e2533b1f3a9f20f23ace4afc51ff41c264deb70625b49e94ff746ee"
+    },
+    {
+      "id": "climate_1122",
+      "category": "climate",
+      "brand": "Mitsubishi",
+      "models": [
+        "MSZ-AP50VGKD"
+      ],
+      "command_count": 265,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1122.json",
+      "source_sha256": "4bf263836c83488984b86038ea6f02d9d36b24dac6462d6d685f42b9b6c945cc"
+    },
+    {
+      "id": "climate_1123",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "SRK25ZSX-SRC25ZSX"
+      ],
+      "command_count": 88,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1123.json",
+      "source_sha256": "cc464b9df44fcdbfa731e6ca3ce316fea2396e9befc4607ad2edbb63b4ffd5e2"
+    },
+    {
+      "id": "climate_1124",
+      "category": "climate",
+      "brand": "Mitsubishi",
+      "models": [
+        "MSZ-SF25VE3",
+        "MSZ-SF35VE3",
+        "MSZ-SF42VE3",
+        "MSZ-SF50VE3",
+        "MSZ-AP20VG",
+        "MSZ-AP25VGD"
+      ],
+      "command_count": 481,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1124.json",
+      "source_sha256": "83f0f22ef571d3ae3e1f6544bc85f35659d3b801aaea116a1fb77104c6a07c96"
+    },
+    {
+      "id": "climate_1125",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "MLZ-KP25VF",
+        "MLZ-KP35VF",
+        "MLZ-KP50VF"
+      ],
+      "command_count": 257,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1125.json",
+      "source_sha256": "7d77ca24c1e9fe87173ed22db8659594e94c8408c71deefb48e834a4c7b3cd12"
+    },
+    {
+      "id": "climate_1126",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "MSX09-NV II",
+        "MSH-07RV",
+        "MSH-12RV",
+        "MS-24RV"
+      ],
+      "command_count": 257,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1126.json",
+      "source_sha256": "e29836afd7b86af294d92c5cb6880288cc2bea322dade0ece4ef27d161d91b2b"
+    },
+    {
+      "id": "climate_1127",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "MSZ-HJ25VA"
+      ],
+      "command_count": 161,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1127.json",
+      "source_sha256": "5cf72db0f32630f91104b1043bf539d848ed9d85f3e8653c8cfb1177f62990e8"
+    },
+    {
+      "id": "climate_1128",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "MSZ-HJ25VA",
+        "MSZ-HJ35VA"
+      ],
+      "command_count": 321,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1128.json",
+      "source_sha256": "bfe4f11ca04b6427e8573884048cd03c980c8688b03a5ea6add523ea6482bcf9"
+    },
+    {
+      "id": "climate_1129",
+      "category": "climate",
+      "brand": "Mitsubishi Electric ",
+      "models": [
+        "MSZ-GE22VA"
+      ],
+      "command_count": 2689,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1129.json",
+      "source_sha256": "f5532d7b55baa8c184c645603c2b6ba7107687de78e9e79e268b0cb589b4258c"
+    },
+    {
+      "id": "climate_1130",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "MS-SGD18VC"
+      ],
+      "command_count": 191,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1130.json",
+      "source_sha256": "eb263347134d64abeebd7d86bc2a40fbe669a94530e605c5f3407c53a8f2dae2"
+    },
+    {
+      "id": "climate_1131",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "PAR-FL32MA"
+      ],
+      "command_count": 145,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1131.json",
+      "source_sha256": "2494c3ffd0500267ebaa9128e3aad6db2f0f6f2045d1e40f9fbec575b53a761d"
+    },
+    {
+      "id": "climate_1132",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "MSC-A12YV"
+      ],
+      "command_count": 193,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1132.json",
+      "source_sha256": "894ca7e469f100ae215f5387298b0453dd207504e687cdb299c5e3654aea8f5e"
+    },
+    {
+      "id": "climate_1133",
+      "category": "climate",
+      "brand": "Mitsubishi Electric Starmex",
+      "models": [
+        "MSXY-FN10VE",
+        "MSXY-FN07VE",
+        "MSXY-FN13VE",
+        "MSXY-FN18VE"
+      ],
+      "command_count": 2128,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1133.json",
+      "source_sha256": "5e67bbec2233715a75c26072a56847c22ffa9da71856b9200ecd5fc71790ccc3"
+    },
+    {
+      "id": "climate_1134",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "MG-GN18VF",
+        "MS-GN18VF",
+        "MS-GN13VF"
+      ],
+      "command_count": 241,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1134.json",
+      "source_sha256": "83a0497e81dabe9f627864edf367ffe02ebf4a260e01b1ac15dc3a63bcb9448e"
+    },
+    {
+      "id": "climate_1135",
+      "category": "climate",
+      "brand": "Mitsubishi",
+      "models": [
+        "MSZ-GE60VAD",
+        "MSZ-GE71VAD",
+        "MSZ-GE80VAD"
+      ],
+      "command_count": 481,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1135.json",
+      "source_sha256": "784d2ddf542cd8b16d3b30214299fdd2b384cc990f00e8ed7b3bef1fe792aa0a"
+    },
+    {
+      "id": "climate_1136",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "MSXY-FP10VG",
+        "MSXY-FP13VG",
+        "MSXY-FP18VG"
+      ],
+      "command_count": 289,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1136.json",
+      "source_sha256": "a12bf7ba684365578af24498bae5080d23fdcda5bb2f80a433379d8a21953e73"
+    },
+    {
+      "id": "climate_1137",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "MSZ-HR35VF"
+      ],
+      "command_count": 2241,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1137.json",
+      "source_sha256": "b4da55183192121979612369e4ba5e0160c1e58d743145ae97cdd5ec0c973249"
+    },
+    {
+      "id": "climate_1138",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "Remote KM09D/166901"
+      ],
+      "command_count": 321,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1138.json",
+      "source_sha256": "9399e01f2f7c46ac1a353894b15478d511ae721bd31abf9da62bfb832f253144"
+    },
+    {
+      "id": "climate_1139",
+      "category": "climate",
+      "brand": "Mitsubishi",
+      "models": [
+        "MLZ-KP09NA2",
+        "MLZ-KP18NA2"
+      ],
+      "command_count": 58,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1139.json",
+      "source_sha256": "a25aa2636b396a9b0ee923d276a7b500b8701d854585f948b0d2fc8dce134a6d"
+    },
+    {
+      "id": "climate_1140",
+      "category": "climate",
+      "brand": "Actron",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 113,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1140.json",
+      "source_sha256": "505af0e0082b08d87287a2eda731a28c2a0d2cd63b65b751247bbc499095fc09"
+    },
+    {
+      "id": "climate_1160",
+      "category": "climate",
+      "brand": "Carrier",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1160.json",
+      "source_sha256": "1dffc9a830667329fd0d811c8e471364d04e3a53995f11d76428d7f3e7bdccdf"
+    },
+    {
+      "id": "climate_1161",
+      "category": "climate",
+      "brand": "Carrier",
+      "models": [
+        "40GKX-024RB"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1161.json",
+      "source_sha256": "6410aa6a356f553b4f3edbac9574915dc630b35ddd1618731df547d54c2ea988"
+    },
+    {
+      "id": "climate_1162",
+      "category": "climate",
+      "brand": "Carrier",
+      "models": [
+        "42TVGS024-703"
+      ],
+      "command_count": 57,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1162.json",
+      "source_sha256": "e3bd1ffde813f6d2a85e3063def757d7e214bd66af3e7f9d448bbc7cab33ec20"
+    },
+    {
+      "id": "climate_1163",
+      "category": "climate",
+      "brand": "Carrier",
+      "models": [
+        "40MAQB12B--3",
+        "40MAQB18B--3"
+      ],
+      "command_count": 501,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1163.json",
+      "source_sha256": "bd6b2de7a3f3d34e5d969b4bcbd04a74f74fcb8315027f15888dcc226b518c6c"
+    },
+    {
+      "id": "climate_1164",
+      "category": "climate",
+      "brand": "Carrier",
+      "models": [
+        "42LUVH025N-1"
+      ],
+      "command_count": 238,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1164.json",
+      "source_sha256": "fbaa295e989198eff4d013728c4f80d02eeea70c6b7eb2cb3b1b8c76cfeb6f3e"
+    },
+    {
+      "id": "climate_1165",
+      "category": "climate",
+      "brand": "Carrier",
+      "models": [
+        "42P250HX",
+        "53P250HX"
+      ],
+      "command_count": 321,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1165.json",
+      "source_sha256": "3bb14b30848c007d11bf07715f6a008e1a3e862dc2b45487c33681fc7012f52d"
+    },
+    {
+      "id": "climate_1166",
+      "category": "climate",
+      "brand": "Carrier",
+      "models": [
+        "CS-A121N"
+      ],
+      "command_count": 130,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1166.json",
+      "source_sha256": "69bf33717bc2fa0e78d7f0616ee3ab460e5259c9dd7d9ceecaa65169ef29d0be"
+    },
+    {
+      "id": "climate_1180",
+      "category": "climate",
+      "brand": "Gree",
+      "models": [
+        "GWH12-KF-K3DNA5G-I"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1180.json",
+      "source_sha256": "a977bfce808284e8a01cd6c2d06fd7376f4bc6c71663097a27c26b61ae7a15c0"
+    },
+    {
+      "id": "climate_1181",
+      "category": "climate",
+      "brand": "Gree",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 79,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1181.json",
+      "source_sha256": "afad1ae014f47dd7c8ba76b2bf177db18723dfbfb8778d40630a5a6713ad1632"
+    },
+    {
+      "id": "climate_1182",
+      "category": "climate",
+      "brand": "Gree",
+      "models": [
+        "GMV-R45G/NaB-K"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1182.json",
+      "source_sha256": "ca9c6f5fb438061cc9003db79436cb4b9030afd81eed484e8486c7a3384793ad"
+    },
+    {
+      "id": "climate_1183",
+      "category": "climate",
+      "brand": "Gree",
+      "models": [
+        "Gree Smart inverter models. WiFi off. Health on. Swing modes: [swing]_[led]"
+      ],
+      "command_count": 960,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1183.json",
+      "source_sha256": "90f0d08633767a5cd7a476ba34d64498bcb95879272255dc9d90676383a7b4df"
+    },
+    {
+      "id": "climate_1184",
+      "category": "climate",
+      "brand": "Gree",
+      "models": [
+        "GWH09KF",
+        "GC-EAF09HR"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1184.json",
+      "source_sha256": "3853e2a861addaf6d114632223557a3fbb47162215d3e522c0d3f7854d1950af"
+    },
+    {
+      "id": "climate_1185",
+      "category": "climate",
+      "brand": "Gree",
+      "models": [
+        "KFR-50LW",
+        "YAP1F2"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1185.json",
+      "source_sha256": "9405bfd3dd1539b2d48ac695968a5cb2be625d5167576d1fda5f49be55754020"
+    },
+    {
+      "id": "climate_1186",
+      "category": "climate",
+      "brand": "Gree",
+      "models": [
+        "GWH18ACD-D3DNA 1M"
+      ],
+      "command_count": 59,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1186.json",
+      "source_sha256": "881cbddf61b71c164827bf1d0f095fbd2821c8f13eb5283d789c21a36bed3189"
+    },
+    {
+      "id": "climate_1187",
+      "category": "climate",
+      "brand": "Gree",
+      "models": [
+        "Unknown model"
+      ],
+      "command_count": 61,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1187.json",
+      "source_sha256": "7f03953ac82514111ecdaf647fbde3883ca53f11ac034a65b19a245b4e125fa7"
+    },
+    {
+      "id": "climate_1188",
+      "category": "climate",
+      "brand": "Gree",
+      "models": [
+        "VIR18HP230V1AH"
+      ],
+      "command_count": 521,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1188.json",
+      "source_sha256": "ebc366fb4950b2df82fd269522ccc29c67d9d0b89f3bdc9d4db630710a03ab0b"
+    },
+    {
+      "id": "climate_1200",
+      "category": "climate",
+      "brand": "Tosot",
+      "models": [
+        "T09H-SJ"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1200.json",
+      "source_sha256": "2f823ccbdf5f18df711e108596ff3cd96fb0e3f518ad93be782874b98c2e1c89"
+    },
+    {
+      "id": "climate_1220",
+      "category": "climate",
+      "brand": "Sungold",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 201,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1220.json",
+      "source_sha256": "73efa4bfe997d592d79ce7ad0bfe52ad927cde0d76721627e884bca26168b6dc"
+    },
+    {
+      "id": "climate_1240",
+      "category": "climate",
+      "brand": "Consul",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 117,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1240.json",
+      "source_sha256": "7a38d8318725743bae3186e97729af43a48abba0115028bfce839e4bddaee632"
+    },
+    {
+      "id": "climate_1241",
+      "category": "climate",
+      "brand": "Consul",
+      "models": [
+        "CBV12CBBNA",
+        "CBY12DBBNA"
+      ],
+      "command_count": 241,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1241.json",
+      "source_sha256": "94052f2d87c9cb8edcc386c2eb221b143bb0054553ca585fed65f23f954cbcea"
+    },
+    {
+      "id": "climate_1260",
+      "category": "climate",
+      "brand": "Toshiba",
+      "models": [
+        "RAS-13NKV-E / RAS-13NAV-E",
+        "RAS-13NKV-A / RAS-13NAV-A",
+        "RAS-16NKV-E / RAS-16NAV-E",
+        "RAS-16NKV-A / RAS-16NAV-A",
+        "RAS-M10SKV-E"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1260.json",
+      "source_sha256": "30023deee94c701913844798707f6ba9faf9e40ce6a32cbbfab0d8ee65c7fc91"
+    },
+    {
+      "id": "climate_1261",
+      "category": "climate",
+      "brand": " Toshiba",
+      "models": [
+        "WH-TA05NE",
+        "WH-TA11EJ"
+      ],
+      "command_count": 421,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1261.json",
+      "source_sha256": "e23ef767469bacb7d96fdfb139bee514547b8e40a5b12da0a2551c49417f5db9"
+    },
+    {
+      "id": "climate_1262",
+      "category": "climate",
+      "brand": "Toshiba",
+      "models": [
+        "RAC-PD0812CRRU",
+        "RAC-PD1013CWRU",
+        "RAC-PD1213CWRU",
+        "RAC-PD1414CWRU"
+      ],
+      "command_count": 354,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1262.json",
+      "source_sha256": "87903f33df258a8ce18777a251da0cb5a9a7a36570daa19da2e633cc912d64fd"
+    },
+    {
+      "id": "climate_1263",
+      "category": "climate",
+      "brand": "Toshiba",
+      "models": [
+        "RAS-B07J2KVSG-E",
+        "RAS-B10J2KVSG-E",
+        "RAS-B13J2KVSG-E",
+        "RAS-B10SKVP-E"
+      ],
+      "command_count": 421,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1263.json",
+      "source_sha256": "c157354e0c88199b8760488eb4bd2af2cd71e67a87a896e2b1b3d721c143a51d"
+    },
+    {
+      "id": "climate_1264",
+      "category": "climate",
+      "brand": "Toshiba",
+      "models": [
+        "RAS-13SKVR-A"
+      ],
+      "command_count": 421,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1264.json",
+      "source_sha256": "55bdcc4aee6de950c8029b5c8a356834a2fa99d5e1e857c4d3f88cf05ac8472a"
+    },
+    {
+      "id": "climate_1265",
+      "category": "climate",
+      "brand": "Toshiba",
+      "models": [
+        "RAS-25SKVP2-ND",
+        "RAS-35SKVP2-ND"
+      ],
+      "command_count": 316,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1265.json",
+      "source_sha256": "5c66a167dc57b9d0a51c3b6ca88cbd83a7a886a55c65fbfe7026e2ec4b644bd9"
+    },
+    {
+      "id": "climate_1280",
+      "category": "climate",
+      "brand": "Fujitsu",
+      "models": [
+        "AR-RBE1E"
+      ],
+      "command_count": 144,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1280.json",
+      "source_sha256": "1de9e9f32279891d7d6c47eeacce0c47e482a004f9a017bc37e469da5440f853"
+    },
+    {
+      "id": "climate_1281",
+      "category": "climate",
+      "brand": "Fujitsu",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 700,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1281.json",
+      "source_sha256": "2be0acfd77b5a3e1bea54115916db84af43b9d5364c16e0c2b60741d4d90f183"
+    },
+    {
+      "id": "climate_1282",
+      "category": "climate",
+      "brand": "Fujitsu",
+      "models": [
+        "AR-JW11"
+      ],
+      "command_count": 375,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1282.json",
+      "source_sha256": "d11ef3508cf5d26a70f7ad74cdd37a34140daee077a17c365cd1dd1193945998"
+    },
+    {
+      "id": "climate_1283",
+      "category": "climate",
+      "brand": "Fujitsu",
+      "models": [
+        "AR-AB5"
+      ],
+      "command_count": 157,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1283.json",
+      "source_sha256": "69b724b1eba7b38ff495eb4656b2b08abd5d9edd6f1f477f156635475b939bb3"
+    },
+    {
+      "id": "climate_1284",
+      "category": "climate",
+      "brand": "Fujitsu",
+      "models": [
+        "AR-REG1U"
+      ],
+      "command_count": 313,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1284.json",
+      "source_sha256": "d903994fe4b172b8d0011b2cbe97c76add4140765dc56afda77add21d726eeea"
+    },
+    {
+      "id": "climate_1285",
+      "category": "climate",
+      "brand": "Fujitsu",
+      "models": [
+        "AR-RCE1E",
+        "AR-PZ2"
+      ],
+      "command_count": 376,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1285.json",
+      "source_sha256": "37714de0b25a4b1759d0535ed2ec2b8e18a61d68895017e836908cfd0327c0c8"
+    },
+    {
+      "id": "climate_1286",
+      "category": "climate",
+      "brand": "Fujitsu",
+      "models": [
+        "AR-JE5"
+      ],
+      "command_count": 326,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1286.json",
+      "source_sha256": "af836ab8f90b253ed7af15abcea99aa6d7d2bfc95e4782b7511921a0f6b3aeca"
+    },
+    {
+      "id": "climate_1287",
+      "category": "climate",
+      "brand": "Fujitsu",
+      "models": [
+        "ASYG-LMCE",
+        "AR-REB1E",
+        "AR-REM7E",
+        "AR-REW2E"
+      ],
+      "command_count": 323,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1287.json",
+      "source_sha256": "7be69411b807a5b733ed99e4819978d5abc74deddad29e287a7c807e2fa268ba"
+    },
+    {
+      "id": "climate_1288",
+      "category": "climate",
+      "brand": "Fujitsu",
+      "models": [
+        "AR-AB8"
+      ],
+      "command_count": 208,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1288.json",
+      "source_sha256": "4146ff427f32e4a5aea2a1e1fa4b317bd3d10ee7b02bb4a4bf23cbc6f793d3e4"
+    },
+    {
+      "id": "climate_1289",
+      "category": "climate",
+      "brand": "Fujitsu",
+      "models": [
+        "AR-REW1E"
+      ],
+      "command_count": 209,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1289.json",
+      "source_sha256": "1af31f80e7582f3dae301277dd85ffec71ee518e34adec32e51682a661684c36"
+    },
+    {
+      "id": "climate_1290",
+      "category": "climate",
+      "brand": "Fujitsu",
+      "models": [
+        "AR-RFL7J"
+      ],
+      "command_count": 376,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1290.json",
+      "source_sha256": "a48c1322c7c8da18c3ece46834f97e25e44412e4daa46fea87a8ae56ead601c0"
+    },
+    {
+      "id": "climate_1291",
+      "category": "climate",
+      "brand": "Fujitsu",
+      "models": [
+        "AR-REF1E"
+      ],
+      "command_count": 210,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1291.json",
+      "source_sha256": "5fc9b511ef35905251172ed0bdfef06730a2df8cd1aa850ff761b052fff632b8"
+    },
+    {
+      "id": "climate_1294",
+      "category": "climate",
+      "brand": "Fujitsu",
+      "models": [
+        "AR-RY4"
+      ],
+      "command_count": 548,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1294.json",
+      "source_sha256": "1a93082727732f760b1169e340ac87b59d85834e6d06c92bca7237edef1a127c"
+    },
+    {
+      "id": "climate_1300",
+      "category": "climate",
+      "brand": "Sharp",
+      "models": [
+        "AY-B22DM"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1300.json",
+      "source_sha256": "f7ac2ba77d0bea03f5c6d4c0615079d319c537a39b7f938d6210510d6dae0fee"
+    },
+    {
+      "id": "climate_1301",
+      "category": "climate",
+      "brand": "Sharp",
+      "models": [
+        "AY-X13BE"
+      ],
+      "command_count": 241,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1301.json",
+      "source_sha256": "e116e016b0c3b2990a270a2b6ce11992dd016f8be4a8bb7d6b9ede4f005e110b"
+    },
+    {
+      "id": "climate_1320",
+      "category": "climate",
+      "brand": "Haier",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1320.json",
+      "source_sha256": "0e25d8d591ea1b682b59d6054694f471e19a73b5fb23480f91922eba0faf6b73"
+    },
+    {
+      "id": "climate_1321",
+      "category": "climate",
+      "brand": "Haier",
+      "models": [
+        "Top-Tech 14"
+      ],
+      "command_count": 166,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1321.json",
+      "source_sha256": "812a1609aadb2435d320373ae4ce8af64f54d4f4beda69cb21c51803ab07f498"
+    },
+    {
+      "id": "climate_1322",
+      "category": "climate",
+      "brand": "Haier",
+      "models": [
+        "HSU-09HPL03/R03"
+      ],
+      "command_count": 241,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1322.json",
+      "source_sha256": "299ef858172a74a4596869ccb7bdbc7a1271cee6db8267bc004a6dc097c4d6ca"
+    },
+    {
+      "id": "climate_1340",
+      "category": "climate",
+      "brand": "Tadiran",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 136,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1340.json",
+      "source_sha256": "6a848ee84c5b7c89cc8709a00b5d4893d204d18a4604ceccd249f39b1a1bae25"
+    },
+    {
+      "id": "climate_1341",
+      "category": "climate",
+      "brand": "Tadiran",
+      "models": [
+        "TAC490"
+      ],
+      "command_count": 91,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1341.json",
+      "source_sha256": "571ffd01e47214314270a3f238aa2384c2a8a85cf8caf09bd3108731286aab61"
+    },
+    {
+      "id": "climate_1342",
+      "category": "climate",
+      "brand": "Tadiran",
+      "models": [
+        "Tadiran-10i/15i/inv220a"
+      ],
+      "command_count": 121,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1342.json",
+      "source_sha256": "c7d84801118ae97f21ee84a4aa7262761de5ea720f66173c52c6ae3d522d191b"
+    },
+    {
+      "id": "climate_1343",
+      "category": "climate",
+      "brand": "Tadiran",
+      "models": [
+        "Alpha Series"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1343.json",
+      "source_sha256": "f20bc6ff4f823f1ef0a1d511b5b08bc57fb76e4bb599f1e324221bd453f6562c"
+    },
+    {
+      "id": "climate_1344",
+      "category": "climate",
+      "brand": "Tadiran",
+      "models": [
+        "Remote Control YB1FA",
+        "Tadiran Inverter"
+      ],
+      "command_count": 1321,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1344.json",
+      "source_sha256": "7b8ffbc13e584e14db727486e0e1dd5b1d4959367c51d1dc98a65ff94a34e561"
+    },
+    {
+      "id": "climate_1345",
+      "category": "climate",
+      "brand": "Tadiran",
+      "models": [
+        "TAC 297"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1345.json",
+      "source_sha256": "7f939b7bf98617d82fdfcd3d0ff6bd803d27f1d60b9b9183061d80680109c976"
+    },
+    {
+      "id": "climate_1346",
+      "category": "climate",
+      "brand": "Tadiran",
+      "models": [
+        "TAC 297H V3.2"
+      ],
+      "command_count": 137,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1346.json",
+      "source_sha256": "8422688927fabe04060fdf231fcbd5dfaafa04f413d1a5289d5ff9d7dbc2d000"
+    },
+    {
+      "id": "climate_1360",
+      "category": "climate",
+      "brand": "Springer",
+      "models": [
+        "Split Hi Wall Maxiflex"
+      ],
+      "command_count": 269,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1360.json",
+      "source_sha256": "ebeddbfd4023b81dbcc05b1dbc4afe9a9c98cf4689a48d29edbd2b206aa5a1cd"
+    },
+    {
+      "id": "climate_1380",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 157,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1380.json",
+      "source_sha256": "b565a03bf719def44bc268ccf9d0a413db7d633eef0f4f7a478fe59e1557f666"
+    },
+    {
+      "id": "climate_1381",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 67,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1381.json",
+      "source_sha256": "b14a6062639d94ed6bffaf1e4b15265756beea4aa76208e2659320b8776df8d8"
+    },
+    {
+      "id": "climate_1382",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "MSY-12HRDN1"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1382.json",
+      "source_sha256": "4d70224741c59165225ad227734f129a87832a31ac82a2351c6bab7ec9d95698"
+    },
+    {
+      "id": "climate_1383",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "KFR-35G"
+      ],
+      "command_count": 225,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1383.json",
+      "source_sha256": "2c117b512b0b4db29d721b0ee288871b51cb7320f24104b8f900a9c6c4332059"
+    },
+    {
+      "id": "climate_1384",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "MSMACU-18HRFN1-QRD0GW"
+      ],
+      "command_count": 65,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1384.json",
+      "source_sha256": "eed27fdba2193d9e63e58208292913a2092ec6bb6b2b9c82e9c6422025759deb"
+    },
+    {
+      "id": "climate_1386",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "KFR-32GW"
+      ],
+      "command_count": 141,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1386.json",
+      "source_sha256": "b4b5b4ab766648491d6f01b33b345df68e892b8dc7ee20f3beb253722aa2f951"
+    },
+    {
+      "id": "climate_1387",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "RG70E/BGEF (Remote)"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1387.json",
+      "source_sha256": "46a40d984d30dd4ee7137df48de7176cfdcbf6767253deb988b51b46e3af1437"
+    },
+    {
+      "id": "climate_1388",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "42MAQA09S5"
+      ],
+      "command_count": 57,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1388.json",
+      "source_sha256": "43ecddd90c87439e3e1f02560546b24dfd0e1dc3f1e3a737521d9c435b71fd3a"
+    },
+    {
+      "id": "climate_1389",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "MAP05R1WWT"
+      ],
+      "command_count": 289,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1389.json",
+      "source_sha256": "78612454ec65be3e4d40ff94f083fc4a9194901835acc3fd8fd5df3a71865a34"
+    },
+    {
+      "id": "climate_1390",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "RG52C1/BGE (Remote)"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1390.json",
+      "source_sha256": "ff1135620db81de1b164d37b369a7b170dc781189fa82fe645b28412bca62a71"
+    },
+    {
+      "id": "climate_1391",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "RG58E3/BGEF"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1391.json",
+      "source_sha256": "ee62a62c8e02fd2a01ec72b28e47e42c8d70577ce007fdf7e03746c28662d6da"
+    },
+    {
+      "id": "climate_1392",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "MPD-12CRN7"
+      ],
+      "command_count": 127,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1392.json",
+      "source_sha256": "c9df0e6c5bdb92fdff8c965d077914f307aeaa84901149d28ab6c97fac3a453c"
+    },
+    {
+      "id": "climate_1393",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "MPPHB-09CRN7-QB6-N"
+      ],
+      "command_count": 131,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1393.json",
+      "source_sha256": "a3d7865a1038026cad51bcb07908693631d27730467b484a2ad3278c4b250ffe"
+    },
+    {
+      "id": "climate_1394",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "RG70C/BGEF (Remote)"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1394.json",
+      "source_sha256": "26ce8e434407535ab64338ccedc0914dc39d9403f02440ca0e5a9dcdbbd557d5"
+    },
+    {
+      "id": "climate_1395",
+      "category": "climate",
+      "brand": "Midea",
+      "models": [
+        "RG10B(D1)/BGEFU1 (Remote)"
+      ],
+      "command_count": 284,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1395.json",
+      "source_sha256": "9f94593466a7472acca57d69000a663cb2d36b564473b5c140de0f315f522984"
+    },
+    {
+      "id": "climate_1400",
+      "category": "climate",
+      "brand": "Samsung",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 449,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1400.json",
+      "source_sha256": "934104959a4af97d1c05f8298f95991761e284dcf2ce82275dfe3468b2313217"
+    },
+    {
+      "id": "climate_1401",
+      "category": "climate",
+      "brand": "Samsung",
+      "models": [
+        "AR**HSF/JFS**"
+      ],
+      "command_count": 240,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1401.json",
+      "source_sha256": "6c0a3b3debb50ba8cb1f6587c5955df964371a5a206531d5f63296edf545e8b2"
+    },
+    {
+      "id": "climate_1402",
+      "category": "climate",
+      "brand": "Samsung",
+      "models": [
+        "AR**TSHGAWK"
+      ],
+      "command_count": 459,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1402.json",
+      "source_sha256": "6f3c370a52493d3b32814e833d11c6c21455277b9c2ffb6431c6c4f29fb4a185"
+    },
+    {
+      "id": "climate_1403",
+      "category": "climate",
+      "brand": "Samsung",
+      "models": [
+        "AR**TXHZ***"
+      ],
+      "command_count": 417,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1403.json",
+      "source_sha256": "1601d5828ec9f9de35d9407f8fe19b9d40de86830ec3fd221d604192b5c5020d"
+    },
+    {
+      "id": "climate_1404",
+      "category": "climate",
+      "brand": "Samsung",
+      "models": [
+        "AR**TSHZ****"
+      ],
+      "command_count": 837,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1404.json",
+      "source_sha256": "fc123f6e8283a946e0a3e5dfbaecc237bb204e7eed9e1bcdd4f054f65d0bacc9"
+    },
+    {
+      "id": "climate_1405",
+      "category": "climate",
+      "brand": "Samsung",
+      "models": [
+        "AR**TSHQBURN"
+      ],
+      "command_count": 197,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1405.json",
+      "source_sha256": "ead300744675da0f1a9e020e18e413f95ae1dacd2fa9a8249ce269db4494ea6d"
+    },
+    {
+      "id": "climate_1407",
+      "category": "climate",
+      "brand": "Samsung",
+      "models": [
+        "AR**NXWS***"
+      ],
+      "command_count": 367,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1407.json",
+      "source_sha256": "e86f42767f065351394eb8214b1c3a0e69f8e1204d4570f28372644d7dc4a463"
+    },
+    {
+      "id": "climate_1408",
+      "category": "climate",
+      "brand": "Samsung",
+      "models": [
+        "AR18HSFSAWKNEU Ver.01"
+      ],
+      "command_count": 901,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1408.json",
+      "source_sha256": "12ba97703caba08b60ae27ead1411de069ba3eb0e0f11e47d0c9061de643c2cc"
+    },
+    {
+      "id": "climate_1420",
+      "category": "climate",
+      "brand": "Sintech",
+      "models": [
+        "KFR-34GW"
+      ],
+      "command_count": 257,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1420.json",
+      "source_sha256": "e42f249431098579fc355d530d98cdaffdef9f5ab1481d3d706cf746b9895a9f"
+    },
+    {
+      "id": "climate_1440",
+      "category": "climate",
+      "brand": "Akai",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 341,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1440.json",
+      "source_sha256": "65e4f4a3c6511b57232636c711b66237fe0404b484a2709bd7b99a7e3369340d"
+    },
+    {
+      "id": "climate_1441",
+      "category": "climate",
+      "brand": "Akai",
+      "models": [
+        "TEM-26CHSAAK5",
+        "TEM-70CHSAAK5",
+        "TEM-26CHSAKA5",
+        "TEM-35CHSAKA",
+        "TEM-50CHSAKA",
+        "TEM-35CHSABH",
+        "TEM-35CHSF"
+      ],
+      "command_count": 154,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1441.json",
+      "source_sha256": "46931378bcc96d06a5fd9bb1fbda1e0b8e9d634d5156f9f4bc0cba242ea1f6c7"
+    },
+    {
+      "id": "climate_1460",
+      "category": "climate",
+      "brand": "Alliance",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 211,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1460.json",
+      "source_sha256": "7e883f865239e280c97e4e3754f2573ccc7622fe3c7d61be0821b4ffa3a9c085"
+    },
+    {
+      "id": "climate_1480",
+      "category": "climate",
+      "brand": "Junkers",
+      "models": [
+        "Excellence"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1480.json",
+      "source_sha256": "9558a87d6d2e926066bf6fc725e72767bdf37e6c18432f6886a31c961f5a2d51"
+    },
+    {
+      "id": "climate_1481",
+      "category": "climate",
+      "brand": "Junkers",
+      "models": [
+        "Excellence"
+      ],
+      "command_count": 361,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1481.json",
+      "source_sha256": "9c7dbe564340aacc33058568b3d91f4dedab6cb873b8116e0daaa973b8703324"
+    },
+    {
+      "id": "climate_1500",
+      "category": "climate",
+      "brand": "Sanyo",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 157,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1500.json",
+      "source_sha256": "ecc064d1f44d1a02172eb0e269a5ea293dc1753eab5c8ce0676d2c87352e3e0d"
+    },
+    {
+      "id": "climate_1501",
+      "category": "climate",
+      "brand": "Sanyo",
+      "models": [
+        "SAP-KR124EHEA"
+      ],
+      "command_count": 286,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1501.json",
+      "source_sha256": "c0decf1cae731c536cb8b2209209d06dfa147678245b7e82627f438f08a6aacd"
+    },
+    {
+      "id": "climate_1520",
+      "category": "climate",
+      "brand": "Hisense",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 261,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1520.json",
+      "source_sha256": "a71ba75c8b4e262d58a725a93cd0eefa7528ae7ea49e72fb5e3b13519e806d00"
+    },
+    {
+      "id": "climate_1521",
+      "category": "climate",
+      "brand": "Hisense",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 121,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1521.json",
+      "source_sha256": "ed9d16cb4dca64b7f4afb58a857e878d46bc97fbc6af7a3638711f2e2de90b83"
+    },
+    {
+      "id": "climate_1522",
+      "category": "climate",
+      "brand": "Hisense",
+      "models": [
+        "DGR11R2"
+      ],
+      "command_count": 361,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1522.json",
+      "source_sha256": "2feec36e48887d10c030d2d7fca475483ce327b9a49fe9a182306d2a0f5f268c"
+    },
+    {
+      "id": "climate_1540",
+      "category": "climate",
+      "brand": "Whirlpool",
+      "models": [
+        "SPIS412L"
+      ],
+      "command_count": 105,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1540.json",
+      "source_sha256": "86d8812269827c20522778dfb9903933311b0e0aea7784f1ce08845e6b4fd0fa"
+    },
+    {
+      "id": "climate_1560",
+      "category": "climate",
+      "brand": "Tadiran",
+      "models": [
+        "WIND 3P"
+      ],
+      "command_count": 136,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1560.json",
+      "source_sha256": "bc1afe42ba18ecb9759296a8f849c3c5d8946fe8bd97055864457818d3288093"
+    },
+    {
+      "id": "climate_1580",
+      "category": "climate",
+      "brand": "Chigo",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 118,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1580.json",
+      "source_sha256": "dff7fda00fd5bf65b43fcb2e15566b6ac6aa17c3d368df8d53796e6d931cb8d3"
+    },
+    {
+      "id": "climate_1581",
+      "category": "climate",
+      "brand": "Chigo",
+      "models": [
+        "ZH/TY-01"
+      ],
+      "command_count": 290,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1581.json",
+      "source_sha256": "16f04d63048141f45d560f446b3f61f2aaede4f4539cc19033aa40ba62cefc7f"
+    },
+    {
+      "id": "climate_1582",
+      "category": "climate",
+      "brand": "Chigo",
+      "models": [
+        "ZH/TT-14"
+      ],
+      "command_count": 222,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1582.json",
+      "source_sha256": "0f261d363565988e56292596a54b09517867d4370ae68d66c10015cacfcff4fe"
+    },
+    {
+      "id": "climate_1600",
+      "category": "climate",
+      "brand": "Beko",
+      "models": [
+        "BEVCA 120"
+      ],
+      "command_count": 154,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1600.json",
+      "source_sha256": "b9929cd2f09d47901c7df3a2a18087300bbfefc13ddfc281832301705bc489be"
+    },
+    {
+      "id": "climate_1601",
+      "category": "climate",
+      "brand": "Beko",
+      "models": [
+        "BPAK 120"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1601.json",
+      "source_sha256": "8edc879dd7f30157811cb149f86078561505eb7d188012df8622936c3e698da2"
+    },
+    {
+      "id": "climate_1602",
+      "category": "climate",
+      "brand": "Beko",
+      "models": [
+        "BXK 120"
+      ],
+      "command_count": 321,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1602.json",
+      "source_sha256": "f3109540ddbeb1a43f8f3c3d3f587a49b238a1ff2a5414315ca9d0ed7d3a659c"
+    },
+    {
+      "id": "climate_1603",
+      "category": "climate",
+      "brand": "Beko",
+      "models": [
+        "BXEU 090"
+      ],
+      "command_count": 361,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1603.json",
+      "source_sha256": "802ffb04aa40076c4fe86353b0d361b838e32b418a3ba349430c35b1755c1482"
+    },
+    {
+      "id": "climate_1604",
+      "category": "climate",
+      "brand": "Beko",
+      "models": [
+        "BPEU 120"
+      ],
+      "command_count": 229,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1604.json",
+      "source_sha256": "c41b825664d11d8d05d20d5a758ec1660628a0daeac80c750c9b4057f3a4c459"
+    },
+    {
+      "id": "climate_1620",
+      "category": "climate",
+      "brand": "Tornado",
+      "models": [
+        "Super - Inverter A, i",
+        "Inverter",
+        "Inverter A",
+        "Super Design",
+        "Super Plasma",
+        "Gold i",
+        "Multi ON-OFF",
+        "Multi Inverter",
+        "Super Gold i",
+        "Plasma Gold"
+      ],
+      "command_count": 118,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1620.json",
+      "source_sha256": "11340b21bc38e45079529953925084f836110715fbdd0b3bd0a5549c9b4ec444"
+    },
+    {
+      "id": "climate_1621",
+      "category": "climate",
+      "brand": "Tornado",
+      "models": [
+        "Super Legend 40"
+      ],
+      "command_count": 121,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1621.json",
+      "source_sha256": "801494e885d442dbe587c480e696726cd56dbc8153c83ebb9aac84ec3432a3ce"
+    },
+    {
+      "id": "climate_1622",
+      "category": "climate",
+      "brand": "Tornado",
+      "models": [
+        "Master-22 X"
+      ],
+      "command_count": 545,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1622.json",
+      "source_sha256": "038bde531a0dbb93b13eccc92dca2284aee900f7b9c870c9269ba27f4c747fd3"
+    },
+    {
+      "id": "climate_1623",
+      "category": "climate",
+      "brand": "Tornado",
+      "models": [
+        "Inverter VRF"
+      ],
+      "command_count": 91,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1623.json",
+      "source_sha256": "3b59039dec01a7d686923c61051f350ebbf654f1e80f0a11f6a7aa8d8b87072c"
+    },
+    {
+      "id": "climate_1624",
+      "category": "climate",
+      "brand": "Tornado",
+      "models": [
+        "Super Legend 40"
+      ],
+      "command_count": 121,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1624.json",
+      "source_sha256": "2784b37053d39edbfb17d8e9e94c8af0b3e9a11002b4a2dda12a67e66714492e"
+    },
+    {
+      "id": "climate_1625",
+      "category": "climate",
+      "brand": "Tornado",
+      "models": [
+        "Inverter VRF BOX"
+      ],
+      "command_count": 91,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1625.json",
+      "source_sha256": "283a0aa2fa66a6e3669fd0acd7e8df0d64c5bbf0852381c2142ae37abddff2d2"
+    },
+    {
+      "id": "climate_1626",
+      "category": "climate",
+      "brand": "Tornado",
+      "models": [
+        "MASTER-35 X 1PH"
+      ],
+      "command_count": 121,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1626.json",
+      "source_sha256": "70ff84510d2daa4b6a4761b73e2b0074cedd7da80a5f24130380b11773616fb6"
+    },
+    {
+      "id": "climate_1627",
+      "category": "climate",
+      "brand": "Tornado",
+      "models": [
+        "MASTER-12A PLUS"
+      ],
+      "command_count": 241,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1627.json",
+      "source_sha256": "f5509a49e8a02215b93ab59181e3e00d640c552fe422bfc8b5dfa0dcb250e7a9"
+    },
+    {
+      "id": "climate_1640",
+      "category": "climate",
+      "brand": "FUJIKO",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1640.json",
+      "source_sha256": "b837398cbad307e85fa41e7c87948f9acf98487156a412754a16f246b360efbe"
+    },
+    {
+      "id": "climate_1660",
+      "category": "climate",
+      "brand": "ROYAL",
+      "models": [
+        "08HPN1T1"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1660.json",
+      "source_sha256": "17838ea03427c94f51ab6110333e1d6b67940926035e14111e49d71dd33d3ce3"
+    },
+    {
+      "id": "climate_1661",
+      "category": "climate",
+      "brand": "ROYAL",
+      "models": [
+        "RC-G25HN"
+      ],
+      "command_count": 385,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1661.json",
+      "source_sha256": "1d38a4be433a4305456810d9ab4c3694747285fc829ba7c82008f8a62f26a897"
+    },
+    {
+      "id": "climate_1680",
+      "category": "climate",
+      "brand": "Mitsubishi Heavy",
+      "models": [
+        "SRK25ZJ-S1",
+        "SRK13CRV-S1"
+      ],
+      "command_count": 157,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1680.json",
+      "source_sha256": "9e9211685e5432f8c26fd29c77fe366e5236d38eb8529541b3c3b96fe3457393"
+    },
+    {
+      "id": "climate_1681",
+      "category": "climate",
+      "brand": "Mitsubishi Heavy",
+      "models": [
+        "SRK71ZK-S"
+      ],
+      "command_count": 196,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1681.json",
+      "source_sha256": "0d261624ef5c80fc613db3bec5c43acd6eaf43d034bcd4060262f5606d924e1d"
+    },
+    {
+      "id": "climate_1682",
+      "category": "climate",
+      "brand": "Mitsubishi Heavy",
+      "models": [
+        "SRKM25H",
+        "SRK40HBE",
+        "RKS502A502",
+        "RKS502A503"
+      ],
+      "command_count": 157,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1682.json",
+      "source_sha256": "29cecb808e8cfda622f61876877c169984814facecae7e2cc297cedb25762965"
+    },
+    {
+      "id": "climate_1683",
+      "category": "climate",
+      "brand": "Mitsubishi Heavy",
+      "models": [
+        "DXK12ZMA-S"
+      ],
+      "command_count": 196,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1683.json",
+      "source_sha256": "d89fd79b9d549392d8fe3b765ea908360750042e72b1fb9ab8b053c496b7b275"
+    },
+    {
+      "id": "climate_1684",
+      "category": "climate",
+      "brand": "Mitsubishi Heavy Industries",
+      "models": [
+        "DXK24ZRA"
+      ],
+      "command_count": 121,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1684.json",
+      "source_sha256": "ea60253583abb2489a163753a2c60e739847e8a6538d09903cb05920301238b7"
+    },
+    {
+      "id": "climate_1685",
+      "category": "climate",
+      "brand": "Mitsubishi Heavy",
+      "models": [
+        "SRK50ZS-S"
+      ],
+      "command_count": 325,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1685.json",
+      "source_sha256": "568548cb1c0e9c89765e07854b7f214e6bfff1b50012d9d3851b4355546ffd1b"
+    },
+    {
+      "id": "climate_1686",
+      "category": "climate",
+      "brand": "Mitsubishi Heavy",
+      "models": [
+        "SRK20ZSA-W",
+        "SRK25ZSA-W",
+        "SRK35ZSA-W",
+        "SRK50ZSA-W"
+      ],
+      "command_count": 326,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1686.json",
+      "source_sha256": "665e229d4ad5abe88ffb6057e4c29f480a755f14963d2191f39456e692eeb814"
+    },
+    {
+      "id": "climate_1687",
+      "category": "climate",
+      "brand": "Mitsubishi Heavy",
+      "models": [
+        "SRK35ZJX-S",
+        "SRK20ZJX-S"
+      ],
+      "command_count": 157,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1687.json",
+      "source_sha256": "5acdc9fc0ab5c4cf9ad6cf9846f1322552659e5aaf402b9c6bd5a63e4d328dfc"
+    },
+    {
+      "id": "climate_1688",
+      "category": "climate",
+      "brand": "Mitsubishi Heavy",
+      "models": [
+        "SRK25ZSP-W",
+        "SRK35ZSP-W",
+        "SRK45ZSP-W"
+      ],
+      "command_count": 260,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1688.json",
+      "source_sha256": "38f8259da4153b4e4c7ad4ac94d43eddf0f96c3c89a922298d5210bf45c7dbbf"
+    },
+    {
+      "id": "climate_1689",
+      "category": "climate",
+      "brand": "Mitsubishi Heavy",
+      "models": [
+        "DXK12ZSA-W"
+      ],
+      "command_count": 326,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1689.json",
+      "source_sha256": "3322e3d66d972375336e939f8894495e295b9f12605eb8a87b53914e5e584748"
+    },
+    {
+      "id": "climate_1690",
+      "category": "climate",
+      "brand": "Mitsubishi Heavy",
+      "models": [
+        "FDUM VF2"
+      ],
+      "command_count": 325,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1690.json",
+      "source_sha256": "f70107189c12098397b60cea7b55265292a6a1290e61161a10dc26bb72d50133"
+    },
+    {
+      "id": "climate_1692",
+      "category": "climate",
+      "brand": "Mitsubishi Heavy",
+      "models": [
+        "DXK12Z3-S",
+        "DXK09Z5-S",
+        "DXK15Z5-S"
+      ],
+      "command_count": 157,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1692.json",
+      "source_sha256": "fd5e81d5cd115a3e63422b8028af4a2e871d7ca5ec148b89ea2b078cbfd5054d"
+    },
+    {
+      "id": "climate_1700",
+      "category": "climate",
+      "brand": "Electrolux",
+      "models": [
+        "EACS/I-HAT/N3"
+      ],
+      "command_count": 57,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1700.json",
+      "source_sha256": "2add01bf8a7add7713a5498cc6db6d0a716ecdebd6f54c7f8d3dedb52b25ced6"
+    },
+    {
+      "id": "climate_1701",
+      "category": "climate",
+      "brand": "Electrolux",
+      "models": [
+        "EACS-HA"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1701.json",
+      "source_sha256": "a6b05eca4ce9c2a0d2f78f5b8bfef3b2141c108c2cd924f36c9b52fd490aa333"
+    },
+    {
+      "id": "climate_1702",
+      "category": "climate",
+      "brand": "Electrolux",
+      "models": [
+        "QI/QE09F",
+        "QI/QE09R",
+        "QI/QE12F",
+        "QI/QE12R",
+        "QI/QE18F",
+        "QI/QE18R",
+        "QI/QE22F",
+        "QI/QE22R",
+        "XI/XE09F",
+        "XI/XE09R",
+        "XI/XE12F",
+        "XI/XE12R",
+        "XI/XE18F",
+        "XI/XE18R",
+        "XI/XE22F",
+        "XI/XE22R"
+      ],
+      "command_count": 334,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1702.json",
+      "source_sha256": "83c866f891164c3a6c6cf50fc5e0bcabaa81b8cf22336b2ebb2c810e1e50d4d7"
+    },
+    {
+      "id": "climate_1703",
+      "category": "climate",
+      "brand": "Electrolux",
+      "models": [
+        "EXP26U758CW"
+      ],
+      "command_count": 273,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1703.json",
+      "source_sha256": "7ebd1892f9f13a204a47a793c0097db58cda847c42331ce30f00c3edfe9524f4"
+    },
+    {
+      "id": "climate_1704",
+      "category": "climate",
+      "brand": "Electrolux",
+      "models": [
+        "EPI12LEIWI"
+      ],
+      "command_count": 182,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1704.json",
+      "source_sha256": "b078c12b61de1a44da72fb4e2e4db8384f1b36db0b3c063ace096432d77f3a11"
+    },
+    {
+      "id": "climate_1705",
+      "category": "climate",
+      "brand": "Electrolux",
+      "models": [
+        "EACM-10 HR/N3"
+      ],
+      "command_count": 545,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1705.json",
+      "source_sha256": "4e5c254f9879b79cb57bd286651992d9952abaefa07e3a6610c21aafd03b8f24"
+    },
+    {
+      "id": "climate_1720",
+      "category": "climate",
+      "brand": "Erisson",
+      "models": [
+        "EC-S07T2"
+      ],
+      "command_count": 321,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1720.json",
+      "source_sha256": "41a1b7fbef2b47295fd83b60a147bc9b781be4e0f8558f65f40d88a13fccf62c"
+    },
+    {
+      "id": "climate_1741",
+      "category": "climate",
+      "brand": "Kelvinator",
+      "models": [
+        "KSV26CRC",
+        "KSV26HRC",
+        "KSV35CRC",
+        "KSV35HRC",
+        "KSV53HRC",
+        "KSV62HRC",
+        "KSV70CRC",
+        "KCV70HRC",
+        "KSV80HRC"
+      ],
+      "command_count": 451,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1741.json",
+      "source_sha256": "d1f7b3a80ece6cc764a455dc8be8864ada2985eb6a2f53fae6758616fe11d7b7"
+    },
+    {
+      "id": "climate_1760",
+      "category": "climate",
+      "brand": "Daitsu",
+      "models": [
+        "DS12U-RV"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1760.json",
+      "source_sha256": "16d590bfc19a36c98cd9f9ab2d22445640869f3ce0fea5cbd1daa8fc2d457d8d"
+    },
+    {
+      "id": "climate_1761",
+      "category": "climate",
+      "brand": "Daitsu",
+      "models": [
+        "DS-9KIDT"
+      ],
+      "command_count": 258,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1761.json",
+      "source_sha256": "be9644a44046de204e8379f55f7f48834ecb84a9789d34ecde1510c5033b70e8"
+    },
+    {
+      "id": "climate_1762",
+      "category": "climate",
+      "brand": "Daitsu",
+      "models": [
+        "ASD9KI-DT"
+      ],
+      "command_count": 257,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1762.json",
+      "source_sha256": "f501692d364bad1a90696af243a5e9302255a3abeb3073f16942be2bfec1e22f"
+    },
+    {
+      "id": "climate_1763",
+      "category": "climate",
+      "brand": "Daitsu",
+      "models": [
+        "DOS12KIDB"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1763.json",
+      "source_sha256": "be4f90c0e4307d1c443443b41b60141605d9486828f2f071b9a887fa6ffb2056"
+    },
+    {
+      "id": "climate_1764",
+      "category": "climate",
+      "brand": "Daitsu",
+      "models": [
+        "DS-12KIDC(WD)"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1764.json",
+      "source_sha256": "db7e52f3016cb9c03c955ef02ad8c33fe02527bf712e86d30c981f789d3fbf08"
+    },
+    {
+      "id": "climate_1780",
+      "category": "climate",
+      "brand": "Trotec",
+      "models": [
+        "YX1F6"
+      ],
+      "command_count": 121,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1780.json",
+      "source_sha256": "a80024adbe323d050c19855eadebc61803c23db2d5f3c547a12632936fd876a7"
+    },
+    {
+      "id": "climate_1781",
+      "category": "climate",
+      "brand": "Trotec",
+      "models": [
+        "YX1F"
+      ],
+      "command_count": 226,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1781.json",
+      "source_sha256": "0cbec800595867d0539147e2242bb8fe8ba4f8eb874e93f034252f1a4d18e5c5"
+    },
+    {
+      "id": "climate_1782",
+      "category": "climate",
+      "brand": "Trotec",
+      "models": [
+        "RG57H3(B)/BGCEF-M",
+        "PAC 2100 X",
+        "PAC 2600 X"
+      ],
+      "command_count": 169,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1782.json",
+      "source_sha256": "bcfc5522a4b8ba4648dbba2fb9f8b50ca0164c795f8162512597d6d2910167a0"
+    },
+    {
+      "id": "climate_1800",
+      "category": "climate",
+      "brand": "Ballu",
+      "models": [
+        "YKR-K/002E"
+      ],
+      "command_count": 137,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1800.json",
+      "source_sha256": "de25aff16f41ec2e4826fe17f93771de00077972f827e7c6734aa36723cfb89a"
+    },
+    {
+      "id": "climate_1801",
+      "category": "climate",
+      "brand": "Ballu",
+      "models": [
+        "BSD/in-09HN1_20Y"
+      ],
+      "command_count": 168,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1801.json",
+      "source_sha256": "659c39961f5e8802f08dc664bcd7f85e7312032d6c194e6b03734dba17f5da99"
+    },
+    {
+      "id": "climate_1820",
+      "category": "climate",
+      "brand": "Riello",
+      "models": [
+        "WSI XN",
+        "RAR-3U4"
+      ],
+      "command_count": 273,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1820.json",
+      "source_sha256": "0a1178cd837f37ec70dc4010827049bfa8fa02981cb89e647fda078f5c06cc4c"
+    },
+    {
+      "id": "climate_1840",
+      "category": "climate",
+      "brand": "Hualing",
+      "models": [
+        "KFR-45GW/JNV",
+        "KFR-45G/JNV"
+      ],
+      "command_count": 257,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1840.json",
+      "source_sha256": "a668058cf1cd828754c72fcec4dc07f675928b83aea3d042af8160fa83db7151"
+    },
+    {
+      "id": "climate_1860",
+      "category": "climate",
+      "brand": "Simbio",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 129,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1860.json",
+      "source_sha256": "61b099f77ec8ba2fa1a047f1ad30646f7c47e9ab2991212e96cab15482a6fd05"
+    },
+    {
+      "id": "climate_1880",
+      "category": "climate",
+      "brand": "Saunier Duval",
+      "models": [
+        "1"
+      ],
+      "command_count": 121,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1880.json",
+      "source_sha256": "b392bcb95caf4303d97bc7d338fbaca6165892d7e6abf4dd54a3dc20961a9871"
+    },
+    {
+      "id": "climate_1900",
+      "category": "climate",
+      "brand": "TCL",
+      "models": [
+        "TAC-12CHSD/XA21I"
+      ],
+      "command_count": 33,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1900.json",
+      "source_sha256": "6720389fc25d817a63eee35c4e5eed3ad316d7ff35adbb26f39256b8ee0cdcd4"
+    },
+    {
+      "id": "climate_1901",
+      "category": "climate",
+      "brand": "TCL",
+      "models": [
+        "TAC-12CHSD/XA71IN"
+      ],
+      "command_count": 129,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1901.json",
+      "source_sha256": "2f57ac78fd5976006bd4c2258d73afadf187eda43fe0690b59e836c6f5c8c062"
+    },
+    {
+      "id": "climate_1920",
+      "category": "climate",
+      "brand": "Aokesi",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 118,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1920.json",
+      "source_sha256": "93fe37502486faf6fec9ce59ece910ba3e99f08f0f6c8317ab4ca9e70eb0927e"
+    },
+    {
+      "id": "climate_1940",
+      "category": "climate",
+      "brand": "Electra",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1940.json",
+      "source_sha256": "db652e0663eee29dac4a3b46e51165faa266f1209a0e9ddbda8c8ecf429731c7"
+    },
+    {
+      "id": "climate_1941",
+      "category": "climate",
+      "brand": "Electra",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1941.json",
+      "source_sha256": "85b7a1a8bc1e6e11dfef0d20d11b5e7298f1b2012256f387d6f9f4301f4ba119"
+    },
+    {
+      "id": "climate_1942",
+      "category": "climate",
+      "brand": "Electra",
+      "models": [
+        "Electra Classic"
+      ],
+      "command_count": 202,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1942.json",
+      "source_sha256": "58b1d673d5ee7bf974e941051e5ca9cd98689e52536ea0ca10faea25ce8bf97a"
+    },
+    {
+      "id": "climate_1943",
+      "category": "climate",
+      "brand": "Electra",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1943.json",
+      "source_sha256": "49dc1b3cfa259efecbf2722488cb97762ce9e9fe3c1fc7041e5ebdf3ad2bfa3e"
+    },
+    {
+      "id": "climate_1944",
+      "category": "climate",
+      "brand": "Electra",
+      "models": [
+        "Electra Platinum Plus Inverter"
+      ],
+      "command_count": 112,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1944.json",
+      "source_sha256": "7bbe308912a6401414bea78d7391fead4dfdb6720f1e25dfe6b7bc8ac035ccdf"
+    },
+    {
+      "id": "climate_1945",
+      "category": "climate",
+      "brand": "Electra",
+      "models": [
+        "Electra"
+      ],
+      "command_count": 56,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1945.json",
+      "source_sha256": "4c3c5a9e604dbad15d3fe213d9ce3b7efa6ff6e27a113400f5ffb131b4fc9182"
+    },
+    {
+      "id": "climate_1946",
+      "category": "climate",
+      "brand": "Electra",
+      "models": [
+        "RC-3"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1946.json",
+      "source_sha256": "7ec92909312c6d8a2ff4501978a42259a1270db2b74e92c8680bd801f98250ff"
+    },
+    {
+      "id": "climate_1947",
+      "category": "climate",
+      "brand": "Electra",
+      "models": [
+        "Electra"
+      ],
+      "command_count": 127,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1947.json",
+      "source_sha256": "7b3ac2fc023dcbf582986e9ed0a75d29d1d9217add14c8d652d619ea6e057316"
+    },
+    {
+      "id": "climate_1948",
+      "category": "climate",
+      "brand": "Electra",
+      "models": [
+        "Classic 10"
+      ],
+      "command_count": 241,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1948.json",
+      "source_sha256": "43f437ab82df3101f92bc058ab2ebcc449f003b73740215f2d28b2c05e0bab09"
+    },
+    {
+      "id": "climate_1960",
+      "category": "climate",
+      "brand": "AUX",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 118,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1960.json",
+      "source_sha256": "3c927457d20abe25c008fd3c20c522906615f921603c4f2b656b93c0be4b86a0"
+    },
+    {
+      "id": "climate_1961",
+      "category": "climate",
+      "brand": "AUX",
+      "models": [
+        "AUX FREEDOM AUX-09FH"
+      ],
+      "command_count": 991,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1961.json",
+      "source_sha256": "7e212cafeebfb02963e6a6704fa85bbbaf1a8cc4f24595a83c94735739e408a6"
+    },
+    {
+      "id": "climate_1962",
+      "category": "climate",
+      "brand": "AUX",
+      "models": [
+        "iClima ICI-09A"
+      ],
+      "command_count": 426,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1962.json",
+      "source_sha256": "77a99e89f0dc8a2071f82f629d78414095398ed016d968ca61f65669afbadff4"
+    },
+    {
+      "id": "climate_1963",
+      "category": "climate",
+      "brand": "AUX",
+      "models": [
+        "Kendal Split Inverter"
+      ],
+      "command_count": 512,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1963.json",
+      "source_sha256": "376ae1711cdec9db66c08ef22b218b1dc45af62d2a36e2afb6d06d787640b2e8"
+    },
+    {
+      "id": "climate_1980",
+      "category": "climate",
+      "brand": "Fuji",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 79,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/1980.json",
+      "source_sha256": "331ce862994737915d70c3a769f0f48c1bf0ed96196a420c41e242764202153d"
+    },
+    {
+      "id": "climate_2000",
+      "category": "climate",
+      "brand": "Aeronik",
+      "models": [
+        "ASO-12IL",
+        "ASI-12IL"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2000.json",
+      "source_sha256": "477de09ac3d8912427a9629c83e8cb25e8093618167695e09150b0d9dbce87d2"
+    },
+    {
+      "id": "climate_2020",
+      "category": "climate",
+      "brand": "Ariston",
+      "models": [
+        "A-IFWHxx-IGX"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2020.json",
+      "source_sha256": "92138cbb452cd4b5858e4fdcab77ea8c5b4466b40613b94982e19b7eb5322e4d"
+    },
+    {
+      "id": "climate_2040",
+      "category": "climate",
+      "brand": "Pioneer",
+      "models": [
+        "WYS018GMFI17RL",
+        "WYS009GMFI17RL",
+        "CB018GMFILCFHD",
+        "CB012GMFILCFHD"
+      ],
+      "command_count": 501,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2040.json",
+      "source_sha256": "718b5c93acec1bd0233e2e73ce9b7da4f8749bb5d60067ab22dbc6cf15c7c479"
+    },
+    {
+      "id": "climate_2041",
+      "category": "climate",
+      "brand": "Pioneer",
+      "models": [
+        "WT018GLFI19HLD"
+      ],
+      "command_count": 1121,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2041.json",
+      "source_sha256": "600a774c33cdc55f8d6eb82252328c98b9bb030c41df0968543d58630e68bb3e"
+    },
+    {
+      "id": "climate_2060",
+      "category": "climate",
+      "brand": "Dimplex",
+      "models": [
+        "GDPAC12RC"
+      ],
+      "command_count": 321,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2060.json",
+      "source_sha256": "216c4fd58f09191e813d523e0b5d45f43f9cd308fee93f273853e21e4376e52f"
+    },
+    {
+      "id": "climate_2080",
+      "category": "climate",
+      "brand": "Sendo",
+      "models": [
+        "SND-18/IK"
+      ],
+      "command_count": 204,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2080.json",
+      "source_sha256": "1da80504c16a2e150411d72c939b75ffeaf64e7c4fa8980b3f09ac34c0083f85"
+    },
+    {
+      "id": "climate_2100",
+      "category": "climate",
+      "brand": "Mirage",
+      "models": [
+        "Magnum Inverter 19"
+      ],
+      "command_count": 57,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2100.json",
+      "source_sha256": "3ce6d7b8e65930e43c1c3101ef8907c8327d345b29ba8a31e918afab77e8fd86"
+    },
+    {
+      "id": "climate_2120",
+      "category": "climate",
+      "brand": "Technibel",
+      "models": [
+        "MPAF13A0R5IAA"
+      ],
+      "command_count": 392,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2120.json",
+      "source_sha256": "c0abf426610d9ea1cbb1b42b553322eb928d32ca51162cb31bcebf5aae3737d4"
+    },
+    {
+      "id": "climate_2140",
+      "category": "climate",
+      "brand": "Unionaire",
+      "models": [
+        "Artify"
+      ],
+      "command_count": 91,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2140.json",
+      "source_sha256": "4041ad7b26c850b47ee0d5fd5603a1674d098004ac8663351875c17b66e1069d"
+    },
+    {
+      "id": "climate_2160",
+      "category": "climate",
+      "brand": "Lennox",
+      "models": [
+        "2018",
+        "2019"
+      ],
+      "command_count": 227,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2160.json",
+      "source_sha256": "6769361588e3fde5a5e8f205e6a77ab9cafd921968bbe43249daf33f8711892b"
+    },
+    {
+      "id": "climate_2161",
+      "category": "climate",
+      "brand": "Lennox",
+      "models": [
+        "LNMTE026V2"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2161.json",
+      "source_sha256": "36f1fa1ec082c7213ddb2ff18f3628d71f75e1596dcc7973a02eb3fe709d46d6"
+    },
+    {
+      "id": "climate_2162",
+      "category": "climate",
+      "brand": "Lennox",
+      "models": [
+        "LNINVE052",
+        "LNINVC052"
+      ],
+      "command_count": 331,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2162.json",
+      "source_sha256": "7a047e409d68c66f6d7829e5100058304174791fbe56ca8d368cfcc7584684d0"
+    },
+    {
+      "id": "climate_2180",
+      "category": "climate",
+      "brand": "Hokkaido",
+      "models": [
+        "LA09-DUAL H1"
+      ],
+      "command_count": 122,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2180.json",
+      "source_sha256": "085ef4a5d6e34e33fab2f1341313febaa7508c43ae9dc3c574f45d037155abe4"
+    },
+    {
+      "id": "climate_2200",
+      "category": "climate",
+      "brand": "IGC",
+      "models": [
+        "RAK-12NH",
+        "RAK-18NH"
+      ],
+      "command_count": 241,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2200.json",
+      "source_sha256": "66a053ffe3f0272dd4a8b09277bcc4ef745e84f9e53f70ee98dd16897dc68c25"
+    },
+    {
+      "id": "climate_2220",
+      "category": "climate",
+      "brand": "Blueridge",
+      "models": [
+        "RG57A4",
+        "BGEFU1"
+      ],
+      "command_count": 525,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2220.json",
+      "source_sha256": "0fc0df952a49146f5f2ad2432880f3dfb44ead2703c9f642d6f8f669b7df1a5e"
+    },
+    {
+      "id": "climate_2240",
+      "category": "climate",
+      "brand": "DeLonghi",
+      "models": [
+        "PAC N82ECO",
+        "PAC AN111"
+      ],
+      "command_count": 138,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2240.json",
+      "source_sha256": "3cd703f3a97cfdbced10110d461260e15fc5f225ae3d156953a6f91e25529904"
+    },
+    {
+      "id": "climate_2241",
+      "category": "climate",
+      "brand": "DeLonghi",
+      "models": [
+        "PAC EM77"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2241.json",
+      "source_sha256": "0e17757174bf5661e98d7f8ef580e8b0fca350d6d03e20ae344037e22be82ba7"
+    },
+    {
+      "id": "climate_2242",
+      "category": "climate",
+      "brand": "DeLonghi",
+      "models": [
+        "PAC AN140HPEW"
+      ],
+      "command_count": 501,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2242.json",
+      "source_sha256": "dd02c0dd472b3da934fef49501e1ff1601e0591a2586ca634c44d5a7fe3b0b30"
+    },
+    {
+      "id": "climate_2243",
+      "category": "climate",
+      "brand": "DeLonghi",
+      "models": [
+        "DL3000"
+      ],
+      "command_count": 321,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2243.json",
+      "source_sha256": "ff8757f520d41bc9e240bef1a2f1e4fdefff92471d651b4354ef62b5e710b280"
+    },
+    {
+      "id": "climate_2260",
+      "category": "climate",
+      "brand": "Profio",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 321,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2260.json",
+      "source_sha256": "d4cbe99e8a85d6cb5ef35e8b976dd03a6c9bdb43acc9de5cdaf251e29fd512d0"
+    },
+    {
+      "id": "climate_2280",
+      "category": "climate",
+      "brand": "Hantech",
+      "models": [
+        "A018-12KR2"
+      ],
+      "command_count": 91,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2280.json",
+      "source_sha256": "57b9723833325bd83ccecb3bac5f0dd2a3b22b5de4f70f5d4d0a2d6ad26ec61c"
+    },
+    {
+      "id": "climate_2281",
+      "category": "climate",
+      "brand": "Hantech",
+      "models": [
+        "A016-09KR2/A"
+      ],
+      "command_count": 97,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2281.json",
+      "source_sha256": "0333016f96bd6a8668047c9a3582f4638107a11cfc50c35dd69ebbc75a20c7c9"
+    },
+    {
+      "id": "climate_2300",
+      "category": "climate",
+      "brand": "Zanussi",
+      "models": [
+        "ZH/TT-02"
+      ],
+      "command_count": 242,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2300.json",
+      "source_sha256": "e3bbd7725281747c3e83b650b8740008378ccfa270e01f2c76f12fe70d5df3bc"
+    },
+    {
+      "id": "climate_2301",
+      "category": "climate",
+      "brand": "Zanussi",
+      "models": [
+        "ZACS/I-07 HPF/A17/N1"
+      ],
+      "command_count": 1,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2301.json",
+      "source_sha256": "bc8ce284fe44c3bac85dbba86d9016258030cb601e89e9945c66045b51e65d88"
+    },
+    {
+      "id": "climate_2320",
+      "category": "climate",
+      "brand": "Whynter",
+      "models": [
+        "ARC-08WB",
+        "ARC-10WB",
+        "ARC-126MD",
+        "ARC-126MDB",
+        "ARC-148MS"
+      ],
+      "command_count": 225,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2320.json",
+      "source_sha256": "2602b119cccfd8d2c2b8043ea0f1af94808a6105dc7bdd011aa3ae9452c3fbe2"
+    },
+    {
+      "id": "climate_2321",
+      "category": "climate",
+      "brand": "Whynter",
+      "models": [
+        "ARC-12S",
+        "ARC-12SD",
+        "ARC-122DS",
+        "ARC-14S",
+        "ARC-141BG",
+        "ARC-143MX",
+        "ARC-101CW"
+      ],
+      "command_count": 205,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2321.json",
+      "source_sha256": "88ff03c951fbd938ab85593b7c82dc1b7d65832d2df5b960d850a119d5e32094"
+    },
+    {
+      "id": "climate_2340",
+      "category": "climate",
+      "brand": "Vortex",
+      "models": [
+        "VOR-12C3/407"
+      ],
+      "command_count": 241,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2340.json",
+      "source_sha256": "0fe0fdf50cffb00fd7643c45a2209bfcf85a0db7a0a2ab0acb24245fb72e9ab5"
+    },
+    {
+      "id": "climate_2360",
+      "category": "climate",
+      "brand": "Flouu",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 196,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2360.json",
+      "source_sha256": "77de22aa2d209ba7e5ab78f5f8b8bf267527b59d16de95d512d8333e6b0290ee"
+    },
+    {
+      "id": "climate_2380",
+      "category": "climate",
+      "brand": "BAXI",
+      "models": [
+        "Unknow"
+      ],
+      "command_count": 627,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2380.json",
+      "source_sha256": "f64d64043b2ec13bdf5ebc75f1fc0a9228fd28e01c367c844389f3199421eb53"
+    },
+    {
+      "id": "climate_2400",
+      "category": "climate",
+      "brand": "Yamatsu",
+      "models": [
+        "YAM-12KDA",
+        "AUS-07C53R013L24"
+      ],
+      "command_count": 257,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2400.json",
+      "source_sha256": "4b9e775fc4e54086c80abb98e682e7bbb965fc3eb8d44c07427b28c8b1be9c1a"
+    },
+    {
+      "id": "climate_2420",
+      "category": "climate",
+      "brand": "VS",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 340,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2420.json",
+      "source_sha256": "9557cb9696e30e659f54361eabb7bbdd4b58d7bac4ca44951a9a793acee1bca1"
+    },
+    {
+      "id": "climate_2440",
+      "category": "climate",
+      "brand": "Vaillant",
+      "models": [
+        "ClimaVair VAI 8-025"
+      ],
+      "command_count": 196,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2440.json",
+      "source_sha256": "6d41299d4433b8aa82e01363ba4c091e829c46918959785d038270ba1ca50d4f"
+    },
+    {
+      "id": "climate_2460",
+      "category": "climate",
+      "brand": "FanWorld",
+      "models": [
+        "FW6-3000"
+      ],
+      "command_count": 273,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2460.json",
+      "source_sha256": "953575b86948572acfb66d2435399b7543f729d8f5891ad17bb58fac2f80fc87"
+    },
+    {
+      "id": "climate_2480",
+      "category": "climate",
+      "brand": "Rotenso",
+      "models": [
+        "Ukura",
+        "Maze (remote)"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2480.json",
+      "source_sha256": "0ffa036f2d557a7eab0beb7284366c1f3f2c446357c7829ec169af40f6f589f1"
+    },
+    {
+      "id": "climate_2500",
+      "category": "climate",
+      "brand": "Endesa",
+      "models": [
+        "DGR11"
+      ],
+      "command_count": 361,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2500.json",
+      "source_sha256": "66fe56596517e2e8bb3fda8b99321179e4e765b61c8198efebf11001a4a20051"
+    },
+    {
+      "id": "climate_2520",
+      "category": "climate",
+      "brand": "Galanz",
+      "models": [
+        "GZ-1002B-E3"
+      ],
+      "command_count": 257,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2520.json",
+      "source_sha256": "a7da835f1c315c0d3a251256eb67fa031e93480ab4cddc02dd688628e4f72180"
+    },
+    {
+      "id": "climate_2540",
+      "category": "climate",
+      "brand": "Audinac",
+      "models": [
+        "SP3500"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2540.json",
+      "source_sha256": "c957fa921ceeac3df6b4c6e45706c24305fd934907c7950964c1c4f269f4dc7b"
+    },
+    {
+      "id": "climate_2560",
+      "category": "climate",
+      "brand": "Mistral",
+      "models": [
+        "MPAC15CY28"
+      ],
+      "command_count": 271,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2560.json",
+      "source_sha256": "37f080569b75c776b98081762e3eec421721e6282d7cd69870e56e1a729e0576"
+    },
+    {
+      "id": "climate_2580",
+      "category": "climate",
+      "brand": "KOREL",
+      "models": [
+        "KSAL2-09DCEH"
+      ],
+      "command_count": 792,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2580.json",
+      "source_sha256": "9b8c3c374a5e45a8dbdf28643ccdbc13de70e7722a281f888ce06dc2694a4b5a"
+    },
+    {
+      "id": "climate_2600",
+      "category": "climate",
+      "brand": "Equation",
+      "models": [
+        "RCH-143"
+      ],
+      "command_count": 301,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2600.json",
+      "source_sha256": "924b658a66ff4bd66e2bbcd5da452ea6087737be94518faecca638a2fe914089"
+    },
+    {
+      "id": "climate_2620",
+      "category": "climate",
+      "brand": "Komeco",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2620.json",
+      "source_sha256": "0e07751335787f53b63a08046f9e9da1f0f79662ee796c2e10427e6393692242"
+    },
+    {
+      "id": "climate_2640",
+      "category": "climate",
+      "brand": "Fisher",
+      "models": [
+        "FPR-91DE4-R",
+        "FPR-121DE4-R",
+        "FPR-141DE4-R"
+      ],
+      "command_count": 169,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2640.json",
+      "source_sha256": "3fb200e6326908b186084c80bd409b4f6383f8fb5a0920ecc0a7715b89d58cc2"
+    },
+    {
+      "id": "climate_2641",
+      "category": "climate",
+      "brand": "Fisher",
+      "models": [
+        "FSOAI-SU-90AE2"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2641.json",
+      "source_sha256": "39d37c665e5bf8ef0f2984354d9777a8867c067faac52199ff922025753b3e98"
+    },
+    {
+      "id": "climate_2660",
+      "category": "climate",
+      "brand": "Hyundai",
+      "models": [
+        "HSE09PH5V"
+      ],
+      "command_count": 269,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2660.json",
+      "source_sha256": "9b4cb56cab9b37a9899c2fe03e733a668c9378de0b1333994990917fa01b1241"
+    },
+    {
+      "id": "climate_2661",
+      "category": "climate",
+      "brand": "Hyundai",
+      "models": [
+        "HY6INV"
+      ],
+      "command_count": 482,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2661.json",
+      "source_sha256": "525a58af6f684a917f2808bf112c7d3921d789c0808606d2868123ca7202dc6a"
+    },
+    {
+      "id": "climate_2662",
+      "category": "climate",
+      "brand": "Hyndai",
+      "models": [
+        "H-ARI22-09H"
+      ],
+      "command_count": 341,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2662.json",
+      "source_sha256": "9893e3d39fd9f37a3b6ac648a6d4f7300add8b895aef7af536122450c9bc4269"
+    },
+    {
+      "id": "climate_2720",
+      "category": "climate",
+      "brand": "AEG",
+      "models": [
+        "AXP35U538CW"
+      ],
+      "command_count": 273,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2720.json",
+      "source_sha256": "0d41379d9dbc3c1ce31b16a72fedb00444118edeaf80218d82c1a034f0eff762"
+    },
+    {
+      "id": "climate_2740",
+      "category": "climate",
+      "brand": "Bosch",
+      "models": [
+        "5000i"
+      ],
+      "command_count": 376,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2740.json",
+      "source_sha256": "7fe0c6325997311b92441256c64d713ebd914dfe13045e55b5d1043f31ddbde2"
+    },
+    {
+      "id": "climate_2760",
+      "category": "climate",
+      "brand": "Tristar",
+      "models": [
+        "AC-5400"
+      ],
+      "command_count": 137,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2760.json",
+      "source_sha256": "40df3c3c5473b95bc87e6266b3437383422470cca9c10b023e4206da2f1a8414"
+    },
+    {
+      "id": "climate_2780",
+      "category": "climate",
+      "brand": "Xiaomi",
+      "models": [
+        "KFR-35G/F3C1"
+      ],
+      "command_count": 993,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2780.json",
+      "source_sha256": "ede4c7204bc421b9e72c5d0183d415d64ee472127f7b87e15380f1fe7cfb1ad8"
+    },
+    {
+      "id": "climate_2800",
+      "category": "climate",
+      "brand": "ELGIN",
+      "models": [
+        "HVQI18B2IA"
+      ],
+      "command_count": 35,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2800.json",
+      "source_sha256": "b7c165a68a42202db4fb82fef13e6fefebd7259718dba64ac4d245f0030b1325"
+    },
+    {
+      "id": "climate_2801",
+      "category": "climate",
+      "brand": "ELGIN",
+      "models": [
+        "HVQI12B2FB"
+      ],
+      "command_count": 29,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2801.json",
+      "source_sha256": "f2dd084902d3b6495b3161596a531ddcdcd808281f51600258403b82743564e6"
+    },
+    {
+      "id": "climate_2820",
+      "category": "climate",
+      "brand": "Pearl",
+      "models": [
+        "EXGC24FCBC1"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2820.json",
+      "source_sha256": "f2677212749d4974b3ba6f02f76f61b5fe4c3e38807082bdc6dca66f2db3394e"
+    },
+    {
+      "id": "climate_2840",
+      "category": "climate",
+      "brand": "HTW",
+      "models": [
+        "HTWS035IX21D2-R32-I"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2840.json",
+      "source_sha256": "1982c3d133b775784af06b3a66f3f54f15b7d5bf1a84ebb1261bf78080e7fb1c"
+    },
+    {
+      "id": "climate_2860",
+      "category": "climate",
+      "brand": "Senville",
+      "models": [
+        "SENA/12HF/IZ"
+      ],
+      "command_count": 211,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2860.json",
+      "source_sha256": "e4e10753e0152579fb82e884d9b31c5290c6bfd60ff00081bbf79b794b62a377"
+    },
+    {
+      "id": "climate_2880",
+      "category": "climate",
+      "brand": "Bora",
+      "models": [
+        "18SRA-HE"
+      ],
+      "command_count": 312,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2880.json",
+      "source_sha256": "bf9214016d2c2be0e1b6cc00155571cd1b23ee552acee97e80462c21a561b232"
+    },
+    {
+      "id": "climate_2900",
+      "category": "climate",
+      "brand": "Goodman",
+      "models": [
+        "MSH123E21AXAA",
+        "MST183E20ACAA",
+        "RG57E1/BGEU1 (remote)"
+      ],
+      "command_count": 169,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2900.json",
+      "source_sha256": "28775ce66d11d877738d8f8197cc36d973a3522de8b14f42103d3d113f59680b"
+    },
+    {
+      "id": "climate_2920",
+      "category": "climate",
+      "brand": "Best",
+      "models": [
+        "BSTS18CNE2"
+      ],
+      "command_count": 241,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2920.json",
+      "source_sha256": "f491c5c3f18c18e2790fb755e7932f53300334aba78721e7b8d90d62fa14d18c"
+    },
+    {
+      "id": "climate_2940",
+      "category": "climate",
+      "brand": "SAGA",
+      "models": [
+        "SAGA-A-22(CH)"
+      ],
+      "command_count": 545,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2940.json",
+      "source_sha256": "2f6862aa5b1d7cd9e82845567580272cb61d260a8831a68ab990f9d1a9d7424b"
+    },
+    {
+      "id": "climate_2960",
+      "category": "climate",
+      "brand": "EcoAir",
+      "models": [
+        "Split Type Wall Air Conditioner"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2960.json",
+      "source_sha256": "91ba7c8a68e8f089d56e4a31cde50f5d1b1921b03309817b5a9d1f820d31a7da"
+    },
+    {
+      "id": "climate_2980",
+      "category": "climate",
+      "brand": "Agratto",
+      "models": [
+        "ECST12FR4-02",
+        "ECST19QFIR4-02"
+      ],
+      "command_count": 94,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/2980.json",
+      "source_sha256": "01431942787ee35073f14b3226c5fe1a8c72d29796495602bd5089ec3252e1f0"
+    },
+    {
+      "id": "climate_3000",
+      "category": "climate",
+      "brand": "Philco",
+      "models": [
+        "Philco AC"
+      ],
+      "command_count": 273,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3000.json",
+      "source_sha256": "919da2934406a7d0e82e98f2a752a031a30fd75c0235637dbc20d10824eb858b"
+    },
+    {
+      "id": "climate_3020",
+      "category": "climate",
+      "brand": "Klasse",
+      "models": [
+        "DOZ-S06JT"
+      ],
+      "command_count": 241,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3020.json",
+      "source_sha256": "5846e72dd9eb432847c7d1dbfa44a0af3ced6424e75eb6cc87dd309493e22610"
+    },
+    {
+      "id": "climate_3040",
+      "category": "climate",
+      "brand": "Viessmann",
+      "models": [
+        "Vitoclima 300-S"
+      ],
+      "command_count": 1,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3040.json",
+      "source_sha256": "71dcb4c38b110bc257b24cc514f92d5c14dbd51331fc4fec0898c8e47b4f66c5"
+    },
+    {
+      "id": "climate_3060",
+      "category": "climate",
+      "brand": "HappyTree",
+      "models": [
+        "TAC-12CHSD/XA81"
+      ],
+      "command_count": 241,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3060.json",
+      "source_sha256": "5cf059bc13012a79c801eceb8530dd24e4c4ad90899dd7d120c5e507bdde059c"
+    },
+    {
+      "id": "climate_3080",
+      "category": "climate",
+      "brand": "Voltas",
+      "models": [
+        "VOLTAS INV/AC 1.5T 183V MZJ3 3S"
+      ],
+      "command_count": 722,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3080.json",
+      "source_sha256": "5d0d3f3383fdeb647107dbeb9dc9f7a524bec16e5befd810c6288efd754a14b1"
+    },
+    {
+      "id": "climate_3100",
+      "category": "climate",
+      "brand": "Cecotec",
+      "models": [
+        "EnergySilence 12000 AirClima (05290)"
+      ],
+      "command_count": 321,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3100.json",
+      "source_sha256": "8c52597b7ab1145611abc25e0d34731e923e8b0054b4c68b9f6616ebe52e33d4"
+    },
+    {
+      "id": "climate_3120",
+      "category": "climate",
+      "brand": "Cooper & Hunter",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 601,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3120.json",
+      "source_sha256": "c7d7be77a93705fd56242a19969ef142b6fae25ed159c9903e97c0da18fed09e"
+    },
+    {
+      "id": "climate_3140",
+      "category": "climate",
+      "brand": "Argo",
+      "models": [
+        "Ulisse13"
+      ],
+      "command_count": 181,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3140.json",
+      "source_sha256": "7e80aa573bd5d5b151e22aab177c03182a6d78a0d9736c32bf91238e76a562ba"
+    },
+    {
+      "id": "climate_3160",
+      "category": "climate",
+      "brand": "AquaThermal",
+      "models": [
+        "LM AURI-12"
+      ],
+      "command_count": 321,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3160.json",
+      "source_sha256": "ca78ba1a7919a5fbed018b08984da6df429f3ef925814803f23b3671c7f0b9b7"
+    },
+    {
+      "id": "climate_3180",
+      "category": "climate",
+      "brand": "Devanti",
+      "models": [
+        "WAC-05C-WH"
+      ],
+      "command_count": 257,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3180.json",
+      "source_sha256": "cce9e4cc0f5a01bf8d4fdc263a00925087ba5fab9a06b540a3715ddfccaea23e"
+    },
+    {
+      "id": "climate_3200",
+      "category": "climate",
+      "brand": "Friedrich",
+      "models": [
+        "CP12G10B"
+      ],
+      "command_count": 325,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3200.json",
+      "source_sha256": "49c2f6f017fe748e31170a2fba0eb85723117a367e978d998d85227ea2f77838"
+    },
+    {
+      "id": "climate_3220",
+      "category": "climate",
+      "brand": "Mundoclima",
+      "models": [
+        "MUPR-09-H9A",
+        "MUPR-12-H9A",
+        "MUPR-18-H9A",
+        "MUPR-24-H9A",
+        "MUPR-09-H5A",
+        "MUPR-12-H5A",
+        "MUPR-18-H5A",
+        "MUPR-24-H5A"
+      ],
+      "command_count": 341,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3220.json",
+      "source_sha256": "57ebfe96da833df5d6b1ab2c124bae47ee4e890038818d4ac033e7e7cb860490"
+    },
+    {
+      "id": "climate_3240",
+      "category": "climate",
+      "brand": "Casper",
+      "models": [
+        "SC-09FS32"
+      ],
+      "command_count": 749,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3240.json",
+      "source_sha256": "256ebfbe23b3ee8eb78b0a909309b44710e6ce985975cdd4a499bc1ea53af81b"
+    },
+    {
+      "id": "climate_3300",
+      "category": "climate",
+      "brand": "PARKAIR",
+      "models": [
+        "DI-A"
+      ],
+      "command_count": 121,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3300.json",
+      "source_sha256": "0172336cbb96407cf309974a604048267fa5ea97388e8d286a8dd73024efd61c"
+    },
+    {
+      "id": "climate_3320",
+      "category": "climate",
+      "brand": "Chunlan",
+      "models": [
+        "KFR-25GW/VW (CH-9)"
+      ],
+      "command_count": 256,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3320.json",
+      "source_sha256": "e5446c58b0214dfbf3fd2a21570dcb7c33b17a95f7d7dc8a873a34eb51d9074c"
+    },
+    {
+      "id": "climate_3340",
+      "category": "climate",
+      "brand": "Wide",
+      "models": [
+        "WDS12ECO"
+      ],
+      "command_count": 273,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3340.json",
+      "source_sha256": "ce23157aae373688e9d88f5a5463b9eadaee3fe2ebd12c1dd5d1c87d0ebd9da2"
+    },
+    {
+      "id": "climate_3360",
+      "category": "climate",
+      "brand": "Kaden",
+      "models": [
+        "KS09",
+        "KS12",
+        "KS18",
+        "KS24",
+        "KS28"
+      ],
+      "command_count": 281,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3360.json",
+      "source_sha256": "1462743e85d6f0d2abee76f23a78a026670539a0a3a4a709d2857b7b6fc18b86"
+    },
+    {
+      "id": "climate_3380",
+      "category": "climate",
+      "brand": "Zephir",
+      "models": [
+        "DualSplit"
+      ],
+      "command_count": 141,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3380.json",
+      "source_sha256": "21d31edeef350e28b815bb861d99d07d9f26180d359688feee3084b40c529de4"
+    },
+    {
+      "id": "climate_5120",
+      "category": "climate",
+      "brand": "Daikin",
+      "models": [
+        "ARC433B51"
+      ],
+      "command_count": 703,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/5120.json",
+      "source_sha256": "39645b983f3f14dac95d157c1b09e4b26b063a4fd0206967b0a9a1501dd1923c"
+    },
+    {
+      "id": "climate_5140",
+      "category": "climate",
+      "brand": "Mitsubishi Electric",
+      "models": [
+        "MSC-A12WV"
+      ],
+      "command_count": 1345,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/5140.json",
+      "source_sha256": "ab36abfb596b022d1861f794a5673cec68b1116403f138d0a1a78ea7c0e525a5"
+    },
+    {
+      "id": "climate_7741",
+      "category": "climate",
+      "brand": "Family",
+      "models": [
+        "12WIFI"
+      ],
+      "command_count": 401,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/7741.json",
+      "source_sha256": "8bc5e38270540757a1306971362805cd63674d7f25aab1d1a6d737beabf46e0a"
+    },
+    {
+      "id": "climate_8800",
+      "category": "climate",
+      "brand": "Sigma",
+      "models": [
+        "SGS32H13NE"
+      ],
+      "command_count": 242,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/8800.json",
+      "source_sha256": "a72207475c9da2e259822512058732df1917bcbab2e436a6264457432d41f8a0"
+    },
+    {
+      "id": "fan_1040",
+      "category": "fan",
+      "brand": "Lucci Air",
+      "models": [
+        "Aria"
+      ],
+      "command_count": 4,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/fan/1040.json",
+      "source_sha256": "efce41e5bfd67bee9e1d0fcba3231bb67f41dfc2ae76740eaed34d8814c0a628"
+    },
+    {
+      "id": "fan_1060",
+      "category": "fan",
+      "brand": "Super Fan",
+      "models": [
+        "Super Fan A1"
+      ],
+      "command_count": 2,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/fan/1060.json",
+      "source_sha256": "b075e114b704f0f2762c81a599c8d2758114f8fe6400ccce3ffc46fc5009808c"
+    },
+    {
+      "id": "fan_1100",
+      "category": "fan",
+      "brand": "Pacific",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 4,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/fan/1100.json",
+      "source_sha256": "d161b4379fb0b1b58f04c738625b1911905e72afe36b5139fd699761d118d06f"
+    },
+    {
+      "id": "fan_1120",
+      "category": "fan",
+      "brand": "Europace",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 5,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/fan/1120.json",
+      "source_sha256": "a23cc4a28b13a49c385e70c9903a5df02fb66dcb62a8c65a29ae87b812e041ca"
+    },
+    {
+      "id": "fan_1140",
+      "category": "fan",
+      "brand": "SMC",
+      "models": [
+        "SP486",
+        "SP483"
+      ],
+      "command_count": 4,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/fan/1140.json",
+      "source_sha256": "5f2be02505cc7ee31e1901d586ef44bdddd245d254e1590df4a71a9cdb394e07"
+    },
+    {
+      "id": "fan_1160",
+      "category": "fan",
+      "brand": "Atomberg",
+      "models": [
+        "Efficio"
+      ],
+      "command_count": 7,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/fan/1160.json",
+      "source_sha256": "ae9387fe4fd9a2b2e4c10ab2493b0092cdaf2a5ca76fc07f287fbcca9a2f49b4"
+    },
+    {
+      "id": "fan_1170",
+      "category": "fan",
+      "brand": "Atomberg",
+      "models": [
+        "Renesa"
+      ],
+      "command_count": 6,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/fan/1170.json",
+      "source_sha256": "682ae500f561e13575758f0ef562b919de4421b4883c7ac908cb7627cfeeb952"
+    },
+    {
+      "id": "fan_1180",
+      "category": "fan",
+      "brand": "Argo",
+      "models": [
+        "Standy"
+      ],
+      "command_count": 5,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/fan/1180.json",
+      "source_sha256": "2b738954972ae9149b4d555ca0f34e51543248adc70b9d44da33a9ad2db7bfe9"
+    },
+    {
+      "id": "fan_1200",
+      "category": "fan",
+      "brand": "DCG",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 4,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/fan/1200.json",
+      "source_sha256": "3f859204e1bd684805208d6a91932d9d6d75df30d8f24dfaeca3c90a8a60831d"
+    },
+    {
+      "id": "fan_1220",
+      "category": "fan",
+      "brand": "Mitsubishi",
+      "models": [
+        "C56-RW5"
+      ],
+      "command_count": 7,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/fan/1220.json",
+      "source_sha256": "3992cbff553747d3773288047a7a6042a47fe1c4833fb54685cf36271750f461"
+    },
+    {
+      "id": "fan_1240",
+      "category": "fan",
+      "brand": "Mallory",
+      "models": [
+        "Air Timer TS+"
+      ],
+      "command_count": 4,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/fan/1240.json",
+      "source_sha256": "8f9ac70fbc04d9f1f70b01eed806a3b1ae485c81d0114b68892a291652dd82de"
+    },
+    {
+      "id": "light_1000",
+      "category": "light",
+      "brand": "Iris Ohyama",
+      "models": [
+        "LEDHCL-R2"
+      ],
+      "command_count": 6,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/light/1000.json",
+      "source_sha256": "50758250d910e48a2ecf9cafd87fb34249035945c7c0ca0a6cd9aa3d71ee87ca"
+    },
+    {
+      "id": "light_1021",
+      "category": "light",
+      "brand": "NEC",
+      "models": [
+        "RE0201-CH2"
+      ],
+      "command_count": 4,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/light/1021.json",
+      "source_sha256": "04638996836a42d2e874680ba5a3ad52617153b58e1626a471a59ed005674ce6"
+    },
+    {
+      "id": "light_1060",
+      "category": "light",
+      "brand": "Takizumi",
+      "models": [
+        "TLR-002"
+      ],
+      "command_count": 6,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/light/1060.json",
+      "source_sha256": "87039e9a78426b662ac6958e303801e0f16be0c876f470088c37c6da7a9051b8"
+    },
+    {
+      "id": "media_player_1000",
+      "category": "media_player",
+      "brand": "Philips",
+      "models": [
+        "26PFL560H"
+      ],
+      "command_count": 14,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1000.json",
+      "source_sha256": "d5e58d641468e68f5bb4b005b0dd70d6f87dd96112ed5e21dfd0c90202e8d516"
+    },
+    {
+      "id": "media_player_1001",
+      "category": "media_player",
+      "brand": "Philips",
+      "models": [
+        "42PFL3007H/60",
+        "37PF9641D/10"
+      ],
+      "command_count": 24,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1001.json",
+      "source_sha256": "77c7626b5e338ce68426d2f580aa143891218fcdea824d9c1aaeaf9a4042f0fd"
+    },
+    {
+      "id": "media_player_1002",
+      "category": "media_player",
+      "brand": "Philips",
+      "models": [
+        "47PFG4109/77"
+      ],
+      "command_count": 38,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1002.json",
+      "source_sha256": "9cee25c22cf3dce4afa931a318cb2e9d0d33f970086835eb2e33f20a8af6f3db"
+    },
+    {
+      "id": "media_player_1020",
+      "category": "media_player",
+      "brand": "Sony",
+      "models": [
+        "KDL-46HX800"
+      ],
+      "command_count": 18,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1020.json",
+      "source_sha256": "a959a75b9fd82589977ebae44b3f26e3e38c06e0c52bb6aeedfce95c0d2015f7"
+    },
+    {
+      "id": "media_player_1040",
+      "category": "media_player",
+      "brand": "LG",
+      "models": [
+        "22MT47DC"
+      ],
+      "command_count": 18,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1040.json",
+      "source_sha256": "006246317e4a93481abcae52f20ff055a2e1d4bf6d6eb624fcbd552be3c263a5"
+    },
+    {
+      "id": "media_player_1041",
+      "category": "media_player",
+      "brand": "LG",
+      "models": [
+        "LH6235D"
+      ],
+      "command_count": 9,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1041.json",
+      "source_sha256": "03fe5f9d36467950f442af091626ea3404c32bdd9e4d851b915e4e3da86c517d"
+    },
+    {
+      "id": "media_player_1042",
+      "category": "media_player",
+      "brand": "LG",
+      "models": [
+        "43UM7510PSB",
+        "OLED55B8SSC"
+      ],
+      "command_count": 31,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1042.json",
+      "source_sha256": "18d233df63e00ae3b7efed58a7b60d05966de02d39ac7ec33c84ce47f790503e"
+    },
+    {
+      "id": "media_player_1043",
+      "category": "media_player",
+      "brand": "LG",
+      "models": [
+        "32LC2R"
+      ],
+      "command_count": 15,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1043.json",
+      "source_sha256": "6be40ce069ea87400b3264d864746bb3467f2a6aa52139603ae2926dd4efc257"
+    },
+    {
+      "id": "media_player_1060",
+      "category": "media_player",
+      "brand": "Samsung",
+      "models": [
+        "UE40F6500",
+        "UE40H7000SL"
+      ],
+      "command_count": 24,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1060.json",
+      "source_sha256": "75af826a58354a9cd33d6de6e9305386f7b6291abd64efb0577ec6daa8e183d2"
+    },
+    {
+      "id": "media_player_1061",
+      "category": "media_player",
+      "brand": "Samsung",
+      "models": [
+        "UE40C6000",
+        "UE40D6500",
+        "UE32H5500",
+        "UE22D5000"
+      ],
+      "command_count": 18,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1061.json",
+      "source_sha256": "86d7f78303ab413744d38324ab9effaf1f7d9a4e82c43d3eda4e3708b51422bf"
+    },
+    {
+      "id": "media_player_1062",
+      "category": "media_player",
+      "brand": "Samsung",
+      "models": [
+        "UE40C6000",
+        "UE40D6500",
+        "UE32H5500",
+        "UE22D5000"
+      ],
+      "command_count": 23,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1062.json",
+      "source_sha256": "31f682647e2737c2e92ac320a7d2432548057d28c7267c74d89b8255d7fb60f1"
+    },
+    {
+      "id": "media_player_1063",
+      "category": "media_player",
+      "brand": "Samsung",
+      "models": [
+        "UN55JU7500"
+      ],
+      "command_count": 23,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1063.json",
+      "source_sha256": "e0bdf7dd9f84d3527a1ec502be2704184facbc5c3bf70327001955621661caef"
+    },
+    {
+      "id": "media_player_1064",
+      "category": "media_player",
+      "brand": "Samsung",
+      "models": [
+        "QE49Q7FAM"
+      ],
+      "command_count": 2,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1064.json",
+      "source_sha256": "967c4c5f1352bb89e310a6f235ab9a5a84114b6374c00ca673afeb740769e0f8"
+    },
+    {
+      "id": "media_player_1065",
+      "category": "media_player",
+      "brand": "Samsung",
+      "models": [
+        "QE65Q67RAUXRU"
+      ],
+      "command_count": 2,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1065.json",
+      "source_sha256": "b8da296def01538763ce711e630bda468492505feb1be0580f651c2a218b7cb0"
+    },
+    {
+      "id": "media_player_1080",
+      "category": "media_player",
+      "brand": "Insignia",
+      "models": [
+        "NS-42D510NA15"
+      ],
+      "command_count": 7,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1080.json",
+      "source_sha256": "219d6c5c1e6dc62359a699162f55309d132cd975ff53f5154ab3311211ff80fb"
+    },
+    {
+      "id": "media_player_1100",
+      "category": "media_player",
+      "brand": "Toshiba",
+      "models": [
+        "42C3530D"
+      ],
+      "command_count": 21,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1100.json",
+      "source_sha256": "75fa31778da7091d6bfe125c0dca74926b8815848a8367465ee94a3dd8b5495e"
+    },
+    {
+      "id": "media_player_1120",
+      "category": "media_player",
+      "brand": "Yamaha",
+      "models": [
+        "Unknown"
+      ],
+      "command_count": 8,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1120.json",
+      "source_sha256": "6082dd41a9b93179219bf6db22544159bca27f7a85c1ac9f894d82aaf838bd09"
+    },
+    {
+      "id": "media_player_1121",
+      "category": "media_player",
+      "brand": "Yamaha",
+      "models": [
+        "HTR-3065",
+        "RX-V373",
+        "RX-V373BL",
+        "RX-V375",
+        "RX-V375BL",
+        "YHT-497",
+        "YHT-497BL"
+      ],
+      "command_count": 28,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1121.json",
+      "source_sha256": "d431f2dd4146a8df0ce16a51d595c12f22478eb87a0c42736597a4df01c098a5"
+    },
+    {
+      "id": "media_player_1122",
+      "category": "media_player",
+      "brand": "Yamaha",
+      "models": [
+        "VR50590"
+      ],
+      "command_count": 10,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1122.json",
+      "source_sha256": "060f6ad6144e84fe1809b7401f45fdbe2737e38d3304906d1966e1ccff23b7d1"
+    },
+    {
+      "id": "media_player_1123",
+      "category": "media_player",
+      "brand": "Yamaha",
+      "models": [
+        "AS201"
+      ],
+      "command_count": 16,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1123.json",
+      "source_sha256": "3b0301fd836170f6d11f18fe3321c3b1ff51e9b69c1d1751a52070e5d73387bd"
+    },
+    {
+      "id": "media_player_1124",
+      "category": "media_player",
+      "brand": "Yamaha",
+      "models": [
+        "YAS-109"
+      ],
+      "command_count": 22,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1124.json",
+      "source_sha256": "fb21a4569b28913cf448fabaa441319b310423137e21eb3ad28e72b1d3f740f7"
+    },
+    {
+      "id": "media_player_1160",
+      "category": "media_player",
+      "brand": "Logitech",
+      "models": [
+        "Z906"
+      ],
+      "command_count": 12,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1160.json",
+      "source_sha256": "e3c67f392300fe735a84a8219eea0368be0c060c9acd24604a4d86a58f8da373"
+    },
+    {
+      "id": "media_player_1161",
+      "category": "media_player",
+      "brand": "Logitech",
+      "models": [
+        "Z-5500"
+      ],
+      "command_count": 8,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1161.json",
+      "source_sha256": "5d0cfa21a539dd7fcf18c2f844397d200d994a5afbd341903eb75d999fce317d"
+    },
+    {
+      "id": "media_player_1162",
+      "category": "media_player",
+      "brand": "Logitech",
+      "models": [
+        "Z-5450"
+      ],
+      "command_count": 11,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1162.json",
+      "source_sha256": "5278723d6e45e17cdf940ef63e7dd2b6a10cba199ecf0515be186e05fa043df5"
+    },
+    {
+      "id": "media_player_1180",
+      "category": "media_player",
+      "brand": "TCL",
+      "models": [
+        "55EP640"
+      ],
+      "command_count": 4,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1180.json",
+      "source_sha256": "b949c2d2806a6b0636000f373d38cccba2e7dbac39d8f979d6940210695c8eec"
+    },
+    {
+      "id": "media_player_1181",
+      "category": "media_player",
+      "brand": "TCL",
+      "models": [
+        "43S6500FS",
+        "32A325"
+      ],
+      "command_count": 4,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1181.json",
+      "source_sha256": "9ec9ed1eaa9d9c579ac8c588282c8747fbe1939990e1ee0bcf621b183117fa96"
+    },
+    {
+      "id": "media_player_1200",
+      "category": "media_player",
+      "brand": "Pace",
+      "models": [
+        "TDS850NNZ",
+        "TDC850NF"
+      ],
+      "command_count": 17,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1200.json",
+      "source_sha256": "348e60d69344a1f08b37d4d7077fce59f6042df6a72c18f4c7af89fd2f17eb46"
+    },
+    {
+      "id": "media_player_1220",
+      "category": "media_player",
+      "brand": "Silver",
+      "models": [
+        "MEO"
+      ],
+      "command_count": 18,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1220.json",
+      "source_sha256": "cf841277f97aecf5d8678a8c14f8614e49609665528343d7fae53d3cf7c62cba"
+    },
+    {
+      "id": "media_player_1240",
+      "category": "media_player",
+      "brand": "TurboX",
+      "models": [
+        "TXV-2420"
+      ],
+      "command_count": 17,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1240.json",
+      "source_sha256": "d3258608f2dbed46377db7a6c1e4b05353251fcf7d841804b196e44eb1ec68e7"
+    },
+    {
+      "id": "media_player_1260",
+      "category": "media_player",
+      "brand": "Thomson",
+      "models": [
+        "40FA3203"
+      ],
+      "command_count": 24,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1260.json",
+      "source_sha256": "cbb6863600361043480bbc14821165150974ce7980472dffc60d4d0b457b664b"
+    },
+    {
+      "id": "media_player_1280",
+      "category": "media_player",
+      "brand": "Grunding",
+      "models": [
+        "GSB-810"
+      ],
+      "command_count": 8,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1280.json",
+      "source_sha256": "ead5987ed5dbdc839145c6c99168e7d53ce75f4e1979f062b4734fc6739b75fd"
+    },
+    {
+      "id": "media_player_1300",
+      "category": "media_player",
+      "brand": "OKI",
+      "models": [
+        "V19B-LED4"
+      ],
+      "command_count": 17,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1300.json",
+      "source_sha256": "7a9baadce09b896237f8ee51bcd1003baf457e91236fa9cd0f673184b2fcab4b"
+    },
+    {
+      "id": "media_player_1320",
+      "category": "media_player",
+      "brand": "Sky",
+      "models": [
+        "SkyQ black",
+        "SkyQ mini"
+      ],
+      "command_count": 35,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1320.json",
+      "source_sha256": "a05fc7b8acde097b5f7eb223a5a3091d7d010b12e410aa6e17c5a39e85453d1f"
+    },
+    {
+      "id": "media_player_1340",
+      "category": "media_player",
+      "brand": "Bauhn",
+      "models": [
+        "Aldi"
+      ],
+      "command_count": 18,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1340.json",
+      "source_sha256": "0e00a6beeab2e0d6ae47506ca90a43d2fdffe5bd153d66c2fec3e844c371a81f"
+    },
+    {
+      "id": "media_player_1360",
+      "category": "media_player",
+      "brand": "OPTOMA",
+      "models": [
+        "HD27"
+      ],
+      "command_count": 23,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1360.json",
+      "source_sha256": "b668c5b140e84815058df4632123352464d4838923f69d223b01be3fe27946f3"
+    },
+    {
+      "id": "media_player_1380",
+      "category": "media_player",
+      "brand": "Xiaomi",
+      "models": [
+        "MiBox",
+        "MItv"
+      ],
+      "command_count": 11,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1380.json",
+      "source_sha256": "74d6d9742352a140570616328145c2fe969984e3ea51d2ee14f5d81b4ee7b12e"
+    },
+    {
+      "id": "media_player_1400",
+      "category": "media_player",
+      "brand": "Pioneer",
+      "models": [
+        "X-CM56"
+      ],
+      "command_count": 10,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1400.json",
+      "source_sha256": "959dd8f09f7c0e093e0f3a840e4020176ddcfbef430c02e3eecda9f4ca6d8d3a"
+    },
+    {
+      "id": "media_player_1420",
+      "category": "media_player",
+      "brand": "JBL",
+      "models": [
+        "Cinema SB160"
+      ],
+      "command_count": 14,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1420.json",
+      "source_sha256": "fc051f65a65843b52612ed89b1b2ae55beb980cf46ca56ba4e4c75a75230eb80"
+    },
+    {
+      "id": "media_player_1421",
+      "category": "media_player",
+      "brand": "JBL",
+      "models": [
+        "jblbar20aioblkep"
+      ],
+      "command_count": 6,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1421.json",
+      "source_sha256": "530f538ce55713850586441bbcebe67126a55311c94dee712a036090dfa068c5"
+    },
+    {
+      "id": "media_player_1460",
+      "category": "media_player",
+      "brand": "Edifier",
+      "models": [
+        "R1280DB"
+      ],
+      "command_count": 10,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1460.json",
+      "source_sha256": "5affaa7dd797b2596888dc2d18e39c76ef309b13305dd4c9a791954980093910"
+    },
+    {
+      "id": "media_player_1461",
+      "category": "media_player",
+      "brand": "Edifier",
+      "models": [
+        "R2000DB"
+      ],
+      "command_count": 9,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1461.json",
+      "source_sha256": "a0294530268f97bc6b51d6b12fab8d382719adfb3b837207252fe234abc9453b"
+    },
+    {
+      "id": "media_player_1480",
+      "category": "media_player",
+      "brand": "Kanto",
+      "models": [
+        "YU6"
+      ],
+      "command_count": 12,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1480.json",
+      "source_sha256": "5555aa26f49e8cb7cbd6e97cd00d0adb531239316431a7f13c60a2253f0cd8f8"
+    },
+    {
+      "id": "media_player_1500",
+      "category": "media_player",
+      "brand": "Onkyo",
+      "models": [
+        "TX-SR508",
+        "TX-SR700"
+      ],
+      "command_count": 36,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1500.json",
+      "source_sha256": "73d79afbb2b2480e31494362fec56a7028a7e465017b8593e05177027c1f167f"
+    },
+    {
+      "id": "media_player_1520",
+      "category": "media_player",
+      "brand": "JVC",
+      "models": [
+        "RX-5022R"
+      ],
+      "command_count": 5,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1520.json",
+      "source_sha256": "632d89dcd751cb1a18422bf58115e63a5d965bfe9b57aa310451fe072fc2f1ef"
+    },
+    {
+      "id": "media_player_1540",
+      "category": "media_player",
+      "brand": "Epson",
+      "models": [
+        "MG-850HD"
+      ],
+      "command_count": 5,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1540.json",
+      "source_sha256": "58652a70f95477378825ec8c58f526dfd504c6f3b3e10641e85647aa987a61bd"
+    },
+    {
+      "id": "media_player_1580",
+      "category": "media_player",
+      "brand": "Dialog",
+      "models": [
+        "J-103BF"
+      ],
+      "command_count": 27,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1580.json",
+      "source_sha256": "8e0b30aa8f203237980a9b177a36ae3d7528bfea4d8d9ad5c2cc97a601db8295"
+    },
+    {
+      "id": "media_player_1600",
+      "category": "media_player",
+      "brand": "Kivi",
+      "models": [
+        "40F600GU"
+      ],
+      "command_count": 5,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1600.json",
+      "source_sha256": "04e19611324ecf5c06a7591efb32df6732436cd6567a086d4805925bad9a90e5"
+    },
+    {
+      "id": "media_player_1620",
+      "category": "media_player",
+      "brand": "Sharp",
+      "models": [
+        "LC-32LE700E",
+        "LC-32LE700S",
+        "LC-40LE700E",
+        "LC-40LE700S",
+        "LC-46LE700E",
+        "LC-46LE700S",
+        "LC-52LE700E",
+        "LC-52LE700S",
+        "LC-32LX700E",
+        "LC-40LX700E",
+        "LC-46LX700E",
+        "LC-32LU700E",
+        "LC-32LU700S",
+        "LC-40LU700E",
+        "LC-40LU700S",
+        "LC-46LU700E",
+        "LC-46LU700S",
+        "LC-32LE705E",
+        "LC-32LE705S",
+        "LC-40LE705E",
+        "LC-40LE705S",
+        "LC-46LE705E",
+        "LC-46LE705S",
+        "LC-52LE705E",
+        "LC-52LE705S",
+        "LC-32LX705E",
+        "LC-40LX705E",
+        "LC-46LX705E",
+        "LC-32LU705E",
+        "LC-32LU705S",
+        "LC-40LU705E",
+        "LC-40LU705S",
+        "LC-46LU705E",
+        "LC-46LU705S"
+      ],
+      "command_count": 30,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1620.json",
+      "source_sha256": "9e8fac5a8f8b1d677daa9555d8635e99b8f0dff6df7791bc78ab7740b815b787"
+    },
+    {
+      "id": "media_player_1640",
+      "category": "media_player",
+      "brand": "Noblex",
+      "models": [
+        "Noblex 32LC818H",
+        "Sansei TLS1032H",
+        "Admiral TLC3200A",
+        "Fisher FTL320H",
+        "Recco RLCD32H10"
+      ],
+      "command_count": 48,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/1640.json",
+      "source_sha256": "6ed7591c6bb8d939e9a93281e48868661deea743de047b0671e064d368e52f28"
+    },
+    {
+      "id": "media_player_8100",
+      "category": "media_player",
+      "brand": "Cambridge Audio",
+      "models": [
+        "AXR100"
+      ],
+      "command_count": 15,
+      "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/media_player/8100.json",
+      "source_sha256": "c3ed38a1194d395028576b3fef392ba3612f7fc997769095bd6c2c48b50471a5"
+    }
+  ],
+  "skipped": [
+    {
+      "file": "codes/climate/2680.json",
+      "reason": "invalid JSON"
+    },
+    {
+      "file": "codes/light/1020.json",
+      "reason": "invalid JSON"
+    },
+    {
+      "file": "codes/media_player/1440.json",
+      "reason": "invalid JSON"
+    }
+  ]
+}

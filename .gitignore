@@ -22,3 +22,5 @@ dist/
 *.sqlite3*
 *.pem
 *.key
+.pio/
+firmware/esp32/data/

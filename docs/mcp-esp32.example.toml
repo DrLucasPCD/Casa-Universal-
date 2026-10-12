@@ -1,0 +1,6 @@
+# Keep the real IP/access code only in your private local client configuration.
+[mcp_servers.casa_esp32]
+url = "http://IP_DA_PLACA/mcp"
+http_headers = { Authorization = "Bearer CODIGO_PRIVADO_DA_CENTRAL" }
+startup_timeout_sec = 20
+tool_timeout_sec = 60

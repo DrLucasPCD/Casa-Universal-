@@ -1,0 +1,89 @@
+"""Loopback-only USB setup; Wi-Fi passwords never enter logs, URLs or Git."""
+import argparse
+import json
+import os
+import threading
+import time
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
+import serial
+
+ROOT=Path(__file__).resolve().parent.parent
+PAGE='''<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Casa · Configurar ESP32</title>
+<style>body{background:#101416;color:#eeeae1;font:16px system-ui;margin:0;padding:28px}main{max-width:580px;margin:35px auto}h1{font-size:38px;letter-spacing:-1.7px}p{color:#b7beb9;line-height:1.6}section{background:#202629;border:1px solid #353d3d;border-radius:24px;padding:25px;margin:22px 0}label{display:block;margin:18px 0}input{box-sizing:border-box;width:100%;padding:14px;border-radius:12px;background:#151b1d;border:1px solid #46504c;color:white;margin-top:8px;font:inherit}button,a.button{display:inline-block;border:0;border-radius:13px;padding:15px 20px;background:#d9cbb0;color:#111719;font-weight:650;cursor:pointer;text-decoration:none}button:disabled{opacity:.5}#code{font-family:monospace;overflow-wrap:anywhere;color:#d9cbb0}#msg{white-space:pre-wrap}small{color:#adb4ac}</style>
+<main><small>CASA UNIVERSAL · CENTRAL ESP32</small><h1>Sua casa, sem o Mac ligado.</h1><p>Conecte a placa ao Wi-Fi de casa. Os dados são enviados somente pelo USB para seu ESP32.</p>
+<section><h2>Wi-Fi de casa</h2><form id="wifi"><label>Nome da rede (2,4 GHz)<input name="ssid" autocomplete="off" maxlength="32" required></label><label>Senha do Wi-Fi<input type="password" name="password" autocomplete="new-password" maxlength="63"></label><button>Conectar a central</button></form><p id="msg" role="status"></p></section>
+<section><h2>Seu painel</h2><p id="status">Consultando a placa…</p><div id="link"></div><details><summary>Mostrar código de acesso da central</summary><p id="code">—</p></details><small>Este código permite controlar os aparelhos. Os controles salvos permanecem na placa ao desligar o Mac.</small></section>
+<p>Samsung e BroadLink têm drivers locais. Fechadura HAHA, Tuya e Sonoff permanecem pendentes nesta primeira versão. O catálogo possui 387 perfis para testar e confirmar no aparelho.</p></main>
+<script src="/setup.js"></script></html>'''
+SCRIPT='''let busy=false;async function info(){if(busy)return;try{const r=await fetch('/info'),d=await r.json();if(!r.ok)throw new Error(d.error);document.querySelector('#code').textContent=d.access_key;document.querySelector('#status').textContent=d.wifi_connected?'Central conectada: '+d.ip+' · '+d.devices+' aparelhos cadastrados':'A placa está pronta. Preencha o Wi-Fi acima.';const link=document.querySelector('#link');link.replaceChildren();if(d.wifi_connected){const a=document.createElement('a');a.href='http://'+d.ip;a.className='button';a.textContent='Abrir Casa Universal';link.append(a);}}catch(e){document.querySelector('#status').textContent=e.message;}}
+document.querySelector('#wifi').addEventListener('submit',async e=>{e.preventDefault();busy=true;const b=e.target.querySelector('button');b.disabled=true;try{const r=await fetch('/wifi',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({ssid:e.target.ssid.value,password:e.target.password.value})}),d=await r.json();if(!r.ok)throw new Error(d.error);e.target.password.value='';document.querySelector('#msg').textContent='Dados enviados pelo USB. Aguardando conexão com o roteador…';}catch(error){document.querySelector('#msg').textContent=error.message;}finally{busy=false;b.disabled=false;info();}});info();setInterval(info,3000);'''
+
+class USB:
+    def __init__(self,port):
+        self.lock=threading.Lock()
+        self.serial=serial.Serial(port=None,baudrate=115200,timeout=.2)
+        self.serial.dtr=False;self.serial.rts=False;self.serial.port=port;self.serial.open()
+
+    def request(self,payload):
+        with self.lock:
+            self.serial.reset_input_buffer()
+            self.serial.write(json.dumps(payload,separators=(',',':')).encode()+b'\n')
+            deadline=time.monotonic()+12
+            while time.monotonic()<deadline:
+                line=self.serial.readline()
+                if line.startswith(b'CASA_JSON:'):
+                    result=json.loads(line[len(b'CASA_JSON:'):])
+                    if 'error' in result:raise ValueError(result['error'])
+                    return result
+        raise ValueError('ESP32 não respondeu pelo USB. Confira o cabo e a gravação.')
+
+class Server(ThreadingHTTPServer):
+    daemon_threads=True
+    def __init__(self,port,usb):
+        self.usb=usb
+        super().__init__(('127.0.0.1',port),Handler)
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self,*args):pass
+    def allowed(self):return self.headers.get('Host') in (f'127.0.0.1:{self.server.server_port}',f'localhost:{self.server.server_port}')
+    def send(self,status,value,kind='application/json'):
+        body=json.dumps(value).encode() if kind=='application/json' else value.encode()
+        self.send_response(status);self.send_header('Content-Type',kind);self.send_header('Content-Length',str(len(body)))
+        self.send_header('Cache-Control','no-store');self.send_header('X-Content-Type-Options','nosniff');self.send_header('Referrer-Policy','no-referrer')
+        self.send_header('Content-Security-Policy',"default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'")
+        self.end_headers()
+        try:self.wfile.write(body)
+        except (BrokenPipeError,ConnectionResetError):pass
+    def do_GET(self):
+        if not self.allowed():return self.send(403,{'error':'Abra a configuração neste Mac.'})
+        if self.path=='/':return self.send(200,PAGE,'text/html; charset=utf-8')
+        if self.path=='/setup.js':return self.send(200,SCRIPT,'application/javascript')
+        if self.path=='/info':
+            try:
+                info=self.server.usb.request({'op':'info'})
+                directory=ROOT/'data/esp32';directory.mkdir(mode=0o700,parents=True,exist_ok=True)
+                path=directory/'connection.json';path.write_text(json.dumps(info));path.chmod(0o600)
+                info.pop('ap_password',None)
+                return self.send(200,info)
+            except (ValueError,serial.SerialException):return self.send(503,{'error':'A placa ainda não respondeu pelo USB. Confira o cabo.'})
+        return self.send(404,{'error':'Página não encontrada.'})
+    def do_POST(self):
+        if not self.allowed() or self.headers.get('Origin')!='http://'+self.headers.get('Host','') or self.headers.get('Content-Type')!='application/json':return self.send(403,{'error':'Use o formulário local.'})
+        try:
+            size=int(self.headers.get('Content-Length','0'))
+            if self.path!='/wifi' or not 0<size<2048:raise ValueError('Solicitação inválida.')
+            payload=json.loads(self.rfile.read(size));ssid=payload['ssid'];password=payload['password']
+            if not isinstance(ssid,str) or not 1<=len(ssid.encode())<=32 or not isinstance(password,str) or len(password)>63:raise ValueError('Confira nome e senha da rede.')
+            result=self.server.usb.request({'op':'wifi','ssid':ssid,'password':password})
+            return self.send(200,result)
+        except (ValueError,KeyError,TypeError,serial.SerialException):return self.send(400,{'error':'Não foi possível enviar o Wi-Fi. Confira os campos e o USB.'})
+
+def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--port',default='/dev/cu.usbmodem101');parser.add_argument('--http-port',type=int,default=8866);args=parser.parse_args()
+    os.umask(0o077);usb=USB(args.port);server=Server(args.http_port,usb)
+    print(f'Configuração USB: http://127.0.0.1:{args.http_port}',flush=True)
+    try:server.serve_forever()
+    finally:server.server_close();usb.serial.close()
+
+if __name__=='__main__':main()

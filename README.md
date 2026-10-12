@@ -4,6 +4,8 @@ Painel local para Samsung, BroadLink, Smart Life/Tuya e Sonoff/eWeLink, com desc
 
 Marca visual: **casa.**. Para publicar a entrada pública e a demonstração no Netlify pelo GitHub, veja [publicação e arquitetura](docs/publicacao.md). O build já está configurado em `netlify.toml`. Os controles reais e o MCP continuam na central da casa; o site publicado abre o painel dessa central pelo endereço informado.
 
+**Central ESP32-S3 N16R8:** há uma versão de firmware para manter painel, Samsung, BroadLink e MCP na placa, sem o Mac ligado. Veja [instalação, suporte e limitações](firmware/esp32/README.md). Tuya, controle Sonoff e driver da fechadura HAHA ainda não foram portados para essa versão; a descoberta Bluetooth está disponível. As instruções abaixo descrevem a central Python no Mac.
+
 ## Abrir e usar
 
 1. Dê dois cliques em **Iniciar no Wi-Fi.command**. O painel abre em `http://127.0.0.1:8787`. Para usar apenas no Mac, escolha **Iniciar no Mac.command**.

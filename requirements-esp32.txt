@@ -1,0 +1,4 @@
+# Add to the existing virtual environment for USB setup and firmware builds.
+platformio==6.2.0
+esptool==5.5.0
+pyserial==3.5

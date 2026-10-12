@@ -5,3 +5,4 @@ mcp==2.3.0
 bleak==3.0.2
 zeroconf==0.151.5
 cryptography==50.0.2
+pyserial==3.5

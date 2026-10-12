@@ -66,7 +66,7 @@ No Safari do iPhone, na mesma rede, abra `http://IP_DA_PLACA/`. O painel abre di
 
 Depois, alimente a placa com um carregador USB. O Mac e o servidor de configuração podem ser desligados. A placa não fornece energia ao BroadLink: ele continua conectado normalmente.
 
-O painel local usa HTTP e não tem cache offline de PWA. No Netlify, informe o IP da placa na entrada pública do projeto; ela abre o painel local no Safari. O Netlify não acessa a rede de casa nem o Bluetooth da placa.
+O painel local usa HTTP e não tem cache offline de PWA. Ao abrir o site Netlify, ele segue automaticamente para `http://casa-universal.local/`, ou para outro endereço escolhido em `/?configurar=1`. O Netlify não acessa a rede de casa nem o Bluetooth da placa.
 
 ## MCP no cliente local
 

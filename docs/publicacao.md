@@ -7,15 +7,17 @@ O nome é **Casa Universal**; a marca visual do painel é **casa.**.
 1. No Netlify, escolha **Add new project → Import an existing project → GitHub**.
 2. Selecione `DrLucasPCD/Casa-Universal-` e a branch `main`.
 3. O `netlify.toml` define o comando `python3 scripts/build_site.py` e a pasta publicada `dist`. Não é necessário instalar as dependências Python da central para construir o site.
-4. Publique. A página inicial permite informar e guardar o endereço da central, ou explorar `/?demo=1` com estados simulados.
+4. Publique. Ao abrir a página inicial, o navegador segue automaticamente para `http://casa-universal.local/`, sem formulário nem código de acesso. `/?demo=1` abre os estados simulados, sem redirecionar.
 
 O build copia apenas os nove arquivos públicos da interface. SQLite, chaves de dispositivos, APKs, análises brutas e configuração MCP específica de cada computador ficam fora da publicação. `firebase/config.json` identifica o projeto Firebase, sem credenciais de administrador; ele também não é copiado para o site. As regras de acesso são implantadas separadamente pelo console Firebase, não pelo Netlify.
 
 ## Usar no iPhone
 
-Inicie **Iniciar no Wi-Fi.command** no Mac. No painel local, abra **No iPhone** e consulte o endereço da central. No site Netlify, informe esse endereço, por exemplo `http://192.168.1.100:8787`, e toque em **Abrir minha central**. O navegador navega para o painel local, que abre os controles diretamente, sem código de acesso. Isso não cria um proxy entre o Netlify e sua casa. O acesso HTTP local é o modo de testes já existente; para HTTPS, configure certificado confiável na central.
+Com o ESP32 ligado e o iPhone no mesmo Wi-Fi, abra o site Netlify. Ele abre automaticamente o painel pelo nome `casa-universal.local`. O firmware anuncia esse nome por mDNS; a rede precisa permitir sua resolução. Isso dispensa preencher o IP, mas não faz uma varredura da rede nem cria um proxy entre o Netlify e sua casa.
 
-O endereço é salvo somente no navegador. Não há descoberta automática da central pelo site, leitura direta do Firestore, sincronização de sessões entre origens nem comando real no modo de demonstração. Adicione o endereço **da central** à Tela de Início para abrir os controles diretamente. Salvar o site Netlify na Tela de Início abre a entrada pública.
+Para outra central, como o servidor de testes do Mac, ou quando a rede não resolve nomes `.local`, abra `SEU_SITE_NETLIFY/?configurar=1`. Nessa tela você pode informar outro endereço e salvá-lo neste navegador; nas próximas aberturas ele também será usado automaticamente. **Usar conexão automática** remove essa escolha e volta ao nome do ESP32. Se a central estiver desligada ou o iPhone estiver fora de casa, o navegador poderá mostrar uma falha de conexão. A entrada pública não consegue verificar antecipadamente uma central HTTP a partir do site HTTPS.
+
+Adicione o endereço **da central** à Tela de Início para abrir os controles diretamente. Não há leitura direta do Firestore, sincronização de sessões entre origens nem comando real no modo de demonstração. Para os recursos da central ESP32 e o MCP HTTP local, veja [o guia do firmware](../firmware/esp32/README.md). As informações abaixo sobre drivers Python e MCP por stdio descrevem a alternativa de testes no Mac.
 
 ## Por que usar o mesmo Wi-Fi não basta?
 

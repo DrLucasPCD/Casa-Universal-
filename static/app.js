@@ -205,14 +205,23 @@ function centralAddress(value){
 }
 
 function hostedView(){
+ if(new URLSearchParams(location.search).get('configurar')!=='1'){
+  let address='http://casa-universal.local/';
+  try{const saved=localStorage.getItem('casa.central.url');if(saved)address=centralAddress(saved);}catch{}
+  document.body.classList.add('hosted-entry');main.className='view-install';main.replaceChildren();$('#connection').textContent='Abrindo sua central';
+  main.append(intro('Abrindo sua casa.','Conecte o iPhone ao Wi-Fi de casa e mantenha o ESP32 ligado.','CASA UNIVERSAL'));
+  const manual=node('a','button quiet','Ajustar conexão');manual.href='/?configurar=1';main.append(manual);
+  location.replace(address);return;
+ }
  document.body.classList.add('hosted-entry');main.className='view-install';main.replaceChildren();$('#connection').textContent='Escolha sua central';
- main.append(intro('Sua casa. Um só controle.','Abra sua central para acessar os aparelhos ou explore a demonstração.','CASA UNIVERSAL'));
+ main.append(intro('Conectar à sua casa.','O acesso automático usa o nome da central no Wi-Fi de casa. Ajuste abaixo somente se precisar de outro endereço.','CASA UNIVERSAL'));
  const box=node('section','login'),form=node('form'),err=node('p','error');let saved='';try{saved=localStorage.getItem('casa.central.url')||'';}catch{}
- box.append(node('h2',null,'Conectar à minha casa'),node('p','subtext','Conecte o iPhone ao Wi-Fi de casa e mantenha a central ligada. No painel do Mac, abra “No iPhone” para encontrar o endereço.'));
- const f=field('Endereço da central','central',saved,'url','http://192.168.1.100:8787');$('input',f).required=true;
+ box.append(node('h2',null,'Endereço da central'),node('p','subtext','Conecte o iPhone ao Wi-Fi de casa e mantenha a central ligada.'));
+ const f=field('Endereço da central','central',saved||'http://casa-universal.local/','url','http://casa-universal.local/');$('input',f).required=true;
  const submit=button('Abrir minha central',()=>{},'button primary');submit.type='submit';form.append(f,err,submit);
  form.addEventListener('submit',event=>{event.preventDefault();try{const address=centralAddress(form.elements.central.value);try{localStorage.setItem('casa.central.url',address);}catch{}location.assign(address);}catch(error){err.textContent=error.message;}});
- const demoLink=node('a','button quiet','Explorar demonstração');demoLink.href='/?demo=1';box.append(form,demoLink);main.append(box);
+ const automatic=button('Usar conexão automática',()=>{try{localStorage.removeItem('casa.central.url');}catch{}location.replace('/');},'button quiet');
+ const demoLink=node('a','button quiet','Explorar demonstração');demoLink.href='/?demo=1';box.append(form,automatic,demoLink);main.append(box);
  main.append(node('p','subtext','Os controles reais abrem diretamente no painel da central, sem código de acesso. Este site não consulta aparelhos nem o Firestore diretamente. O endereço fica salvo neste navegador.'));
 }
 

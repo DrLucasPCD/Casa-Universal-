@@ -1,5 +1,12 @@
 # Casa Universal no ChatGPT
 
+O endereço `CASA_PUBLIC_URL` é público. Se a importação em lote marcar todas as
+variáveis como segredos, `netlify.toml` contém uma exceção de varredura somente
+para esse endereço. `CASA_BRIDGE_TOKEN`, `CASA_OAUTH_SECRET` e `CASA_PAIRING_HASH`
+continuam protegidos e verificados. O Netlify não permite remover a marcação de
+segredo depois de criada. Não coloque tokens, senhas ou parâmetros privados em
+`CASA_PUBLIC_URL`.
+
 Esta versão acrescenta uma ponte privada no Netlify. O ChatGPT usa OAuth e MCP HTTP em `https://casa-universal.netlify.app/mcp`. O ESP32 faz somente conexões HTTPS de saída: o roteador não precisa abrir portas, e o Mac pode ser desligado depois da configuração. O painel local continua abrindo sem código.
 
 **Estado de implantação:** o código pode estar publicado antes de as variáveis privadas serem importadas. Nesse caso `/mcp` retorna `503 setup_required`. Isso não significa que o ChatGPT já esteja conectado. Veja `/chatgpt` no site para conferir se o serviço foi configurado. A conexão real ainda precisa ser criada e autorizada na conta ChatGPT.

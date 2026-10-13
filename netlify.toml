@@ -2,6 +2,10 @@
   command = "python3 scripts/build_site.py"
   publish = "dist"
 
+[build.environment]
+  # This value is the public website address, never an authentication credential.
+  SECRETS_SCAN_OMIT_KEYS = "CASA_PUBLIC_URL"
+
 [functions]
   directory = "netlify/functions"
   node_bundler = "esbuild"

@@ -60,6 +60,12 @@ class ESPSetupTests(unittest.TestCase):
         self.assertEqual(status, 403)
         self.assertEqual(self.usb.calls, [])
 
+    def test_external_origin_cannot_import_ewelink_credentials(self):
+        with patch.object(self.server.sonoff,'connect') as cloud:
+            status,_=self.request('POST','/sonoff/connect',{'username':'owner','password':'private'},
+                {'Origin':'https://evil.example','Content-Type':'application/json'})
+            self.assertEqual(status,403);cloud.assert_not_called()
+
     def test_valid_wifi_is_sent_only_to_usb_without_echo(self):
         payload = {'ssid': 'Rede teste', 'password': 'test-only-password'}
         status, data = self.request('POST', '/wifi', payload,

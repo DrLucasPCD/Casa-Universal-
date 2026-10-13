@@ -1,4 +1,5 @@
 #include "common.h"
+#include "sonoff.h"
 #include <WiFiUdp.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
@@ -123,7 +124,7 @@ void discoverDevices(const String& provider,JsonArray output) {
     static bool initialized=false;if(!initialized){NimBLEDevice::init("Casa Universal");initialized=true;}auto scan=NimBLEDevice::getScan();scan->setActiveScan(true);scan->setInterval(120);scan->setWindow(60);
     auto results=scan->start(5,false);for(int i=0;i<results.getCount()&&i<64;i++){auto d=results.getDevice(i);auto item=output.createNestedObject();item["id"]=d.getAddress().toString();item["name"]=d.getName();item["rssi"]=d.getRSSI();item["likely_lock"]=d.getName().find("Lck")!=std::string::npos;auto services=item.createNestedArray("services");for(int j=0;j<d.getServiceUUIDCount();j++)services.add(d.getServiceUUID(j).toString());}scan->clearResults();return;
   }
-  if(provider=="sonoff") {int count=MDNS.queryService("ewelink","tcp");for(int i=0;i<count&&i<32;i++){auto o=output.createNestedObject();o["ip"]=MDNS.IP(i).toString();o["port"]=MDNS.port(i);o["device_id"]=MDNS.txt(i,"id");o["type"]=MDNS.txt(i,"type");o["encrypted"]=MDNS.txt(i,"encrypt")=="true";}return;}
+  if(provider=="sonoff") {sonoffDiscover(output);return;}
   if(provider=="samsung") {
     std::vector<String> ips;auto configured=deviceById("tv");if(configured["adapter"]=="samsung")ips.push_back(configured["config"]["ip"].as<String>());
     WiFiUDP udp;udp.begin(0);String msg="M-SEARCH * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\nMAN: \"ssdp:discover\"\r\nMX: 1\r\nST: urn:samsung.com:device:RemoteControlReceiver:1\r\n\r\n";udp.beginPacket(IPAddress(239,255,255,250),1900);udp.print(msg);udp.endPacket();uint32_t deadline=millis()+1800;

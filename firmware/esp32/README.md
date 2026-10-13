@@ -9,7 +9,7 @@ Firmware Arduino/PlatformIO para ESP32-S3 com **16 MB de flash e 8 MB de PSRAM O
 | Samsung | Descoberta SSDP/API local, leitura de `PowerState`, controle WebSocket TLS com identidade do certificado importada e token persistente. Wake-on-LAN não confirma que ligou. |
 | BroadLink RM pro+ | Descoberta UDP, autenticação, envio e aprendizado IR; catálogo público de 387 perfis; controles genéricos por botão. Não aprende RF. |
 | Bluetooth | Busca anúncios, nomes, intensidade do sinal e serviços. Não faz pareamento nem abre a fechadura HAHA. |
-| Sonoff | Busca anúncios eWeLink por mDNS. O driver de controle não foi portado. |
+| Sonoff | SonoffLAN: mDNS, LAN criptografada, estados e interruptores de 1 a 4 canais; importação eWeLink uma vez pelo USB. Depende do modo LAN e da chave pessoal. |
 | Tuya | Cadastros preservados. Busca e controle ainda não foram portados. |
 | Firestore | Sincronização das configurações pela identidade existente da central; TLS com raízes Google, validação de regras privadas e exclusão de credenciais. |
 | MCP | 11 ferramentas por HTTP Streamable, endpoint `/mcp`, protegido pela chave da central. |
@@ -69,6 +69,8 @@ Depois, alimente a placa com um carregador USB. O Mac e o servidor de configura�
 O painel local usa HTTP e não tem cache offline de PWA. Ao abrir o site Netlify, ele segue automaticamente para `http://casa-universal.local/`, ou para outro endereço escolhido em `/?configurar=1`. O Netlify não acessa a rede de casa nem o Bluetooth da placa.
 
 ## MCP no cliente local
+
+Para conectar Basic 2, TX1C e TX3C, veja [SonoffLAN na Casa Universal](../../docs/sonoff.md).
 
 Para conectar diretamente no **ChatGPT**, com o Mac desligado depois da instalação, siga [Casa Universal no ChatGPT](../../docs/chatgpt.md). A ponte do Netlify precisa das variáveis privadas e da autorização OAuth; ela não é ativada apenas ao publicar o site.
 

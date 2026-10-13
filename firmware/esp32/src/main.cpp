@@ -1,6 +1,8 @@
 #include "common.h"
 #include "cloud.h"
 #include "remote.h"
+#include "sonoff.h"
+#include "assets.h"
 #include <WebServer.h>
 #include <LittleFS.h>
 #include <Preferences.h>
@@ -62,8 +64,10 @@ static void publicDevice(JsonObject device,JsonObject out,bool status=false) {
   String adapter=device["adapter"]|"pending";auto actions=out.createNestedArray("actions");out["state"]="not_configured";out["available"]=false;
   if(adapter=="samsung"){for(const char* k:{"power","power_on","power_off","up","down","left","right","enter","back","home","volume_up","volume_down","mute","channel_up","channel_down","source","play","pause"})actions.add(k);out["state"]="unknown";}
   else if(adapter=="broadlink"){for(auto p:original["commands"].as<JsonObject>())actions.add(p.key().c_str());out["state"]="unknown";}
+  else if(adapter=="sonoff_lan"||adapter=="sonoff_diy"){int count=original["channels"]|1;for(int ch=1;ch<=count;ch++)for(const char* a:{"on","off"})actions.add(count==1?String(a):String(a)+"_"+String(ch));out["state"]="unknown";if(count>1){auto channels=out.createNestedArray("channels");for(int ch=1;ch<=count;ch++){auto c=channels.createNestedObject();c["channel"]=ch;c["state"]="unknown";}}}
   if(status&&adapter=="samsung"){String state;bool ok=samsungStatus(device,state);out["available"]=ok;out["state"]=ok?state:"unavailable";out["state_source"]="Samsung · API local";}
   if(status&&adapter=="broadlink"){bool ok=broadlinkAuth(connection(device),true);out["available"]=ok;out["state"]="unknown";out["message"]=ok?"IR não confirma o estado físico do aparelho.":"BroadLink sem resposta.";}
+  if(status&&(adapter=="sonoff_lan"||adapter=="sonoff_diy"))sonoffStatus(device,out);
   out["state_available"]=String(out["state"]|"")!="unknown"&&String(out["state"]|"")!="not_configured"&&String(out["state"]|"")!="unavailable";
 }
 static void audit(const String& id,const String& action,bool sent) {
@@ -74,6 +78,7 @@ static bool execute(const String& id,const String& action,Doc& result) {
   if(action=="unlock"){lastError="Abertura de fechadura indisponível.";return false;}
   if(adapter=="samsung")sent=samsungSend(d,action);
   else if(adapter=="broadlink"){String code=d["config"]["commands"][action]|"";if(!code.length()){lastError="Configure este botão antes de usar.";return false;}sent=broadlinkSend(connection(d),code);}
+  else if(adapter=="sonoff_lan"||adapter=="sonoff_diy")sent=sonoffSend(d,action);
   else {lastError="Integração ainda pendente nesta central; nenhum comando foi enviado.";return false;}
   audit(id,action,sent);if(!sent)return false;result["sent"]=true;result["message"]="Comando enviado. O envio não confirma a reação física do aparelho.";return true;
 }
@@ -133,11 +138,22 @@ static bool route(const String& path,JsonObject p,Doc& result) {
   }
   if(path=="/api/configure") {
     auto d=deviceById(p["id"]|"");if(d.isNull()){lastError="Aparelho desconhecido.";return false;}String adapter=p["adapter"]|d["adapter"]|"pending";
-    if(adapter!="pending"&&adapter!="samsung"&&adapter!="broadlink"){lastError="Este driver ainda não foi portado para a central ESP32. O cadastro anterior foi preservado.";return false;}
-    if(adapter!="pending"){IPAddress ip;if(!localIP(p["config"]["ip"]|d["config"]["ip"]|"",ip)){lastError="Informe o IP privado do aparelho.";return false;}}
-    if(p.containsKey("name")){String name=p["name"];if(!name.length()||name.length()>80){lastError="Nome inválido.";return false;}d["name"]=name;}
-    if(p.containsKey("room")){String room=p["room"];if(room.length()>60){lastError="Cômodo inválido.";return false;}d["room"]=room;}
-    auto cfg=d["config"].as<JsonObject>();for(auto item:p["config"].as<JsonObject>()){String k=item.key().c_str();if(k!="ip"&&k!="port"&&k!="mac"&&k!="devtype")continue;if(k=="devtype"&&item.value().is<const char*>())cfg[k]=strtoul(item.value().as<const char*>(),nullptr,0);else cfg[k]=item.value();}
+    bool sonoff=adapter=="sonoff_lan"||adapter=="sonoff_diy";
+    if(adapter!="pending"&&adapter!="samsung"&&adapter!="broadlink"&&!sonoff){lastError="Este driver ainda não foi portado para a central ESP32. O cadastro anterior foi preservado.";return false;}
+    if(sonoff&&d["kind"]!="switch"){lastError="A conexão Sonoff é destinada a interruptores.";return false;}
+    Doc next(32768);auto cfg=next.to<JsonObject>();if(adapter==d["adapter"])cfg.set(d["config"]);
+    for(auto item:p["config"].as<JsonObject>()){
+      String k=item.key().c_str();bool allowed=k=="ip"||k=="port"||k=="mac"||k=="devtype"||(sonoff&&(k=="device_id"||k=="device_key"||k=="channels"||k=="diy_confirmed"));if(!allowed)continue;
+      if(k=="device_key"&&!String(item.value()|"").length())continue;
+      if(k=="port"||k=="channels"){String number=item.value().as<String>();if(!number.length()){lastError="Confira porta e canais.";return false;}for(char c:number)if(!isdigit((unsigned char)c)){lastError="Porta e canais devem ser números inteiros.";return false;}cfg[k]=number.toInt();}
+      else if(k=="devtype"&&item.value().is<const char*>())cfg[k]=strtoul(item.value().as<const char*>(),nullptr,0);else cfg[k]=item.value();
+    }
+    if(adapter!="pending"){IPAddress ip;if(!localIP(cfg["ip"]|"",ip)){lastError="Informe o IP privado do aparelho.";return false;}}
+    if(sonoff&&!sonoffValidate(cfg,adapter=="sonoff_diy"))return false;
+    String name=p["name"]|d["name"]|"",room=p["room"]|d["room"]|"";
+    if(!name.length()||name.length()>80||room.length()>60){lastError="Informe nome e cômodo curtos.";return false;}
+    if(next.overflowed()){lastError="Configuração muito grande.";return false;}
+    d["name"]=name;d["room"]=room;d["config"]=cfg;sonoffForget(p["id"]|"");
     d["adapter"]=adapter;if(!saveHouse())return false;publicDevice(d,result.to<JsonObject>());return true;
   }
   lastError="Função ainda indisponível nesta central.";return false;
@@ -230,12 +246,14 @@ static void serialLoop() {
     else if(op=="info"){result["ok"]=true;result["wifi_connected"]=WiFi.status()==WL_CONNECTED;result["ip"]=WiFi.localIP().toString();result["ap_ssid"]=apName;result["ap_password"]=apPassword;result["access_key"]=accessKey;result["devices"]=house["devices"].size();result["flash_bytes"]=ESP.getFlashChipSize();result["psram_bytes"]=ESP.getPsramSize();result["free_heap"]=ESP.getFreeHeap();result["free_psram"]=ESP.getFreePsram();result["firmware"]="Casa Universal ESP32 0.2.0";}
     else if(op=="remote"){result["ok"]=remoteConfigure(command.as<JsonObject>());if(!result["ok"].as<bool>())result["error"]=lastError;}
     else if(op=="remote_status"){remoteStatus(result);result["ok"]=true;}
+    else if(op=="configure"||op=="discover"){Doc data(32768);bool ok=route(op=="configure"?"/api/configure":"/api/discover/"+String(command["provider"]|""),command.as<JsonObject>(),data);if(ok){result.set(data);result["ok"]=true;}else result["error"]=lastError;}
+    else if(assetCommand(op,command.as<JsonObject>(),result)){}
     else {result["error"]="Operação USB desconhecida.";}
     Serial.print("CASA_JSON:");serializeJson(result,Serial);Serial.println();
   }
 }
 void setup() {
-  Serial.begin(115200);delay(200);if(!psramFound()){Serial.println("CASA_FATAL: PSRAM ausente; confira N16R8/qio_opi.");return;}heap_caps_malloc_extmem_enable(8192);house=Doc(1024*1024);history=Doc(32768);
+  Serial.setRxBufferSize(8192);Serial.begin(115200);delay(200);if(!psramFound()){Serial.println("CASA_FATAL: PSRAM ausente; confira N16R8/qio_opi.");return;}heap_caps_malloc_extmem_enable(8192);house=Doc(1024*1024);history=Doc(32768);
   if(!LittleFS.begin(false,"/littlefs",10,"littlefs")){Serial.println("CASA_FATAL: grave o filesystem antes de iniciar.");return;}
   auto file=LittleFS.open("/state.json");if(!file||deserializeJson(house,file)){house.clear();file=LittleFS.open("/state.previous");if(!file||deserializeJson(house,file)){Serial.println("CASA_FATAL: cadastros inválidos; cópia do Mac preservada.");return;}}file.close();history.createNestedArray("history");
   prefs.begin("casa",false);accessKey=prefs.getString("access_key","");if(!accessKey.length()){accessKey=randomToken();prefs.putString("access_key",accessKey);}apPassword=prefs.getString("ap_password","");if(!apPassword.length()){apPassword=randomToken(8);prefs.putString("ap_password",apPassword);}
@@ -244,5 +262,5 @@ void setup() {
 }
 void loop() {
   serialLoop();web.handleClient();samsungLoop();if(WiFi.status()==WL_CONNECTED&&!mdnsStarted){mdnsStarted=MDNS.begin("casa-universal");if(mdnsStarted)MDNS.addService("http","tcp",80);}
-  if(WiFi.status()==WL_CONNECTED&&WiFi.softAPgetStationNum()==0&&millis()>120000)WiFi.softAPdisconnect(true);cloudPoll();remotePoll();delay(2);
+  if(WiFi.status()==WL_CONNECTED&&WiFi.softAPgetStationNum()==0&&millis()>120000)WiFi.softAPdisconnect(true);if(mdnsStarted)sonoffLoop();cloudPoll();remotePoll();delay(2);
 }

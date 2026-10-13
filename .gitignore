@@ -3,6 +3,7 @@ __pycache__/
 *.pyc
 data/
 research/rea/
+research/SonoffLAN/
 research/haha/
 research/evidence/*.json
 research/evidence/*.log

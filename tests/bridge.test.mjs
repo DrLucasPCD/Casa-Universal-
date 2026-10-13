@@ -31,6 +31,7 @@ function setup() {
     const verifier = 'v'.repeat(43),challenge = createHash('sha256').update(verifier).digest('base64url');
     const params = new URLSearchParams({client_id:client.client_id,redirect_uri:client.redirect_uris[0],response_type:'code',code_challenge_method:'S256',code_challenge:challenge,resource:base+'/mcp',state:'client-csrf',scope:'casa:read casa:control'});
     const login = await request('/oauth/authorize?'+params);assert.equal(login.status,200);
+    assert.equal(login.headers.get('Referrer-Policy'),'same-origin');
     const html = await login.text(), signed = html.match(/name="request" value="([^"]+)"/)[1],cookie=login.headers.get('Set-Cookie').split(';')[0];
     const form = new URLSearchParams({request:signed,key:'test-pairing-key',...(control?{control:'yes'}:{})}).toString();
     const approval = await request('/oauth/authorize','POST',form,{Origin:base,Cookie:cookie});assert.equal(approval.status,303);
@@ -68,6 +69,12 @@ test('consent is bound to browser cookie and same origin; authorization code is 
   const s=setup(),auth=await s.authorize();
   assert.equal((await s.request('/oauth/authorize','POST',auth.form,{Origin:base})).status,401);
   assert.equal((await s.request('/oauth/authorize','POST',auth.form,{Origin:'https://evil.example',Cookie:auth.cookie})).status,403);
+  for (const origin of [null,'null']) {
+    const rejected=await s.request('/oauth/authorize','POST',auth.form,{...(origin===null?{}:{Origin:origin}),Cookie:auth.cookie});
+    assert.equal(rejected.status,403);
+    assert.equal(rejected.headers.get('Content-Type'),'application/json; charset=utf-8');
+    assert.equal((await rejected.json()).error,'Origem inválida.');
+  }
   assert.equal((await s.request('/oauth/token','POST',auth.tokenBody)).status,400);
 });
 test('query-only consent cannot enqueue a command and accepts supported read tools',async () => {

@@ -26,7 +26,7 @@ O procedimento de instalação acima segue a [documentação oficial de conexão
 
 ## O que funciona nesta ponte
 
-Cinco ferramentas: `listar_dispositivos`, `consultar_casa`, `consultar_dispositivo`, `consultar_historico` e `controlar_dispositivo`. Elas usam os mesmos drivers locais da placa. A ponte não cria integrações Tuya, Sonoff ou HAHA que ainda estejam pendentes. Fechaduras não podem ser destrancadas. Comandos IR não medem temperatura nem confirmam se um aparelho está ligado.
+Cinco ferramentas: `listar_dispositivos`, `consultar_casa`, `consultar_dispositivo`, `consultar_historico` e `controlar_dispositivo`. Elas usam os mesmos drivers locais da placa. SonoffLAN e Tuya 3.3 precisam das chaves pessoais cadastradas na placa. A ponte não transforma cadastros pendentes em integrações funcionais. Fechaduras não podem ser destrancadas. Comandos IR não medem temperatura nem confirmam se um aparelho está ligado.
 
 A placa consulta o serviço a cada 15 segundos. Um pedido remoto pode levar alguns segundos para chegar. Consultas de estado podem demorar mais quando aparelhos não respondem. O MCP espera até 25 segundos; a fila aceita pedidos por 30 segundos. Pedidos que a placa não recebeu são cancelados. Se a placa recebeu mas não confirmou o resultado, a resposta informa incerteza e o assistente não deve repetir o comando automaticamente.
 

@@ -24,6 +24,6 @@ bool broadlinkSend(JsonObject config,const String& code);
 bool broadlinkLearn(JsonObject config,String& code);
 void samsungLoop();
 bool samsungPair(JsonObject device);
-bool samsungSend(JsonObject device,const String& action);
+bool samsungSend(JsonObject device,const String& action,Doc* result=nullptr);
 bool samsungStatus(JsonObject device,String& state);
 void discoverDevices(const String& provider,JsonArray output);

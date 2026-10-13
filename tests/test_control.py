@@ -51,6 +51,39 @@ class ControllerTests(unittest.TestCase):
         with self.assertRaises(DeviceError):
             self.c.configure('tv', {'adapter':'samsung', 'config':{'ip':'203.0.113.219'}})
 
+    def samsung(self):
+        self.c.configure('tv', {'adapter':'samsung','config':{'ip':'192.168.1.50','token':'test-token','mac':'c8a6ef84e6e2'}})
+
+    def test_samsung_explicit_power_uses_observed_state_and_standard_key(self):
+        self.samsung();session=Mock()
+        with patch('casa.controller.read_json', return_value={'device':{'PowerState':'standby'}}), patch.object(self.c,'_samsung_session',return_value=session):
+            self.assertTrue(self.c.execute('tv','power_on')['sent'])
+            session.send_key.assert_called_once_with('KEY_POWER')
+        session.reset_mock()
+        with patch('casa.controller.read_json', return_value={'device':{'PowerState':'on'}}), patch.object(self.c,'_samsung_session',return_value=session):
+            self.assertTrue(self.c.execute('tv','power_off')['sent'])
+            session.send_key.assert_called_once_with('KEY_POWER')
+
+    def test_samsung_already_in_requested_state_never_toggles(self):
+        self.samsung()
+        for action,state in [('power_on','on'),('power_off','standby'),('power_off','off')]:
+            with patch('casa.controller.read_json',return_value={'device':{'PowerState':state}}), patch.object(self.c,'_samsung_session') as session:
+                self.assertFalse(self.c.execute('tv',action)['sent']);session.assert_not_called()
+
+    def test_samsung_unknown_or_unreachable_off_never_toggles(self):
+        self.samsung()
+        for response in ({'device':{}}, DeviceError('unreachable')):
+            with patch('casa.controller.read_json',side_effect=response if isinstance(response,Exception) else None,return_value=response), patch.object(self.c,'_samsung_session') as session:
+                with self.assertRaises(DeviceError):self.c.execute('tv','power_off')
+                session.assert_not_called()
+
+    def test_samsung_unreachable_on_uses_wol_without_delayed_toggle(self):
+        self.samsung()
+        with patch('casa.controller.read_json',side_effect=DeviceError('unreachable')), patch('casa.controller.socket.socket') as udp, patch.object(self.c,'_samsung_session') as session:
+            self.assertTrue(self.c.execute('tv','power_on')['sent'])
+            udp.return_value.__enter__.return_value.sendto.assert_called_once_with(b'\xff'*6+bytes.fromhex('c8a6ef84e6e2')*16,('255.255.255.255',9))
+            session.assert_not_called()
+
     def test_secrets_hidden_and_blank_keeps_saved_secret(self):
         self.ha('tuya', 'switch.tomada')
         public = self.c.devices()

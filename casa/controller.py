@@ -21,7 +21,7 @@ class DeviceError(ValueError):
 
 
 TV_KEYS = {
-    "power": "KEY_POWER", "power_off": "KEY_POWEROFF", "up": "KEY_UP", "down": "KEY_DOWN",
+    "power": "KEY_POWER", "power_off": "KEY_POWER", "up": "KEY_UP", "down": "KEY_DOWN",
     "left": "KEY_LEFT", "right": "KEY_RIGHT", "enter": "KEY_ENTER", "back": "KEY_RETURN",
     "home": "KEY_HOME", "volume_up": "KEY_VOLUP", "volume_down": "KEY_VOLDOWN", "mute": "KEY_MUTE",
     "channel_up": "KEY_CHUP", "channel_down": "KEY_CHDOWN", "source": "KEY_SOURCE",
@@ -88,7 +88,7 @@ class Controller:
         if adapter == "pending":
             return []
         if adapter == "samsung":
-            return list(TV_KEYS) + (["power_on"] if cfg.get("mac") else [])
+            return list(TV_KEYS) + ["power_on"]
         if adapter == "broadlink":
             if device.get("generic_remote"):
                 slots={b["id"] for b in device["generic_remote"]["buttons"]}
@@ -420,7 +420,23 @@ class Controller:
             with self.device_lock(device["config"].get("parent_id",id_)), self.device_lock(id_):
                 cfg, adapter = device["config"], device["adapter"]
                 if adapter == "samsung":
-                    if action == "power_on":
+                    wake = False
+                    if action in ("power_on", "power_off"):
+                        try:
+                            power = read_json(f"http://{cfg['ip']}:8001/api/v2/").get('device', {}).get('PowerState')
+                        except Exception:
+                            if action == 'power_off':
+                                raise DeviceError('TV sem resposta; nenhum botão de energia foi enviado.') from None
+                            wake = True
+                            power = None
+                        if (action == 'power_on' and power == 'on') or (action == 'power_off' and power in ('off', 'standby')):
+                            return {'device': id_, 'action': action, 'sent': False, 'already_in_state': True,
+                                    'message': 'A TV já informa o estado solicitado. Nenhum botão foi enviado.'}
+                        if not wake and power not in ('on', 'off', 'standby'):
+                            raise DeviceError('A TV não confirmou a energia. Confira a tela antes de usar Liga / desliga.')
+                    if wake:
+                        if not cfg.get('mac'):
+                            raise DeviceError('Configure o MAC da TV para Wake-on-LAN.')
                         mac = bytes.fromhex(cfg["mac"])
                         with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
                             sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -429,7 +445,7 @@ class Controller:
                         if not cfg.get("token"):
                             raise DeviceError("Toque em Parear com a TV e aceite Casa Universal na tela da Samsung antes de enviar botões.")
                         try:
-                            self._samsung_session(id_, cfg).send_key(TV_KEYS[action])
+                            self._samsung_session(id_, cfg).send_key('KEY_POWER' if action in ('power_on', 'power_off') else TV_KEYS[action])
                         except Exception:
                             session = self.tv_sessions.pop(id_, None)
                             if session:

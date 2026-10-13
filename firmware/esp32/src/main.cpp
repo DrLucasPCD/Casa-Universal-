@@ -2,6 +2,7 @@
 #include "cloud.h"
 #include "remote.h"
 #include "sonoff.h"
+#include "tuya.h"
 #include "assets.h"
 #include <WebServer.h>
 #include <LittleFS.h>
@@ -64,10 +65,12 @@ static void publicDevice(JsonObject device,JsonObject out,bool status=false) {
   String adapter=device["adapter"]|"pending";auto actions=out.createNestedArray("actions");out["state"]="not_configured";out["available"]=false;
   if(adapter=="samsung"){for(const char* k:{"power","power_on","power_off","up","down","left","right","enter","back","home","volume_up","volume_down","mute","channel_up","channel_down","source","play","pause"})actions.add(k);out["state"]="unknown";}
   else if(adapter=="broadlink"){for(auto p:original["commands"].as<JsonObject>())actions.add(p.key().c_str());out["state"]="unknown";}
+  else if(adapter=="tuya"){if(device["kind"]=="cover"){actions.add("open");actions.add("close");int type=original["cover_type"]|1;if(type!=2&&type!=5)actions.add("stop");}else{actions.add("on");actions.add("off");}out["state"]="unknown";}
   else if(adapter=="sonoff_lan"||adapter=="sonoff_diy"){int count=original["channels"]|1;for(int ch=1;ch<=count;ch++)for(const char* a:{"on","off"})actions.add(count==1?String(a):String(a)+"_"+String(ch));out["state"]="unknown";if(count>1){auto channels=out.createNestedArray("channels");for(int ch=1;ch<=count;ch++){auto c=channels.createNestedObject();c["channel"]=ch;c["state"]="unknown";}}}
   if(status&&adapter=="samsung"){String state;bool ok=samsungStatus(device,state);out["available"]=ok;out["state"]=ok?state:"unavailable";out["state_source"]="Samsung · API local";}
   if(status&&adapter=="broadlink"){bool ok=broadlinkAuth(connection(device),true);out["available"]=ok;out["state"]="unknown";out["message"]=ok?"IR não confirma o estado físico do aparelho.":"BroadLink sem resposta.";}
   if(status&&(adapter=="sonoff_lan"||adapter=="sonoff_diy"))sonoffStatus(device,out);
+  if(status&&adapter=="tuya")tuyaStatus(device,out);
   out["state_available"]=String(out["state"]|"")!="unknown"&&String(out["state"]|"")!="not_configured"&&String(out["state"]|"")!="unavailable";
 }
 static void audit(const String& id,const String& action,bool sent) {
@@ -76,11 +79,12 @@ static void audit(const String& id,const String& action,bool sent) {
 static bool execute(const String& id,const String& action,Doc& result) {
   auto d=deviceById(id);if(d.isNull()){lastError="Aparelho não encontrado.";return false;}bool sent=false;String adapter=d["adapter"]|"";
   if(action=="unlock"){lastError="Abertura de fechadura indisponível.";return false;}
-  if(adapter=="samsung")sent=samsungSend(d,action);
+  if(adapter=="samsung")sent=samsungSend(d,action,&result);
   else if(adapter=="broadlink"){String code=d["config"]["commands"][action]|"";if(!code.length()){lastError="Configure este botão antes de usar.";return false;}sent=broadlinkSend(connection(d),code);}
   else if(adapter=="sonoff_lan"||adapter=="sonoff_diy")sent=sonoffSend(d,action);
+  else if(adapter=="tuya")sent=tuyaSend(d,action);
   else {lastError="Integração ainda pendente nesta central; nenhum comando foi enviado.";return false;}
-  audit(id,action,sent);if(!sent)return false;result["sent"]=true;result["message"]="Comando enviado. O envio não confirma a reação física do aparelho.";return true;
+  if(!result.containsKey("already_in_state"))audit(id,action,sent);if(!sent)return false;if(!result.containsKey("sent"))result["sent"]=true;if(!result.containsKey("message"))result["message"]="Comando enviado. O envio não confirma a reação física do aparelho.";return true;
 }
 static std::unique_ptr<Doc> loadProfile(const String& id) {
   if(id.length()>50||id.indexOf('/')>=0||id.indexOf('.')>=0)return nullptr;
@@ -105,7 +109,7 @@ static bool checkTrial(JsonObject p,bool exact) {
 static bool validButton(JsonObject d,const String& id) { for(auto b:d["generic_remote"]["buttons"].as<JsonArray>())if(b["id"]==id)return true;return false; }
 static bool route(const String& path,JsonObject p,Doc& result) {
   lastError="";
-  if(path=="/api/devices"||path=="/api/status") {auto arr=result.createNestedArray("devices");for(auto d:house["devices"].as<JsonArray>())publicDevice(d,arr.createNestedObject(),path.endsWith("status"));return true;}
+  if(path=="/api/devices"||path=="/api/status") {auto arr=result.createNestedArray("devices");String selected=path=="/api/status"?String(p["id"]|""):String();for(auto d:house["devices"].as<JsonArray>())if(!selected.length()||d["id"]==selected)publicDevice(d,arr.createNestedObject(),path.endsWith("status"));return true;}
   if(path=="/api/network") {result["local"]=true;result["backend"]="esp32";result["controller"]="ESP32-S3";result["lan"]=WiFi.status()==WL_CONNECTED;result["tls"]=false;auto urls=result.createNestedArray("urls");if(WiFi.status()==WL_CONNECTED)urls.add("http://"+WiFi.localIP().toString());result["flash_bytes"]=ESP.getFlashChipSize();result["psram_bytes"]=ESP.getPsramSize();result["free_psram"]=ESP.getFreePsram();return true;}
   if(path=="/api/remote"){remoteStatus(result);return true;}
   if(path=="/api/cloud"||path=="/api/cloud/sync"){if(path.endsWith("sync"))cloudChanged();cloudStatus(result);return true;}
@@ -138,18 +142,22 @@ static bool route(const String& path,JsonObject p,Doc& result) {
   }
   if(path=="/api/configure") {
     auto d=deviceById(p["id"]|"");if(d.isNull()){lastError="Aparelho desconhecido.";return false;}String adapter=p["adapter"]|d["adapter"]|"pending";
-    bool sonoff=adapter=="sonoff_lan"||adapter=="sonoff_diy";
-    if(adapter!="pending"&&adapter!="samsung"&&adapter!="broadlink"&&!sonoff){lastError="Este driver ainda não foi portado para a central ESP32. O cadastro anterior foi preservado.";return false;}
+    bool sonoff=adapter=="sonoff_lan"||adapter=="sonoff_diy",tuya=adapter=="tuya";
+    if(adapter!="pending"&&adapter!="samsung"&&adapter!="broadlink"&&!sonoff&&!tuya){lastError="Este driver ainda não foi portado para a central ESP32. O cadastro anterior foi preservado.";return false;}
     if(sonoff&&d["kind"]!="switch"){lastError="A conexão Sonoff é destinada a interruptores.";return false;}
+    if(tuya&&d["kind"]!="switch"&&d["kind"]!="cover"){lastError="Tuya disponível para tomada e cortina.";return false;}
     Doc next(32768);auto cfg=next.to<JsonObject>();if(adapter==d["adapter"])cfg.set(d["config"]);
     for(auto item:p["config"].as<JsonObject>()){
-      String k=item.key().c_str();bool allowed=k=="ip"||k=="port"||k=="mac"||k=="devtype"||(sonoff&&(k=="device_id"||k=="device_key"||k=="channels"||k=="diy_confirmed"));if(!allowed)continue;
-      if(k=="device_key"&&!String(item.value()|"").length())continue;
-      if(k=="port"||k=="channels"){String number=item.value().as<String>();if(!number.length()){lastError="Confira porta e canais.";return false;}for(char c:number)if(!isdigit((unsigned char)c)){lastError="Porta e canais devem ser números inteiros.";return false;}cfg[k]=number.toInt();}
+      String k=item.key().c_str();bool dp=k=="dp"||k=="position_dp"||k=="temperature_dp"||k=="target_temperature_dp";bool allowed=k=="ip"||k=="port"||k=="mac"||k=="devtype"||(sonoff&&(k=="device_id"||k=="device_key"||k=="channels"||k=="diy_confirmed"))||(tuya&&(dp||k=="device_id"||k=="local_key"||k=="version"||k=="cover_type"||k=="temperature_divisor"||k=="temperature_unit"));if(!allowed)continue;
+      if((k=="device_key"||k=="local_key")&&!String(item.value()|"").length())continue;
+      if(dp&&k!="dp"&&item.value().as<String>()==""){cfg.remove(k);continue;}
+      if(k=="port"||k=="channels"||(tuya&&(dp||k=="cover_type"))){String number=item.value().as<String>();if(!number.length()||number.length()>5){lastError="Confira porta, canais e DPs.";return false;}for(char c:number)if(!isdigit((unsigned char)c)){lastError="Porta, canais e DPs devem ser números inteiros.";return false;}cfg[k]=number.toInt();}
+      else if(tuya&&k=="temperature_divisor"){String number=item.value().as<String>();char* end=nullptr;float value=strtof(number.c_str(),&end);if(end==number.c_str()||*end||!isfinite(value)||value<=0){lastError="Divisor de temperatura inválido.";return false;}cfg[k]=value;}
       else if(k=="devtype"&&item.value().is<const char*>())cfg[k]=strtoul(item.value().as<const char*>(),nullptr,0);else cfg[k]=item.value();
     }
     if(adapter!="pending"){IPAddress ip;if(!localIP(cfg["ip"]|"",ip)){lastError="Informe o IP privado do aparelho.";return false;}}
     if(sonoff&&!sonoffValidate(cfg,adapter=="sonoff_diy"))return false;
+    if(tuya&&!tuyaValidate(cfg))return false;
     String name=p["name"]|d["name"]|"",room=p["room"]|d["room"]|"";
     if(!name.length()||name.length()>80||room.length()>60){lastError="Informe nome e cômodo curtos.";return false;}
     if(next.overflowed()){lastError="Configuração muito grande.";return false;}
@@ -192,7 +200,7 @@ static void mcp() {
       {"consultar_historico","Consulta envios desta inicialização.","{}",true},
       {"consultar_dispositivo","Consulta o estado de um aparelho.","{\"device_id\":{\"type\":\"string\"}}",true},
       {"controlar_dispositivo","Envia apenas um comando explicitamente pedido. Não destranca.","{\"device_id\":{\"type\":\"string\"},\"action\":{\"type\":\"string\"}}",false},
-      {"buscar_dispositivos","Busca samsung, broadlink, sonoff ou bluetooth na central.","{\"provider\":{\"type\":\"string\"}}",true},
+      {"buscar_dispositivos","Busca samsung, broadlink, tuya, sonoff ou bluetooth na central.","{\"provider\":{\"type\":\"string\"}}",true},
       {"criar_controle_generico","Cria controle vazio sem acionar aparelhos.","{\"type\":{\"type\":\"string\"},\"name\":{\"type\":\"string\"},\"room\":{\"type\":\"string\"}}",false},
       {"aprender_botao_controle","Aprende IR por 25s. Avise para pressionar o controle físico.","{\"device_id\":{\"type\":\"string\"},\"button_id\":{\"type\":\"string\"}}",false},
       {"consultar_catalogo_ir","Lista perfis públicos sem enviar sinais.","{\"category\":{\"type\":\"string\"},\"brand\":{\"type\":\"string\"},\"profile_id\":{\"type\":\"string\"}}",true},

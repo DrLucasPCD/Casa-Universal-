@@ -4,7 +4,7 @@ Painel local para Samsung, BroadLink, Smart Life/Tuya e Sonoff/eWeLink, com desc
 
 Marca visual: **casa.**. Para publicar a entrada pública e a demonstração no Netlify pelo GitHub, veja [publicação e arquitetura](docs/publicacao.md). O build já está configurado em `netlify.toml`. Os controles reais e o MCP continuam na central da casa; o site publicado abre o painel dessa central pelo endereço informado.
 
-**Central ESP32-S3 N16R8:** há uma versão de firmware para manter painel, Samsung, BroadLink, SonoffLAN e MCP na placa, sem o Mac ligado. Veja [instalação, suporte e limitações](firmware/esp32/README.md) e [como conectar os Sonoff](docs/sonoff.md). Tuya e o driver da fechadura HAHA ainda não foram portados para essa versão; a descoberta Bluetooth está disponível. As instruções abaixo descrevem a central Python no Mac.
+**Central ESP32-S3 N16R8:** há uma versão de firmware para manter painel, Samsung, BroadLink, SonoffLAN, Tuya 3.3 e MCP na placa, sem o Mac ligado. Veja [instalação, suporte e limitações](firmware/esp32/README.md) e [como conectar os Sonoff](docs/sonoff.md). Tuya requer as local keys dos aparelhos; veja [configuração Smart Life](docs/tuya.md). O driver da fechadura HAHA permanece pendente; a descoberta Bluetooth está disponível. As instruções abaixo descrevem a central Python no Mac.
 
 ## Abrir e usar
 
@@ -59,7 +59,7 @@ Uma central Home Assistant ou um sensor de temperatura não foi instalado automa
 | Samsung UN50DU8000GXZD | Descoberta e configurada na instalação de testes; precisa da autorização na TV para receber botões. Busca SSDP e verificação na API local. |
 | BroadLink RM pro+ | Descoberto na instalação de testes, tipo `0x279d`; autenticação local respondeu. Pode testar perfis do catálogo e aprender IR. |
 | Sonoff Basic 2 / TX1C / TX3C | Três anúncios eWeLink encontrados. Escolha qual corresponde a cada aparelho e forneça a `device key`. TX3C admite três canais separados. |
-| Tomada e cortina Smart Life | Quatro anúncios Tuya encontrados. Selecione o aparelho correto e forneça `device_id` + `local_key`. O DP e os valores de movimento da cortina dependem do modelo. |
+| Tomada e cortina Smart Life | Busca de anúncios Tuya no Wi-Fi. Selecione o aparelho correto e forneça `device_id` + `local_key`. O DP e os valores de movimento da cortina dependem do modelo. |
 | Fechadura HAHA | Busca Bluetooth funcional. Foi observado `Lck1_773BBA91BBCE`, compatível pelo nome com a família `Lck1` observada no APK. O serviço anunciado `FFF0` difere do `FFE0` usado no caminho analisado: isso precisa ser validado. Não há driver HAHA de abertura pronto. |
 
 Os endereços e cadastros desta casa não são incluídos no GitHub; outra instalação precisa configurar seus próprios aparelhos. As chaves não estão dentro do APK genérico: pertencem ao dispositivo e à sua conta. Preencha-as no painel deste Mac. Elas ficam em SQLite com permissões locais restritas; não são devolvidas às interfaces nem aos tools. O banco não tem criptografia própria. Não envie senhas ou chaves pelo chat.

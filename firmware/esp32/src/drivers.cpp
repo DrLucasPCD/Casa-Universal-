@@ -1,5 +1,6 @@
 #include "common.h"
 #include "sonoff.h"
+#include "tuya.h"
 #include <WiFiUdp.h>
 #include <WiFiClientSecure.h>
 #include <HTTPClient.h>
@@ -107,10 +108,29 @@ bool samsungPair(JsonObject device) {
   tvId=device["id"].as<String>();tvOpen=true;wsBuffer.clear();deadline=millis()+35000;
   while(tvOpen&&!tvReady&&(int32_t)(deadline-millis())>0){samsungLoop();delay(5);}if(!tvReady){lastError="Autorize Casa Universal na TV e tente novamente.";tvTLS.stop();tvOpen=false;}return tvReady;
 }
-bool samsungSend(JsonObject d,const String& action) {
-  const char* pairs[][2]={{"power","KEY_POWER"},{"power_off","KEY_POWEROFF"},{"up","KEY_UP"},{"down","KEY_DOWN"},{"left","KEY_LEFT"},{"right","KEY_RIGHT"},{"enter","KEY_ENTER"},{"back","KEY_RETURN"},{"home","KEY_HOME"},{"volume_up","KEY_VOLUP"},{"volume_down","KEY_VOLDOWN"},{"mute","KEY_MUTE"},{"channel_up","KEY_CHUP"},{"channel_down","KEY_CHDOWN"},{"source","KEY_SOURCE"},{"play","KEY_PLAY"},{"pause","KEY_PAUSE"}};
-  if(action=="power_on"){uint8_t mac[6];if(!parseHex(d["config"]["mac"]|"",mac,6)){lastError="Configure o MAC da TV.";return false;}uint8_t magic[102];memset(magic,255,6);for(int i=0;i<16;i++)memcpy(magic+6+i*6,mac,6);WiFiUDP udp;udp.begin(0);IPAddress broadcast=WiFi.localIP();broadcast[3]=255;udp.beginPacket(broadcast,9);udp.write(magic,102);udp.endPacket();udp.stop();return true;}
-  String key;for(auto& pair:pairs)if(action==pair[0])key=pair[1];if(!key.length()){lastError="Comando não permitido.";return false;}if(!samsungPair(d))return false;
+bool samsungSend(JsonObject d,const String& action,Doc* result) {
+  const char* pairs[][2]={{"power","KEY_POWER"},{"up","KEY_UP"},{"down","KEY_DOWN"},{"left","KEY_LEFT"},{"right","KEY_RIGHT"},{"enter","KEY_ENTER"},{"back","KEY_RETURN"},{"home","KEY_HOME"},{"volume_up","KEY_VOLUP"},{"volume_down","KEY_VOLDOWN"},{"mute","KEY_MUTE"},{"channel_up","KEY_CHUP"},{"channel_down","KEY_CHDOWN"},{"source","KEY_SOURCE"},{"play","KEY_PLAY"},{"pause","KEY_PAUSE"}};
+  String energyKey;
+  if(action=="power_on"||action=="power_off"){
+    String state;bool reachable=samsungStatus(d,state);
+    if((action=="power_on"&&state=="on")||(action=="power_off"&&(state=="off"||state=="standby"))){
+      if(result){(*result)["sent"]=false;(*result)["already_in_state"]=true;(*result)["message"]="A TV já informa o estado solicitado. Nenhum botão foi enviado.";}return true;
+    }
+    if(reachable){
+      if(state!="on"&&state!="off"&&state!="standby"){lastError="A TV não confirmou a energia. Use Liga / desliga somente após conferir a tela.";return false;}
+      energyKey="KEY_POWER"; // Verified on DU8000: POWEROFF is ignored; POWER also wakes standby.
+    }else if(action=="power_off"){lastError="TV sem resposta. Não foi enviado um botão que poderia ligar a TV.";return false;}
+    else{
+      uint8_t mac[6];if(!parseHex(d["config"]["mac"]|"",mac,6)){lastError="Configure o MAC da TV para Wake-on-LAN.";return false;}
+      uint8_t magic[102];memset(magic,255,6);for(int i=0;i<16;i++)memcpy(magic+6+i*6,mac,6);
+      WiFiUDP udp;if(!udp.begin(0)){lastError="Não foi possível preparar Wake-on-LAN.";return false;}
+      IPAddress broadcast;auto ip=WiFi.localIP(),mask=WiFi.subnetMask();for(int i=0;i<4;i++)broadcast[i]=ip[i]|((uint8_t)~mask[i]);
+      bool sent=false;for(int port:{7,9}){if(udp.beginPacket(broadcast,port)&&udp.write(magic,102)==102&&udp.endPacket())sent=true;}udp.stop();
+      if(!sent){lastError="Wake-on-LAN não foi enviado.";return false;}
+      if(result)(*result)["message"]="Wake-on-LAN enviado. Se não ligar, ative Ligar com dispositivo móvel na TV e confira a mesma rede Wi-Fi.";return true;
+    }
+  }
+  String key=energyKey;for(auto& pair:pairs)if(action==pair[0])key=pair[1];if(!key.length()){lastError="Comando não permitido.";return false;}if(!samsungPair(d))return false;
   Doc command(1024);command["method"]="ms.remote.control";auto p=command.createNestedObject("params");p["Cmd"]="Click";p["DataOfCmd"]=key;p["Option"]="false";p["TypeOfRemote"]="SendRemoteKey";String text;serializeJson(command,text);return wsSend(1,text);
 }
 bool samsungStatus(JsonObject d,String& state) {
@@ -120,6 +140,7 @@ bool samsungStatus(JsonObject d,String& state) {
 }
 
 void discoverDevices(const String& provider,JsonArray output) {
+  if(provider=="tuya") {tuyaDiscover(output);return;}
   if(provider=="bluetooth"){
     static bool initialized=false;if(!initialized){NimBLEDevice::init("Casa Universal");initialized=true;}auto scan=NimBLEDevice::getScan();scan->setActiveScan(true);scan->setInterval(120);scan->setWindow(60);
     auto results=scan->start(5,false);for(int i=0;i<results.getCount()&&i<64;i++){auto d=results.getDevice(i);auto item=output.createNestedObject();item["id"]=d.getAddress().toString();item["name"]=d.getName();item["rssi"]=d.getRSSI();item["likely_lock"]=d.getName().find("Lck")!=std::string::npos;auto services=item.createNestedArray("services");for(int j=0;j<d.getServiceUUIDCount();j++)services.add(d.getServiceUUID(j).toString());}scan->clearResults();return;
@@ -135,5 +156,5 @@ void discoverDevices(const String& provider,JsonArray output) {
     WiFiUDP udp;uint16_t port=40000+(esp_random()%20000);if(!udp.begin(port))return;uint8_t msg[48]={0};IPAddress local=WiFi.localIP();for(int i=0;i<4;i++)msg[0x18+i]=local[i];put16(msg+0x1c,port);msg[0x26]=6;put16(msg+0x20,sum16(msg,48));IPAddress bcast=local;bcast[3]=255;udp.beginPacket(bcast,80);udp.write(msg,48);udp.endPacket();uint32_t deadline=millis()+2000;
     while((int32_t)(deadline-millis())>0){int n=udp.parsePacket();if(n>=0x40&&n<=1024){uint8_t buf[1024];udp.read(buf,n);IPAddress check;if(localIP(udp.remoteIP().toString(),check)){auto o=output.createNestedObject();o["ip"]=check.toString();o["devtype"]=get16(buf+0x34);String mac;for(int i=5;i>=0;i--){char v[3];snprintf(v,3,"%02x",buf[0x3a+i]);mac+=v;}o["mac"]=mac;o["name"]="BroadLink";}}else while(udp.available())udp.read();delay(5);}udp.stop();return;
   }
-  lastError="Descoberta Tuya e driver de fechadura ainda pendentes nesta central.";
+  lastError="Provedor de descoberta desconhecido. Driver de fechadura ainda pendente.";
 }

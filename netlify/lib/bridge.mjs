@@ -74,6 +74,10 @@ export function createBridge({env, store, now = Date.now, wait = ms => new Promi
       || params.resource !== resource || typeof params.state !== 'string' || params.state.length > 2048) fail(400,'Solicitação de autorização inválida.');
     return {...params,scopes:scopes(params.scope),client_name:client.client_name};
   }
+  // Some browsers check the full POST redirect chain against form-action.
+  // Only the already-registered, validated ChatGPT origin may receive the code.
+  const consentPolicy = redirect => headers['Content-Security-Policy'].replace(
+    "form-action 'self'", "form-action 'self' " + new URL(redirect).origin);
   async function tokens(grant) {
     const common = {aud:resource,client_id:grant.client_id,scopes:grant.scopes};
     const refresh = id(), exp = seconds()+30*86400;
@@ -142,7 +146,7 @@ export function createBridge({env, store, now = Date.now, wait = ms => new Promi
         const nonce = id(), form = pack({...grant,nonce,type:'form',aud:resource,exp:seconds()+300});
         // Native form POSTs under no-referrer send Origin: null. Preserve the
         // same-site origin while keeping OAuth query parameters off other sites.
-        return page(`<h1>Conectar sua casa.</h1><p><strong>${escape(grant.client_name)}</strong> está solicitando acesso aos seus aparelhos. Informe a chave ChatGPT exibida na configuração USB local.</p><form method="post" action="/oauth/authorize"><input type="hidden" name="request" value="${escape(form)}"><label>Chave ChatGPT<input type="password" name="key" autocomplete="off" required maxlength="100"></label><p>A conexão poderá consultar seus dispositivos e estados.</p>${grant.scopes.includes(CONTROL)?'<label><input type="checkbox" name="control" value="yes"> Permitir também enviar os comandos que eu pedir no ChatGPT.</label>':''}<button>Autorizar Casa Universal</button></form><p>Feche esta página para cancelar. Nunca informe a senha do Wi-Fi nem da Conta Apple.</p>`,200,{'Referrer-Policy':'same-origin','Set-Cookie':`casa_oauth=${nonce}; HttpOnly; Secure; SameSite=Lax; Path=/oauth/authorize; Max-Age=300`});
+        return page(`<h1>Conectar sua casa.</h1><p><strong>${escape(grant.client_name)}</strong> está solicitando acesso aos seus aparelhos. Informe a chave ChatGPT exibida na configuração USB local.</p><form method="post" action="/oauth/authorize"><input type="hidden" name="request" value="${escape(form)}"><label>Chave ChatGPT<input type="password" name="key" autocomplete="off" required maxlength="100"></label><p>A conexão poderá consultar seus dispositivos e estados.</p>${grant.scopes.includes(CONTROL)?'<label><input type="checkbox" name="control" value="yes"> Permitir também enviar os comandos que eu pedir no ChatGPT.</label>':''}<button>Autorizar Casa Universal</button></form><p>Feche esta página para cancelar. Nunca informe a senha do Wi-Fi nem da Conta Apple.</p>`,200,{'Referrer-Policy':'same-origin','Content-Security-Policy':consentPolicy(grant.redirect_uri),'Set-Cookie':`casa_oauth=${nonce}; HttpOnly; Secure; SameSite=Lax; Path=/oauth/authorize; Max-Age=300`});
       }
       if (path === '/oauth/authorize' && req.method === 'POST') {
         if (req.headers.get('Origin') !== base || !(req.headers.get('Content-Type') || '').startsWith('application/x-www-form-urlencoded')) fail(403,'Origem inválida.');
@@ -154,7 +158,7 @@ export function createBridge({env, store, now = Date.now, wait = ms => new Promi
         grant.scopes = data.control === 'yes' && grant.scopes.includes(CONTROL) ? [READ,CONTROL] : [READ];
         const code = id(); await store.setJSON(`code/${digest(code)}`,{...grant,exp:seconds()+120,used:false});
         const redirect = new URL(grant.redirect_uri);redirect.searchParams.set('code',code);redirect.searchParams.set('state',grant.state);
-        return new Response(null,{status:303,headers:{...headers,Location:redirect.href,'Set-Cookie':'casa_oauth=; HttpOnly; Secure; SameSite=Lax; Path=/oauth/authorize; Max-Age=0'}});
+        return new Response(null,{status:303,headers:{...headers,'Content-Security-Policy':consentPolicy(grant.redirect_uri),Location:redirect.href,'Set-Cookie':'casa_oauth=; HttpOnly; Secure; SameSite=Lax; Path=/oauth/authorize; Max-Age=0'}});
       }
       if (path === '/oauth/token' && req.method === 'POST') {
         await limit('token',60);

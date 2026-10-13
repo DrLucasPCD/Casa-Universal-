@@ -25,16 +25,21 @@ function setup() {
     if(response.status!==200&&token!==env.CASA_BRIDGE_TOKEN&&method==='tools/call') assert.fail(`${response.status}: ${await response.text()}`);
     return response;
   };
-  async function authorize(control = false) {
-    const clientResponse = await request('/oauth/register','POST',{client_name:'ChatGPT',redirect_uris:['https://chatgpt.com/connector_platform/oauth_callback'],token_endpoint_auth_method:'none'});
+  async function authorize(control = false, redirectUri = 'https://chatgpt.com/connector/oauth/test-callback') {
+    const clientResponse = await request('/oauth/register','POST',{client_name:'ChatGPT',redirect_uris:[redirectUri],token_endpoint_auth_method:'none'});
     assert.equal(clientResponse.status,201);const client = await clientResponse.json();
     const verifier = 'v'.repeat(43),challenge = createHash('sha256').update(verifier).digest('base64url');
     const params = new URLSearchParams({client_id:client.client_id,redirect_uri:client.redirect_uris[0],response_type:'code',code_challenge_method:'S256',code_challenge:challenge,resource:base+'/mcp',state:'client-csrf',scope:'casa:read casa:control'});
     const login = await request('/oauth/authorize?'+params);assert.equal(login.status,200);
     assert.equal(login.headers.get('Referrer-Policy'),'same-origin');
+    const policy=login.headers.get('Content-Security-Policy');
+    assert.equal(policy.split(';').map(x=>x.trim()).find(x=>x.startsWith('form-action ')),"form-action 'self' "+new URL(redirectUri).origin);
+    assert.match(policy,/default-src 'none'/);
+    assert.match(policy,/frame-ancestors 'none'/);
     const html = await login.text(), signed = html.match(/name="request" value="([^"]+)"/)[1],cookie=login.headers.get('Set-Cookie').split(';')[0];
     const form = new URLSearchParams({request:signed,key:'test-pairing-key',...(control?{control:'yes'}:{})}).toString();
     const approval = await request('/oauth/authorize','POST',form,{Origin:base,Cookie:cookie});assert.equal(approval.status,303);
+    assert.equal(approval.headers.get('Content-Security-Policy'),policy);
     const redirect = new URL(approval.headers.get('Location'));assert.equal(redirect.searchParams.get('state'),'client-csrf');
     const tokenBody = new URLSearchParams({grant_type:'authorization_code',code:redirect.searchParams.get('code'),client_id:client.client_id,redirect_uri:client.redirect_uris[0],code_verifier:verifier,resource:base+'/mcp'}).toString();
     const response = await request('/oauth/token','POST',tokenBody);assert.equal(response.status,200);
@@ -76,6 +81,14 @@ test('consent is bound to browser cookie and same origin; authorization code is 
     assert.equal((await rejected.json()).error,'Origem inválida.');
   }
   assert.equal((await s.request('/oauth/token','POST',auth.tokenBody)).status,400);
+});
+test('OAuth consent permits only its registered ChatGPT callback origin in form-action',async () => {
+  for (const uri of ['https://chatgpt.com/connector/oauth/test-callback','https://chat.openai.com/connector_platform/oauth_callback']) {
+    const s=setup();await s.authorize(false,uri);
+    const ordinary=await s.request('/chatgpt');
+    assert.match(ordinary.headers.get('Content-Security-Policy'),/form-action 'self';/);
+    assert.doesNotMatch(ordinary.headers.get('Content-Security-Policy'),/https:/);
+  }
 });
 test('query-only consent cannot enqueue a command and accepts supported read tools',async () => {
   const s=setup(),{tokens}=await s.authorize();

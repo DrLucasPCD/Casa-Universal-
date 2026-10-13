@@ -38,7 +38,7 @@ bool request(JsonObject d,bool writing,JsonVariantConst value,bool special,Doc& 
   if(!writing&&!special)payload["gwId"]=id;
   uint32_t cmd=writing?7:special?13:10;
   if(writing)payload["dps"][dp]=value;
-  else if(special){auto requested=payload.createNestedObject("dps");requested[dp]=nullptr;for(const char* field:{"position_dp","temperature_dp","target_temperature_dp"})if(cfg[field].is<int>()&&cfg[field].as<int>()>0)requested[String(cfg[field].as<int>())]=nullptr;}
+  else if(special){auto requested=payload.createNestedObject("dps");requested[dp]=nullptr;for(const char* field:{"position_dp","temperature_dp","target_temperature_dp","humidity_dp"})if(cfg[field].is<int>()&&cfg[field].as<int>()>0)requested[String(cfg[field].as<int>())]=nullptr;}
   String text;serializeJson(payload,text);size_t len=(text.length()/16+1)*16;
   std::vector<uint8_t> body(len,(uint8_t)(len-text.length()));memcpy(body.data(),text.c_str(),text.length());
   if(!crypt(body,(const uint8_t*)key.c_str(),false)){lastError="Não foi possível criptografar Tuya.";return false;}
@@ -74,13 +74,13 @@ bool tuyaValidate(JsonObject cfg){
   if(!localIP(cfg["ip"]|"",ip)||id.length()<16||id.length()>40||key.length()!=16||dp<1||dp>255||port<1||port>65535){lastError="Confira IP privado, device ID, local key de 16 caracteres e DP Tuya.";return false;}
   for(char c:id)if(!isalnum((unsigned char)c)){lastError="Device ID Tuya inválido.";return false;}
   if(version!="3.3"){lastError="A central suporta Tuya 3.3. Os seus aparelhos encontrados anunciam essa versão.";return false;}
-  for(const char* field:{"position_dp","temperature_dp","target_temperature_dp"})if(cfg.containsKey(field)){int n=cfg[field]|0;if(n<1||n>255){lastError="DP opcional Tuya inválido.";return false;}}
+  for(const char* field:{"position_dp","temperature_dp","target_temperature_dp","humidity_dp"})if(cfg.containsKey(field)){int n=cfg[field]|0;if(n<1||n>255){lastError="DP opcional Tuya inválido.";return false;}}
   int type=cfg["cover_type"]|1;if(type<1||type>8){lastError="Confira o tipo da cortina (1 a 8).";return false;}
-  if(cfg.containsKey("temperature_divisor")&&cfg["temperature_divisor"].as<float>()<=0){lastError="O divisor de temperatura deve ser positivo.";return false;}return true;
+  for(const char* field:{"temperature_divisor","humidity_divisor"})if(cfg.containsKey(field)&&(!isfinite(cfg[field].as<float>())||cfg[field].as<float>()<=0)){lastError="O divisor de leitura deve ser positivo.";return false;}return true;
 }
 bool tuyaSend(JsonObject d,const String& action){
   Doc data(128);auto value=data.to<JsonObject>();
-  if(d["kind"]=="switch"&&(action=="on"||action=="off"))value["value"]=action=="on";
+  if((d["kind"]=="switch"||d["kind"]=="light")&&(action=="on"||action=="off"))value["value"]=action=="on";
   else if(d["kind"]=="cover"&&(action=="open"||action=="close"||action=="stop")){
     int type=d["config"]["cover_type"]|1;int index=action=="open"?0:action=="close"?1:2;
     const char* codes[][3]={{"open","close","stop"},{nullptr,nullptr,nullptr},{"1","2","0"},{"01","02","00"},{"fopen","fclose",nullptr},{"on","off","stop"},{"up","down","stop"},{"ZZ","FZ","STOP"}};
@@ -93,7 +93,8 @@ void tuyaStatus(JsonObject d,JsonObject out){
   Doc result(16384);bool ok=poll(d,result);out["available"]=ok;out["state"]=ok?"unknown":"unavailable";out["state_source"]="Tuya 3.3 · rede local";
   if(!ok){out["message"]=lastError;return;}
   auto cfg=d["config"].as<JsonObject>(),dps=result["dps"].as<JsonObject>();auto value=dps[String(cfg["dp"]|1)];
-  if(d["kind"]=="switch"&&value.is<bool>())out["state"]=value.as<bool>()?"on":"off";
+  if((d["kind"]=="switch"||d["kind"]=="light")&&value.is<bool>())out["state"]=value.as<bool>()?"on":"off";
+  if(d["kind"]=="sensor")out["state"]="online";
   auto telemetry=out.createNestedObject("telemetry");
   if(d["kind"]=="cover"){
     if(cfg["position_dp"].is<int>()){
@@ -103,9 +104,10 @@ void tuyaStatus(JsonObject d,JsonObject out){
     if(value.is<const char*>())telemetry["movement"]=value;
   }
   const char* fields[][2]={{"temperature_dp","temperature"},{"target_temperature_dp","target_temperature"}};
-  for(auto& f:fields)if(cfg[f[0]].is<int>()){auto n=dps[String(cfg[f[0]].as<int>())];if(n.is<float>()||n.is<int>())telemetry[f[1]]=n.as<float>()/(cfg["temperature_divisor"]|1.0f);}
+  for(auto& f:fields)if(cfg[f[0]].is<int>()){auto n=dps[String(cfg[f[0]].as<int>())];if(n.is<float>()||n.is<int>()){float value=n.as<float>()/(cfg["temperature_divisor"]|1.0f);if(isfinite(value)&&value>=-100&&value<=200)telemetry[f[1]]=value;}}
+  if(cfg["humidity_dp"].is<int>()){auto n=dps[String(cfg["humidity_dp"].as<int>())];if(n.is<float>()||n.is<int>()){float value=n.as<float>()/(cfg["humidity_divisor"]|1.0f);if(isfinite(value)&&value>=0&&value<=100)telemetry["humidity_percent"]=value;}}
   if(telemetry.containsKey("temperature")||telemetry.containsKey("target_temperature"))telemetry["temperature_unit"]=cfg["temperature_unit"]|"°C";
-  out["message"]="Estado consultado no aparelho. Movimento da cortina não confirma posição final.";
+  out["message"]=d["kind"]=="cover"?"Estado consultado no aparelho. Movimento da cortina não confirma posição final.":d["kind"]=="sensor"?"Leituras consultadas no sensor pelos DPs configurados.":"Estado consultado no aparelho.";
 }
 void tuyaDiscover(JsonArray output){
   WiFiUDP plain,encrypted;if(!plain.begin(6666)||!encrypted.begin(6667)){plain.stop();encrypted.stop();lastError="Não foi possível escutar anúncios Tuya.";return;}

@@ -129,6 +129,16 @@ class ControllerTests(unittest.TestCase):
         with patch.object(self.c, '_tuya', return_value=Mock(status=Mock(return_value={'Error':'invalid key'}))):
             self.assertFalse(self.c.status('tuya')['available'])
 
+    def test_tuya_sensor_only_reports_readings_and_has_no_commands(self):
+        sensor=self.store.get('tuya');sensor['kind']='sensor';self.store.save(sensor)
+        self.c.configure('tuya', {'adapter':'tuya','config':{'ip':'192.168.1.52','device_id':'sensor-test-id','local_key':'1234567890123456','temperature_dp':1,'humidity_dp':2,'temperature_divisor':10}})
+        with patch.object(self.c,'_tuya',return_value=Mock(status=Mock(return_value={'dps':{'1':253,'2':65}}))) as local:
+            self.assertEqual(self.c.actions(self.store.get('tuya')),[])
+            public=self.c.status('tuya');self.assertEqual(public['state'],'online');self.assertEqual(public['telemetry']['temperature'],25.3);self.assertEqual(public['telemetry']['humidity_percent'],65)
+            local.reset_mock()
+            with self.assertRaises(DeviceError):self.c.execute('tuya','on')
+            local.assert_not_called()
+
     def test_cover_sends_configured_enum_and_observes_response(self):
         import tinytuya
         self.c.configure('curtain', {'adapter':'tuya','config':{'ip':'192.168.1.57','device_id':'curtain-id','local_key':'1234567890123456','dp':1,'cover_type':7}})

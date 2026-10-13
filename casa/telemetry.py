@@ -25,11 +25,13 @@ def homeassistant(result):
 def tuya(result,cfg):
     values={};dps=result.get("dps",{})
     if not isinstance(dps,dict):return values
-    for field,target,low,high in [("temperature_dp","temperature",-100,200),("target_temperature_dp","target_temperature",-100,200),("position_dp","position_percent",0,100)]:
+    for field,target,low,high in [("temperature_dp","temperature",-100,200),("target_temperature_dp","target_temperature",-100,200),("position_dp","position_percent",0,100),("humidity_dp","humidity_percent",0,100)]:
         if cfg.get(field):
             value=dps.get(str(cfg[field]))
             if isinstance(value,(int,float)) and not isinstance(value,bool) and "temperature" in field:
                 value=value/float(cfg.get("temperature_divisor",1))
+            elif field=='humidity_dp' and isinstance(value,(int,float)) and not isinstance(value,bool):
+                value=value/float(cfg.get('humidity_divisor',1))
             value=number(value,low,high)
             if value is not None:values[target]=value
     if "temperature" in values or "target_temperature" in values:

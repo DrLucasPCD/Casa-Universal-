@@ -53,8 +53,8 @@ def run(central,host):
         req=urllib.request.Request(central+path,data=json.dumps(payload).encode() if payload is not None else None,
                                    headers={'Origin':central,'Content-Type':'application/json'})
         with urllib.request.urlopen(req,timeout=40) as response:return json.load(response)
-    original=api('/api/devices')['devices'];targets={d['id']:d for d in original if d['id'] in ('tuya','curtain')}
-    assert len(targets)==2 and all(d['adapter']=='pending' and not d['config'].get('has_secret') for d in targets.values()),'Will not replace configured Tuya devices.'
+    original=api('/api/devices')['devices'];targets={d['id']:d for d in original if d['id'] in ('tuya','curtain','tuya_fan','tuya_led','tuya_sensor')}
+    assert len(targets)>=2 and all(d['adapter']=='pending' and not d['config'].get('has_secret') for d in targets.values()),'Will not replace configured Tuya devices.'
     baseline={d['id']:d for d in original if d['id'] not in targets}
     server=TCP((host,0),Sim);thread=threading.Thread(target=server.serve_forever,daemon=True);thread.start()
     cfg={'ip':host,'port':server.server_address[1],'device_id':DEVICE,'local_key':KEY.decode(),'version':'3.3','dp':1}
@@ -73,6 +73,22 @@ def run(central,host):
         assert api('/api/action',{'id':'curtain','action':'close'})['sent'];assert Sim.calls[-1][1]['dps']=={'1':'down'}
         configure('curtain',{'position_dp':''});assert status('curtain')['state']=='unknown'
         print('PASS: configured cover enum; movement alone never reports fully closed.',flush=True)
+        if 'tuya_sensor' in targets:
+            configure('tuya_sensor',{'temperature_dp':3,'temperature_divisor':10,'humidity_dp':4})
+            Sim.dps['4']=65;observed=status('tuya_sensor')
+            assert observed['actions']==[] and observed['state']=='online' and observed['telemetry']['humidity_percent']==65 and observed['telemetry']['temperature']==23.5
+            before=len(Sim.calls)
+            try:api('/api/action',{'id':'tuya_sensor','action':'on'});raise AssertionError('Sensor accepted actuation')
+            except urllib.error.HTTPError as e:assert e.code==400;e.close()
+            assert len(Sim.calls)==before
+            Sim.dps['4']=True;assert 'humidity_percent' not in status('tuya_sensor')['telemetry']
+            print('PASS: sensor temperature/humidity are typed and scaled; no actuation or invented boolean reading.',flush=True)
+        for id_ in ('tuya_fan','tuya_led'):
+            if id_ not in targets:continue
+            configure(id_,{'dp':20});Sim.dps['20']=False
+            assert status(id_)['state']=='off'
+            assert api('/api/action',{'id':id_,'action':'on'})['sent'] and Sim.calls[-1][1]['dps']=={'20':True}
+        print('PASS: additional outlet/light use their configured power DP.',flush=True)
         Sim.mode='device22';assert status('tuya')['available'];assert Sim.calls[-1][0]==13
         print('PASS: device22 read fallback sends only null DPs.',flush=True)
         for mode in ('bad_crc','bad_padding','rejected'):

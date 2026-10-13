@@ -66,6 +66,9 @@ class GenericTelemetryTests(unittest.TestCase):
         self.assertNotIn('token',readings)
         self.assertEqual(homeassistant({'attributes':{'current_temperature':float('nan'),'temperature':True,'current_position':150}}),{})
         self.assertEqual(tuya({'dps':{'2':251,'3':22,'4':60}},{'temperature_dp':2,'temperature_divisor':10,'position_dp':4}),{'temperature':25.1,'temperature_unit':'°C','position_percent':60})
+        self.assertEqual(tuya({'dps':{'1':253,'2':657}},{'temperature_dp':1,'temperature_divisor':10,'humidity_dp':2,'humidity_divisor':10}),{'temperature':25.3,'temperature_unit':'°C','humidity_percent':65.7})
+        self.assertEqual(tuya({'dps':{'2':True}},{'humidity_dp':2}),{})
+        self.assertEqual(tuya({'dps':{'2':101}},{'humidity_dp':2}),{})
 
     def test_feedback_reports_real_state_and_hides_token_without_copying_it_to_new_remote(self):
         remote=self.create('climate');id_=remote['id']

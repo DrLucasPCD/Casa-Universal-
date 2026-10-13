@@ -11,6 +11,7 @@ HOSTS = {'us':'openapi.tuyaus.com', 'us-e':'openapi-ueaz.tuyaus.com',
          'eu':'openapi.tuyaeu.com', 'eu-w':'openapi-weaz.tuyaeu.com',
          'cn':'openapi.tuyacn.com', 'in':'openapi.tuyain.com', 'sg':'openapi-sg.iotbing.com'}
 IDENTIFIER = re.compile(r'[a-zA-Z0-9]{16,40}')
+TARGETS={'tuya','curtain','tuya_fan','tuya_led','tuya_sensor'}
 
 def signature(client, secret, timestamp, path, token=''):
     canonical = 'GET\n' + hashlib.sha256(b'').hexdigest() + '\n\n' + path
@@ -78,7 +79,7 @@ class TuyaSetup:
         with self.lock:
             if time.monotonic()>=self.expires:self.records={};raise ValueError('Importação expirada. Importe novamente as chaves.')
             target=payload.get('target');record=self.records.get(payload.get('device_id'))
-            if target not in ('tuya','curtain') or not record:raise ValueError('Escolha um aparelho importado e seu controle.')
+            if target not in TARGETS or not record:raise ValueError('Escolha um aparelho importado e seu controle.')
             try:
                 ip=ipaddress.IPv4Address(payload.get('ip',''))
                 if not any(ip in ipaddress.ip_network(n) for n in ('10.0.0.0/8','172.16.0.0/12','192.168.0.0/16')):raise ValueError()
@@ -86,12 +87,17 @@ class TuyaSetup:
             version=record.get('version','3.3') or '3.3'
             if version!='3.3':raise ValueError('O ESP32 suporta protocolo Tuya 3.3 nesta versão.')
             cfg={'ip':str(ip),'device_id':record['device_id'],'local_key':record['local_key'],'version':version}
-            for field,default,limit in (('dp',1,255),('cover_type',1,8),('position_dp',None,255)):
+            for field,default,limit in (('dp',1,255),('cover_type',1,8),('position_dp',None,255),('temperature_dp',None,255),('humidity_dp',None,255)):
                 value=payload.get(field,default)
                 if value in ('',None):
                     if default is None:continue
                     value=default
                 if isinstance(value,bool) or not re.fullmatch(r'[0-9]{1,3}',str(value)) or not 1<=int(value)<=limit:raise ValueError('Confira DP, tipo da cortina e DP de posição.')
                 cfg[field]=int(value)
+            for field in ('temperature_divisor','humidity_divisor'):
+                value=payload.get(field,1)
+                if isinstance(value,bool) or not re.fullmatch(r'(1|10|100)',str(value)):raise ValueError('Escolha divisor 1, 10 ou 100 para as leituras.')
+                cfg[field]=int(value)
+            if target.startswith('tuya_'):self.usb.request({'op':'add_tuya','id':target})
             self.usb.request({'op':'configure','id':target,'adapter':'tuya','config':cfg})
             return {'message':'Tuya salva no ESP32. Consulte o estado no painel antes de testar os botões.'}

@@ -18,7 +18,7 @@ static String hash(const String& s){uint8_t bytes[32];mbedtls_sha256_ret((const 
 static void portable(JsonObject device,Doc& result) {
   for(const char* key:{"id","name","room","kind","adapter","generic_remote","ir_profile"})if(device.containsKey(key))result[key]=device[key];
   auto cfg=result.createNestedObject("config");auto original=device["config"].as<JsonObject>();
-  for(const char* key:{"ip","mac","port","devtype","commands","parent_id","device_id","version","dp","cover_type","temperature_dp","target_temperature_dp","position_dp","temperature_divisor","temperature_unit","channels","diy_confirmed","bluetooth_id","bluetooth_name","url","entity_id","remote_device","feedback_url","feedback_entity","feedback_enabled"})if(original.containsKey(key))cfg[key]=original[key];
+  for(const char* key:{"ip","mac","port","devtype","commands","parent_id","device_id","version","dp","cover_type","temperature_dp","target_temperature_dp","position_dp","temperature_divisor","temperature_unit","humidity_dp","humidity_divisor","display_type","channels","diy_confirmed","bluetooth_id","bluetooth_name","url","entity_id","remote_device","feedback_url","feedback_entity","feedback_enabled"})if(original.containsKey(key))cfg[key]=original[key];
 }
 static String collection(){return "https://firestore.googleapis.com/v1/projects/"+String(config["projectId"]|"")+"/databases/(default)/documents/casas/"+String(config["uid"]|"")+"/controles";}
 static int request(const String& url,const String& method,const String& body,Doc& result,bool auth=true,const char* content="application/json"){
@@ -63,7 +63,9 @@ void cloudPoll(){
     time_t now=time(nullptr);struct tm utc;gmtime_r(&now,&utc);char stamp[32];strftime(stamp,32,"%Y-%m-%dT%H:%M:%SZ",&utc);fields["savedAt"]["timestampValue"]=stamp;String body;serializeJson(document,body);Doc response(32768);
     status=request(collection()+"/"+id+"?mask.fieldPaths=digest","PATCH",body,response);
     if(status!=200||response["fields"]["digest"]["stringValue"]!=digest){phase="pending";message="Firestore indisponível. Os controles continuam salvos no ESP32.";return;}
-    hashes[id]=digest;String saved;serializeJson(hashes,saved);cloudPrefs.putString("hashes",saved);lastSynced=stamp;cloudPrefs.putString("last_synced",lastSynced);yield();
+    hashes[id]=digest;String saved;serializeJson(hashes,saved);cloudPrefs.putString("hashes",saved);lastSynced=stamp;cloudPrefs.putString("last_synced",lastSynced);
+    // Service panel, USB and MCP between uploads instead of blocking for every device.
+    nextAttempt=millis()+250;return;
   }
   dirty=false;phase="synced";message="Controles salvos no Firestore. Credenciais permanecem na central ESP32.";
 }

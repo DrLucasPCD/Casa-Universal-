@@ -30,6 +30,14 @@ class TuyaSetupTests(unittest.TestCase):
         self.setup.expires=time.monotonic()-1
         with self.assertRaises(ValueError):self.setup.save(base)
         self.assertEqual(self.setup.records,{})
+    def test_extra_targets_register_once_before_configuring_and_sensor_has_readings(self):
+        self.imported()
+        self.setup.save({'target':'tuya_sensor','device_id':DEVICE,'ip':'192.168.68.116','temperature_dp':3,'humidity_dp':4,'temperature_divisor':10})
+        calls=[c.args[0] for c in self.usb.request.call_args_list]
+        self.assertEqual(calls[-2],{'op':'add_tuya','id':'tuya_sensor'})
+        self.assertEqual(calls[-1]['config']['humidity_dp'],4)
+        self.assertEqual(calls[-1]['config']['temperature_divisor'],10)
+        with self.assertRaises(ValueError):self.setup.save({'target':'tuya_sensor','device_id':DEVICE,'ip':'192.168.68.116','humidity_divisor':0})
     def test_consent_and_fixed_region_required_before_cloud(self):
         with patch('casa.tuya_setup.fetch_devices') as cloud:
             for extra in ({'consent':False},{'region':'evil.example'},{'device_id':'../../secret'}):

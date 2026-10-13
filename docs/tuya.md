@@ -1,6 +1,6 @@
 # Smart Life / Tuya na central ESP32
 
-A tomada e a cortina usam o mesmo driver LAN. O ESP32 implementa Tuya **3.3**, descoberta UDP 6666/6667, TCP 6668 e AES-128-ECB. Protocolos 3.1/3.4/3.5, subdispositivos de gateway e UDP 7000 não são suportados nesta versão. A implementação independente segue o protocolo documentado no [TinyTuya 1.20.0](https://github.com/jasonacox/tinytuya/blob/master/PROTOCOL.md), licença MIT; não inclui o código da biblioteca no firmware.
+Tomadas, cortina, fita LED (liga/desliga) e sensor de temperatura/umidade usam o mesmo driver LAN. O sensor oferece apenas consultas, sem comandos de atuação. O ESP32 implementa Tuya **3.3**, descoberta UDP 6666/6667, TCP 6668 e AES-128-ECB. Protocolos 3.1/3.4/3.5, subdispositivos de gateway e UDP 7000 não são suportados nesta versão. A implementação independente segue o protocolo documentado no [TinyTuya 1.20.0](https://github.com/jasonacox/tinytuya/blob/master/PROTOCOL.md), licença MIT; não inclui o código da biblioteca no firmware.
 
 ## Importar suas chaves
 
@@ -9,7 +9,7 @@ A tomada e a cortina usam o mesmo driver LAN. O ESP32 implementa Tuya **3.3**, d
 3. Confira a disponibilidade e a autorização de **IoT Core** e **Smart Home Basic Service** no projeto. Serviços, planos e limites dependem da sua conta. A Casa Universal não assina planos nem aceita contratos por você.
 4. No projeto: **Devices → Link App Account → Add App Account → Tuya App Account Authorization** (ou **Link Tuya App Account**). Escaneie o QR pelo Smart Life e confirme o vínculo no telefone.
 5. Copie **Access ID / Client ID** e **Access Secret / Client Secret** da seção **Authorization Key / Overview** e um **Device ID** de **All Devices** para o formulário local. Não coloque chaves no chat, GitHub ou variáveis do Netlify.
-6. Clique **Importar meus aparelhos**. Escolha **Tomada** ou **Cortina**, confira IP local, DP de comando e tipo da cortina, e salve na central. O Mac só é necessário nessa importação.
+6. Clique **Importar meus aparelhos**. Escolha o controle correspondente entre **Tomada**, **Cortina**, **Tomada do ventilador**, **Smart Led Strip** e **Sensor de temperatura e umidade**, confira IP local, DP de comando e tipo da cortina, e salve na central. O Mac só é necessário nessa importação.
 
 O importador faz três consultas GET por HTTPS nos endpoints oficiais do data center escolhido: token, informações de um aparelho e lista da sua conta. Usa [assinatura HMAC-SHA256](https://developer.tuya.com/en/docs/iot/new-singnature?id=Kbw0q34cs2e5g), timeout, limite de resposta e bloqueio de redirecionamentos. Access Secret e token não são persistidos. Local keys ficam na RAM por 15 minutos até salvar somente os aparelhos selecionados no ESP32. A cópia Firestore não inclui essas chaves.
 
@@ -30,7 +30,7 @@ DP é o número da função no aparelho. Verifique em **Devices → aparelho →
 | 7 | up | down | stop |
 | 8 | ZZ | FZ | STOP |
 
-Um DP de movimento não confirma posição final. Somente um DP de posição **reportado** em 0–100 permite indicar fechada (0), aberta (100) ou parcial. Confira a polaridade do seu modelo antes de usar essa leitura. DPs de temperatura e divisor são opcionais e precisam corresponder ao aparelho. Nenhum estado é inventado com base no último botão enviado.
+Um DP de movimento não confirma posição final. Somente um DP de posição **reportado** em 0–100 permite indicar fechada (0), aberta (100) ou parcial. Confira a polaridade do seu modelo antes de usar essa leitura. DPs de temperatura e umidade e seus divisores são configuráveis e precisam corresponder ao aparelho. Leituras booleanas, valores fora dos limites e dados não finitos são rejeitados. O visual do ventilador representa a energia da tomada; não confirma movimento físico. A fita LED oferece liga/desliga pelo DP escolhido; cor e brilho precisam de mapeamento próprio para controle completo. O sensor apresenta somente leituras e conexão. Nenhum estado é inventado com base no último botão enviado.
 
 Se o app Smart Life mantiver uma sessão LAN exclusiva, feche-o antes de consultar pela central. Reparear um aparelho pode mudar a local key, exigindo nova importação. Sem chave válida, encontrar um anúncio Wi-Fi não permite controlar ou consultar o estado autenticado.
 

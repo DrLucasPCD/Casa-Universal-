@@ -65,7 +65,7 @@ static void publicDevice(JsonObject device,JsonObject out,bool status=false) {
   String adapter=device["adapter"]|"pending";auto actions=out.createNestedArray("actions");out["state"]="not_configured";out["available"]=false;
   if(adapter=="samsung"){for(const char* k:{"power","power_on","power_off","up","down","left","right","enter","back","home","volume_up","volume_down","mute","channel_up","channel_down","source","play","pause"})actions.add(k);out["state"]="unknown";}
   else if(adapter=="broadlink"){for(auto p:original["commands"].as<JsonObject>())actions.add(p.key().c_str());out["state"]="unknown";}
-  else if(adapter=="tuya"){if(device["kind"]=="cover"){actions.add("open");actions.add("close");int type=original["cover_type"]|1;if(type!=2&&type!=5)actions.add("stop");}else{actions.add("on");actions.add("off");}out["state"]="unknown";}
+  else if(adapter=="tuya"){if(device["kind"]=="cover"){actions.add("open");actions.add("close");int type=original["cover_type"]|1;if(type!=2&&type!=5)actions.add("stop");}else if(device["kind"]!="sensor"){actions.add("on");actions.add("off");}out["state"]="unknown";}
   else if(adapter=="sonoff_lan"||adapter=="sonoff_diy"){int count=original["channels"]|1;for(int ch=1;ch<=count;ch++)for(const char* a:{"on","off"})actions.add(count==1?String(a):String(a)+"_"+String(ch));out["state"]="unknown";if(count>1){auto channels=out.createNestedArray("channels");for(int ch=1;ch<=count;ch++){auto c=channels.createNestedObject();c["channel"]=ch;c["state"]="unknown";}}}
   if(status&&adapter=="samsung"){String state;bool ok=samsungStatus(device,state);out["available"]=ok;out["state"]=ok?state:"unavailable";out["state_source"]="Samsung · API local";}
   if(status&&adapter=="broadlink"){bool ok=broadlinkAuth(connection(device),true);out["available"]=ok;out["state"]="unknown";out["message"]=ok?"IR não confirma o estado físico do aparelho.":"BroadLink sem resposta.";}
@@ -114,6 +114,17 @@ static bool route(const String& path,JsonObject p,Doc& result) {
   if(path=="/api/remote"){remoteStatus(result);return true;}
   if(path=="/api/cloud"||path=="/api/cloud/sync"){if(path.endsWith("sync"))cloudChanged();cloudStatus(result);return true;}
   if(path=="/api/access"){result["key"]=accessKey;return true;}
+  if(path=="/api/tuya/add") {
+    String id=p["id"]|"",name,kind,display;
+    if(id=="tuya_fan"){name="Tomada do ventilador";kind="switch";display="fan";}
+    else if(id=="tuya_led"){name="Smart Led Strip";kind="light";display="led";}
+    else if(id=="tuya_sensor"){name="Sensor de temperatura e umidade";kind="sensor";display="sensor";}
+    else{lastError="Escolha um dos aparelhos Tuya adicionais disponíveis.";return false;}
+    auto existing=deviceById(id);if(!existing.isNull()){publicDevice(existing,result.to<JsonObject>());return true;}
+    auto devices=house["devices"].as<JsonArray>();if(devices.size()>=50){lastError="Limite de aparelhos atingido.";return false;}
+    auto d=devices.createNestedObject();d["id"]=id;d["name"]=name;d["kind"]=kind;d["room"]="Sala";d["adapter"]="pending";d["config"]["display_type"]=display;
+    if(!saveHouse()){devices.remove(devices.size()-1);return false;}publicDevice(d,result.to<JsonObject>());return true;
+  }
   if(path=="/api/history"){result.set(history);return true;}
   if(path.startsWith("/api/discover/")){auto arr=result.createNestedArray("devices");discoverDevices(path.substring(14),arr);return !lastError.length();}
   if(path=="/api/action")return execute(p["id"]|"",p["action"]|"",result);
@@ -145,14 +156,15 @@ static bool route(const String& path,JsonObject p,Doc& result) {
     bool sonoff=adapter=="sonoff_lan"||adapter=="sonoff_diy",tuya=adapter=="tuya";
     if(adapter!="pending"&&adapter!="samsung"&&adapter!="broadlink"&&!sonoff&&!tuya){lastError="Este driver ainda não foi portado para a central ESP32. O cadastro anterior foi preservado.";return false;}
     if(sonoff&&d["kind"]!="switch"){lastError="A conexão Sonoff é destinada a interruptores.";return false;}
-    if(tuya&&d["kind"]!="switch"&&d["kind"]!="cover"){lastError="Tuya disponível para tomada e cortina.";return false;}
+    if(tuya&&d["kind"]!="switch"&&d["kind"]!="cover"&&d["kind"]!="light"&&d["kind"]!="sensor"){lastError="Tipo de aparelho Tuya não suportado.";return false;}
     Doc next(32768);auto cfg=next.to<JsonObject>();if(adapter==d["adapter"])cfg.set(d["config"]);
     for(auto item:p["config"].as<JsonObject>()){
-      String k=item.key().c_str();bool dp=k=="dp"||k=="position_dp"||k=="temperature_dp"||k=="target_temperature_dp";bool allowed=k=="ip"||k=="port"||k=="mac"||k=="devtype"||(sonoff&&(k=="device_id"||k=="device_key"||k=="channels"||k=="diy_confirmed"))||(tuya&&(dp||k=="device_id"||k=="local_key"||k=="version"||k=="cover_type"||k=="temperature_divisor"||k=="temperature_unit"));if(!allowed)continue;
+      String k=item.key().c_str();bool dp=k=="dp"||k=="position_dp"||k=="temperature_dp"||k=="target_temperature_dp"||k=="humidity_dp";bool allowed=k=="ip"||k=="port"||k=="mac"||k=="devtype"||k=="display_type"||(sonoff&&(k=="device_id"||k=="device_key"||k=="channels"||k=="diy_confirmed"))||(tuya&&(dp||k=="device_id"||k=="local_key"||k=="version"||k=="cover_type"||k=="temperature_divisor"||k=="humidity_divisor"||k=="temperature_unit"));if(!allowed)continue;
       if((k=="device_key"||k=="local_key")&&!String(item.value()|"").length())continue;
       if(dp&&k!="dp"&&item.value().as<String>()==""){cfg.remove(k);continue;}
       if(k=="port"||k=="channels"||(tuya&&(dp||k=="cover_type"))){String number=item.value().as<String>();if(!number.length()||number.length()>5){lastError="Confira porta, canais e DPs.";return false;}for(char c:number)if(!isdigit((unsigned char)c)){lastError="Porta, canais e DPs devem ser números inteiros.";return false;}cfg[k]=number.toInt();}
-      else if(tuya&&k=="temperature_divisor"){String number=item.value().as<String>();char* end=nullptr;float value=strtof(number.c_str(),&end);if(end==number.c_str()||*end||!isfinite(value)||value<=0){lastError="Divisor de temperatura inválido.";return false;}cfg[k]=value;}
+      else if(tuya&&(k=="temperature_divisor"||k=="humidity_divisor")){String number=item.value().as<String>();char* end=nullptr;float value=strtof(number.c_str(),&end);if(end==number.c_str()||*end||!isfinite(value)||value<=0){lastError="Divisor de leitura inválido.";return false;}cfg[k]=value;}
+      else if(k=="display_type"){String type=item.value().as<String>();if(type!="fan"&&type!="led"&&type!="sensor"){lastError="Visual de aparelho inválido.";return false;}cfg[k]=type;}
       else if(k=="devtype"&&item.value().is<const char*>())cfg[k]=strtoul(item.value().as<const char*>(),nullptr,0);else cfg[k]=item.value();
     }
     if(adapter!="pending"){IPAddress ip;if(!localIP(cfg["ip"]|"",ip)){lastError="Informe o IP privado do aparelho.";return false;}}
@@ -161,6 +173,7 @@ static bool route(const String& path,JsonObject p,Doc& result) {
     String name=p["name"]|d["name"]|"",room=p["room"]|d["room"]|"";
     if(!name.length()||name.length()>80||room.length()>60){lastError="Informe nome e cômodo curtos.";return false;}
     if(next.overflowed()){lastError="Configuração muito grande.";return false;}
+    String display=d["config"]["display_type"]|"";if(display.length()&&!cfg.containsKey("display_type"))cfg["display_type"]=display;
     d["name"]=name;d["room"]=room;d["config"]=cfg;sonoffForget(p["id"]|"");
     d["adapter"]=adapter;if(!saveHouse())return false;publicDevice(d,result.to<JsonObject>());return true;
   }
@@ -254,7 +267,7 @@ static void serialLoop() {
     else if(op=="info"){result["ok"]=true;result["wifi_connected"]=WiFi.status()==WL_CONNECTED;result["ip"]=WiFi.localIP().toString();result["ap_ssid"]=apName;result["ap_password"]=apPassword;result["access_key"]=accessKey;result["devices"]=house["devices"].size();result["flash_bytes"]=ESP.getFlashChipSize();result["psram_bytes"]=ESP.getPsramSize();result["free_heap"]=ESP.getFreeHeap();result["free_psram"]=ESP.getFreePsram();result["firmware"]="Casa Universal ESP32 0.2.0";}
     else if(op=="remote"){result["ok"]=remoteConfigure(command.as<JsonObject>());if(!result["ok"].as<bool>())result["error"]=lastError;}
     else if(op=="remote_status"){remoteStatus(result);result["ok"]=true;}
-    else if(op=="configure"||op=="discover"){Doc data(32768);bool ok=route(op=="configure"?"/api/configure":"/api/discover/"+String(command["provider"]|""),command.as<JsonObject>(),data);if(ok){result.set(data);result["ok"]=true;}else result["error"]=lastError;}
+    else if(op=="configure"||op=="discover"||op=="add_tuya"){Doc data(32768);bool ok=route(op=="configure"?"/api/configure":op=="add_tuya"?"/api/tuya/add":"/api/discover/"+String(command["provider"]|""),command.as<JsonObject>(),data);if(ok){result.set(data);result["ok"]=true;}else result["error"]=lastError;}
     else if(assetCommand(op,command.as<JsonObject>(),result)){}
     else {result["error"]="Operação USB desconhecida.";}
     Serial.print("CASA_JSON:");serializeJson(result,Serial);Serial.println();

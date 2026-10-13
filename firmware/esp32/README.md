@@ -10,7 +10,7 @@ Firmware Arduino/PlatformIO para ESP32-S3 com **16 MB de flash e 8 MB de PSRAM O
 | BroadLink RM pro+ | Descoberta UDP, autenticação, envio e aprendizado IR; catálogo público de 387 perfis; controles genéricos por botão. Não aprende RF. |
 | Bluetooth | Busca anúncios, nomes, intensidade do sinal e serviços. Não faz pareamento nem abre a fechadura HAHA. |
 | Sonoff | SonoffLAN: mDNS, LAN criptografada, estados e interruptores de 1 a 4 canais; importação eWeLink uma vez pelo USB. Depende do modo LAN e da chave pessoal. |
-| Tuya | Protocolo 3.3: anúncios UDP, LAN AES-128, tomada e cortina, leitura dos DPs configurados; importação das local keys pelo USB. Protocolos 3.4/3.5 e gateways não suportados. |
+| Tuya | Protocolo 3.3: anúncios UDP, LAN AES-128, tomadas, cortina, fita LED liga/desliga e sensor; leitura tipada de temperatura/umidade pelos DPs configurados; importação das local keys pelo USB. Protocolos 3.4/3.5 e gateways não suportados. |
 | Firestore | Sincronização das configurações pela identidade existente da central; TLS com raízes Google, validação de regras privadas e exclusão de credenciais. |
 | MCP | 11 ferramentas por HTTP Streamable, endpoint `/mcp`, protegido pela chave da central. |
 

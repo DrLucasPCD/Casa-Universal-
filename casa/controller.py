@@ -32,7 +32,7 @@ FIELDS = {
     "pending": {"bluetooth_id", "bluetooth_name"},
     "samsung": {"ip", "port", "mac", "token"},
     "broadlink": {"ip", "mac", "devtype", "commands", "feedback_url", "feedback_entity", "feedback_token", "feedback_enabled"},
-    "tuya": {"ip", "device_id", "local_key", "version", "dp", "cover_type", "temperature_dp", "target_temperature_dp", "position_dp", "temperature_divisor", "temperature_unit"},
+    "tuya": {"ip", "device_id", "local_key", "version", "dp", "cover_type", "temperature_dp", "target_temperature_dp", "position_dp", "temperature_divisor", "temperature_unit", "humidity_dp", "humidity_divisor", "display_type"},
     "sonoff_diy": {"ip", "port", "device_id", "diy_confirmed"},
     "sonoff_lan": {"ip", "port", "device_id", "device_key", "channels"},
     "homeassistant": {"url", "token", "entity_id", "commands", "remote_device"},
@@ -96,6 +96,8 @@ class Controller:
             return sorted(cfg.get("commands", {}))
         if adapter == "sonoff_lan" and int(cfg.get("channels", 1)) > 1:
             return [f"{a}_{ch}" for ch in range(1, cfg["channels"] + 1) for a in ("on", "off")]
+        if adapter == "tuya" and kind == "sensor":
+            return []
         if adapter == "tuya" and kind == "cover":
             return ["open", "close"] + ([] if cfg.get("cover_type", 1) in (2, 5) else ["stop"])
         if adapter in ("tuya", "sonoff_diy", "sonoff_lan"):
@@ -122,7 +124,7 @@ class Controller:
         if adapter not in FIELDS:
             raise DeviceError("Integração desconhecida.")
         kind = device["kind"]
-        if (adapter == "samsung" and kind != "tv") or (adapter == "broadlink" and kind != "remote") or (adapter == "tuya" and kind not in ("switch", "cover")) or (adapter in ("sonoff_diy", "sonoff_lan") and kind != "switch"):
+        if (adapter == "samsung" and kind != "tv") or (adapter == "broadlink" and kind != "remote") or (adapter == "tuya" and kind not in ("switch", "cover", "light", "sensor")) or (adapter in ("sonoff_diy", "sonoff_lan") and kind != "switch"):
             raise DeviceError("Esta integração não corresponde ao tipo do dispositivo.")
         cfg = device["config"].copy() if device["adapter"] == adapter else {}
         supplied = payload.get("config", {})
@@ -174,13 +176,15 @@ class Controller:
             cfg["dp"] = int(cfg.get("dp", 1))
             if not 1 <= cfg["dp"] <= 255:
                 raise DeviceError("DP deve ficar entre 1 e 255.")
-            for key in ("temperature_dp","target_temperature_dp","position_dp"):
+            for key in ("temperature_dp","target_temperature_dp","position_dp","humidity_dp"):
                 if cfg.get(key) not in (None,""):
                     cfg[key]=int(cfg[key])
                     if not 1<=cfg[key]<=255:raise DeviceError("DP de leitura deve ficar entre 1 e 255.")
                 else:cfg.pop(key,None)
             cfg["temperature_divisor"]=float(cfg.get("temperature_divisor",1) or 1)
             if cfg["temperature_divisor"] not in (1,10,100):raise DeviceError("Divisor de temperatura deve ser 1, 10 ou 100.")
+            cfg["humidity_divisor"]=float(cfg.get("humidity_divisor",1) or 1)
+            if cfg["humidity_divisor"] not in (1,10,100):raise DeviceError("Divisor de umidade deve ser 1, 10 ou 100.")
             cfg["temperature_unit"]=cfg.get("temperature_unit","°C")
             if cfg["temperature_unit"] not in ("°C","°F"):raise DeviceError("Use °C ou °F.")
             if kind == "cover":
@@ -346,6 +350,8 @@ class Controller:
                     if device["kind"] == "cover":
                         # Directional DP values are commands/motion, not proof of fully open/closed position.
                         public.update(available=True, state="unknown", message="Cortina respondeu. A posição final não foi confirmada pelo DP de movimento.")
+                    elif device["kind"] == "sensor":
+                        public.update(available=True,state="online",message="Leituras consultadas no sensor pelos DPs configurados.")
                     else:
                         public.update(available=True, state="on" if value is True else "off" if value is False else "unknown")
                 elif adapter == "sonoff_diy":

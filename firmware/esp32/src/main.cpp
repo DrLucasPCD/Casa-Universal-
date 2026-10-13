@@ -159,7 +159,7 @@ static bool route(const String& path,JsonObject p,Doc& result) {
     if(tuya&&d["kind"]!="switch"&&d["kind"]!="cover"&&d["kind"]!="light"&&d["kind"]!="sensor"){lastError="Tipo de aparelho Tuya não suportado.";return false;}
     Doc next(32768);auto cfg=next.to<JsonObject>();if(adapter==d["adapter"])cfg.set(d["config"]);
     for(auto item:p["config"].as<JsonObject>()){
-      String k=item.key().c_str();bool dp=k=="dp"||k=="position_dp"||k=="temperature_dp"||k=="target_temperature_dp"||k=="humidity_dp";bool allowed=k=="ip"||k=="port"||k=="mac"||k=="devtype"||k=="display_type"||(sonoff&&(k=="device_id"||k=="device_key"||k=="channels"||k=="diy_confirmed"))||(tuya&&(dp||k=="device_id"||k=="local_key"||k=="version"||k=="cover_type"||k=="temperature_divisor"||k=="humidity_divisor"||k=="temperature_unit"));if(!allowed)continue;
+      String k=item.key().c_str();bool dp=k=="dp"||k=="position_dp"||k=="temperature_dp"||k=="target_temperature_dp"||k=="humidity_dp";bool allowed=k=="ip"||k=="port"||k=="mac"||k=="devtype"||k=="display_type"||(sonoff&&(k=="device_id"||k=="device_key"||k=="channels"||k=="diy_confirmed"))||(tuya&&(dp||k=="device_id"||k=="local_key"||k=="version"||k=="auto_discover"||k=="cover_type"||k=="temperature_divisor"||k=="humidity_divisor"||k=="temperature_unit"));if(!allowed)continue;
       if((k=="device_key"||k=="local_key")&&!String(item.value()|"").length())continue;
       if(dp&&k!="dp"&&item.value().as<String>()==""){cfg.remove(k);continue;}
       if(k=="port"||k=="channels"||(tuya&&(dp||k=="cover_type"))){String number=item.value().as<String>();if(!number.length()||number.length()>5){lastError="Confira porta, canais e DPs.";return false;}for(char c:number)if(!isdigit((unsigned char)c)){lastError="Porta, canais e DPs devem ser números inteiros.";return false;}cfg[k]=number.toInt();}
@@ -167,7 +167,7 @@ static bool route(const String& path,JsonObject p,Doc& result) {
       else if(k=="display_type"){String type=item.value().as<String>();if(type!="fan"&&type!="led"&&type!="sensor"){lastError="Visual de aparelho inválido.";return false;}cfg[k]=type;}
       else if(k=="devtype"&&item.value().is<const char*>())cfg[k]=strtoul(item.value().as<const char*>(),nullptr,0);else cfg[k]=item.value();
     }
-    if(adapter!="pending"){IPAddress ip;if(!localIP(cfg["ip"]|"",ip)){lastError="Informe o IP privado do aparelho.";return false;}}
+    if(adapter!="pending"){IPAddress ip;if(!localIP(cfg["ip"]|"",ip)&&!(tuya&&cfg["auto_discover"]==true&&!String(cfg["ip"]|"").length())){lastError="Informe o IP privado do aparelho.";return false;}}
     if(sonoff&&!sonoffValidate(cfg,adapter=="sonoff_diy"))return false;
     if(tuya&&!tuyaValidate(cfg))return false;
     String name=p["name"]|d["name"]|"",room=p["room"]|d["room"]|"";
@@ -283,5 +283,5 @@ void setup() {
 }
 void loop() {
   serialLoop();web.handleClient();samsungLoop();if(WiFi.status()==WL_CONNECTED&&!mdnsStarted){mdnsStarted=MDNS.begin("casa-universal");if(mdnsStarted)MDNS.addService("http","tcp",80);}
-  if(WiFi.status()==WL_CONNECTED&&WiFi.softAPgetStationNum()==0&&millis()>120000)WiFi.softAPdisconnect(true);if(mdnsStarted)sonoffLoop();cloudPoll();remotePoll();delay(2);
+  if(WiFi.status()==WL_CONNECTED&&WiFi.softAPgetStationNum()==0&&millis()>120000)WiFi.softAPdisconnect(true);if(mdnsStarted)sonoffLoop();if(WiFi.status()==WL_CONNECTED)tuyaLoop();cloudPoll();remotePoll();delay(2);
 }

@@ -17,7 +17,7 @@ static bool dirty=true,configured=false;
 static String hash(const String& s){uint8_t bytes[32];mbedtls_sha256_ret((const uint8_t*)s.c_str(),s.length(),bytes,0);String result;for(auto b:bytes){char v[3];snprintf(v,3,"%02x",b);result+=v;}return result;}
 static void portable(JsonObject device,Doc& result) {
   for(const char* key:{"id","name","room","kind","adapter","generic_remote","ir_profile"})if(device.containsKey(key))result[key]=device[key];
-  auto cfg=result.createNestedObject("config");auto original=device["config"].as<JsonObject>();
+  auto cfg=result.createNestedObject("config");auto original=device["config"].as<JsonObject>();if(original.containsKey("auto_discover"))cfg["auto_discover"]=original["auto_discover"];
   for(const char* key:{"ip","mac","port","devtype","commands","parent_id","device_id","version","dp","cover_type","temperature_dp","target_temperature_dp","position_dp","temperature_divisor","temperature_unit","humidity_dp","humidity_divisor","display_type","channels","diy_confirmed","bluetooth_id","bluetooth_name","url","entity_id","remote_device","feedback_url","feedback_entity","feedback_enabled"})if(original.containsKey(key))cfg[key]=original[key];
 }
 static String collection(){return "https://firestore.googleapis.com/v1/projects/"+String(config["projectId"]|"")+"/databases/(default)/documents/casas/"+String(config["uid"]|"")+"/controles";}

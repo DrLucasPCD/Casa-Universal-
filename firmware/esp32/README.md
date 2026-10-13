@@ -10,7 +10,7 @@ Firmware Arduino/PlatformIO para ESP32-S3 com **16 MB de flash e 8 MB de PSRAM O
 | BroadLink RM pro+ | Descoberta UDP, autenticação, envio e aprendizado IR; catálogo público de 387 perfis; controles genéricos por botão. Não aprende RF. |
 | Bluetooth | Busca anúncios, nomes, intensidade do sinal e serviços. Não faz pareamento nem abre a fechadura HAHA. |
 | Sonoff | SonoffLAN: mDNS, LAN criptografada, estados e interruptores de 1 a 4 canais; importação eWeLink uma vez pelo USB. Depende do modo LAN e da chave pessoal. |
-| Tuya | Protocolo 3.3: anúncios UDP, LAN AES-128, tomadas, cortina, fita LED liga/desliga e sensor; leitura tipada de temperatura/umidade pelos DPs configurados; importação das local keys pelo USB. Protocolos 3.4/3.5 e gateways não suportados. |
+| Tuya | Protocolos 3.3/3.4: anúncios UDP, LAN AES-128 e negociação autenticada por sessão, tomadas, cortina, fita LED liga/desliga e sensor; leitura tipada de temperatura/umidade pelos DPs configurados; importação das local keys pelo USB. Protocolo 3.5 e gateways não suportados. |
 | Firestore | Sincronização das configurações pela identidade existente da central; TLS com raízes Google, validação de regras privadas e exclusão de credenciais. |
 | MCP | 11 ferramentas por HTTP Streamable, endpoint `/mcp`, protegido pela chave da central. |
 
@@ -89,6 +89,8 @@ Os controles permanecem em `/state.json`, com arquivo anterior para recuperaçã
 Validações feitas nesta instalação: identificação de flash/PSRAM; backup integral; compilação e gravação com hash verificado; boot real com nove cadastros; descompactação dos 387 perfis pelo mesmo miniz do firmware. Também foram verificados o painel visual pela rede, leitura real de standby da Samsung, autenticação do BroadLink, sincronização dos nove documentos no Firestore sem credenciais e inicialização/consulta das 11 ferramentas por cliente MCP HTTP real. Não foram enviados botões físicos durante a validação inicial.
 
 Atualização de 12/10/2026: Ligar/Desligar Samsung validados na DU8000 real, com estado consultado e pedidos repetidos sem alternância. Driver Tuya 3.3 validado no ESP32 contra simulação TinyTuya (AES/CRC, booleano, enum da cortina, posição, temperatura, consulta device22 e rejeição de respostas inválidas sem reenvio). Descoberta UDP real também recebeu anúncio Tuya. Controle de tomada/cortina físicas aguarda importação das local keys.
+
+Atualização de 13/10/2026: cinco controles Tuya configurados, com leitura LAN real das duas tomadas e da fita LED no protocolo 3.3 e da cortina no 3.4. A consulta da cortina também foi validada pelo MCP remoto; o retorno informa movimento, sem posição final confirmada. O sensor sem pilhas conserva chave e DPs, aguardando anúncio Wi-Fi. A simulação independente TinyTuya validou negociação 3.4, HMAC, chave de sessão, escrita/leitura, rejeições e anúncios GCM 6699. Nesta configuração foram feitas apenas consultas aos aparelhos reais, sem comandos de atuação.
 
 O catálogo SmartIR conserva sua licença em `catalog-LICENSE-SmartIR.txt` na imagem e no diretório `catalog/` do projeto. miniz 3.0.2 mantém as notificações MIT nos arquivos de origem. Bibliotecas de rede e Bluetooth seguem suas próprias licenças.
 

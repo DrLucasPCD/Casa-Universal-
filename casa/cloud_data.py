@@ -5,7 +5,7 @@ import json
 CONFIG_FIELDS = {
     'ip','mac','port','devtype','commands','parent_id','device_id','version','dp','cover_type',
     'temperature_dp','target_temperature_dp','position_dp','temperature_divisor','temperature_unit',
-    'humidity_dp','humidity_divisor','display_type',
+    'humidity_dp','humidity_divisor','display_type','auto_discover',
     'channels','diy_confirmed','bluetooth_id','bluetooth_name','url','entity_id','remote_device',
     'feedback_url','feedback_entity','feedback_enabled',
 }

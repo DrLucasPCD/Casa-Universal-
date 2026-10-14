@@ -5,7 +5,7 @@ import shutil
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = ROOT / "dist"
 ASSETS = (
-    "index.html", "app.js", "style.css", "sw.js", "manifest.webmanifest",
+    "index.html", "app.js", "visuals.js", "style.css", "sw.js", "manifest.webmanifest",
     "icon.svg", "icon-192.png", "icon-512.png", "apple-touch-icon.png",
 )
 

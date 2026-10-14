@@ -123,3 +123,9 @@ O ar-condicionado tem display de temperatura alvo e seletores de modo, velocidad
 Na fita Tuya com HSV12, cor e intensidade são enviadas juntas sem alterar implicitamente a energia. A posição da cortina usa um DP de percentual configurado, com opção de inverter a direção (0 fechado, 100 aberto na interface). Sem esse DP ou sem resposta, a posição permanece desconhecida.
 
 O MCP remoto do ChatGPT oferece 18 ferramentas, incluindo ajustar luz/clima, preparar ajustes e aprender botões por sessões. Veja [o guia de controles](docs/controles.md). O servidor Python por stdio continua sendo a alternativa local com 11 ferramentas.
+
+## Visual e movimento
+
+Os aparelhos são desenhados localmente com perspectiva, materiais, sombras e reflexos. O fluxo de ar usa canvas; hélices, luz, tecido e outras partes usam animações de SVG/CSS. Nenhuma imagem externa ou serviço de renderização é necessário.
+
+O estado consultado continua separado dos ajustes escolhidos. **Visualizar animação** é uma prévia local e não envia comandos aos aparelhos. As animações respeitam a preferência de reduzir movimento e o fluxo de ar pausa quando a página fica oculta ou sai da tela. A configuração de sinais continua disponível abaixo do controle.

@@ -13,7 +13,7 @@ sys.path.insert(0,str(ROOT))
 from casa.esp32_setup import USB
 from casa.generic_remote import TEMPLATES
 
-ASSETS=('index.html','app.js','style.css','sw.js','manifest.webmanifest','icon.svg',
+ASSETS=('index.html','app.js','visuals.js','style.css','sw.js','manifest.webmanifest','icon.svg',
         'apple-touch-icon.png','icon-192.png','icon-512.png','templates.json','mcp-tools.json','catalog-index.json','profiles/climate_3000.json')
 
 def update(usb):

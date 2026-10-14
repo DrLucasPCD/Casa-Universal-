@@ -9,7 +9,7 @@ O nome é **Casa Universal**; a marca visual do painel é **casa.**.
 3. O `netlify.toml` define o comando `python3 scripts/build_site.py` e a pasta publicada `dist`. Não é necessário instalar as dependências Python da central para construir o site.
 4. Publique. Ao abrir a página inicial, o navegador segue automaticamente para `http://casa-universal.local/`, sem formulário nem código de acesso. `/?demo=1` abre os estados simulados, sem redirecionar.
 
-O build copia apenas os nove arquivos públicos da interface. SQLite, chaves de dispositivos, APKs, análises brutas e configuração MCP específica de cada computador ficam fora da publicação. `firebase/config.json` identifica o projeto Firebase, sem credenciais de administrador; ele também não é copiado para o site. As regras de acesso são implantadas separadamente pelo console Firebase, não pelo Netlify.
+O build copia apenas os dez arquivos públicos da interface. SQLite, chaves de dispositivos, APKs, análises brutas e configuração MCP específica de cada computador ficam fora da publicação. `firebase/config.json` identifica o projeto Firebase, sem credenciais de administrador; ele também não é copiado para o site. As regras de acesso são implantadas separadamente pelo console Firebase, não pelo Netlify.
 
 ## Usar no iPhone
 

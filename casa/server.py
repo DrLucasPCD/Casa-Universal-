@@ -100,7 +100,7 @@ class Handler(BaseHTTPRequestHandler):
                 urls = [f"{scheme}://{ip}:{self.server.server_port}" for ip in self.server.allowed_hosts if ip not in ("localhost", "127.0.0.1")]
                 return self.send(200, {"lan": enabled, "urls": sorted(urls), "tls": self.server.use_tls, "local": self.local})
             return self.send(404, {"error": "Rota não encontrada."})
-        files = {"/": "index.html", "/index.html": "index.html", "/app.js": "app.js", "/style.css": "style.css", "/manifest.webmanifest": "manifest.webmanifest", "/sw.js": "sw.js", "/icon.svg": "icon.svg", "/apple-touch-icon.png": "apple-touch-icon.png", "/icon-192.png": "icon-192.png", "/icon-512.png": "icon-512.png"}
+        files = {"/": "index.html", "/index.html": "index.html", "/app.js": "app.js", "/visuals.js": "visuals.js", "/style.css": "style.css", "/manifest.webmanifest": "manifest.webmanifest", "/sw.js": "sw.js", "/icon.svg": "icon.svg", "/apple-touch-icon.png": "apple-touch-icon.png", "/icon-192.png": "icon-192.png", "/icon-512.png": "icon-512.png"}
         name = files.get(path)
         if name is None:
             return self.send(404, {"error": "Arquivo não encontrado."})

@@ -18,7 +18,7 @@ def build():
     target = ROOT / 'firmware/esp32/data'
     target.mkdir(parents=True, exist_ok=True, mode=0o700)
     target.chmod(0o700)
-    for name in ('index.html','app.js','style.css','sw.js','manifest.webmanifest','icon.svg',
+    for name in ('index.html','app.js','visuals.js','style.css','sw.js','manifest.webmanifest','icon.svg',
                  'apple-touch-icon.png','icon-192.png','icon-512.png'):
         raw=(ROOT/'static'/name).read_bytes()
         if name=='app.js':

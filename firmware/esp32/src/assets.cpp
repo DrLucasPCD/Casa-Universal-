@@ -12,7 +12,7 @@ bool assetCommand(const String& op,JsonObject c,Doc& result){
   auto fail=[&](const char* message){upload.close();LittleFS.remove("/asset.new");target="";result["error"]=message;};
   if(op=="asset_begin"){
     upload.close();target="";String name=c["name"]|"";bool allowed=false;
-    for(const char* asset:{"index.html","app.js","style.css","sw.js","manifest.webmanifest","icon.svg","apple-touch-icon.png","icon-192.png","icon-512.png","templates.json","mcp-tools.json","catalog-index.json","profiles/climate_3000.json"})if(name==String(asset)+".gz")allowed=true;
+    for(const char* asset:{"index.html","app.js", "visuals.js","style.css","sw.js","manifest.webmanifest","icon.svg","apple-touch-icon.png","icon-192.png","icon-512.png","templates.json","mcp-tools.json","catalog-index.json","profiles/climate_3000.json"})if(name==String(asset)+".gz")allowed=true;
     expected=c["size"]|0;digest=c["sha256"]|"";offset=0;
     if(!allowed||!expected||expected>131072||digest.length()!=64){fail("Arquivo de interface inválido.");return true;}
     for(char hex:digest)if(!isxdigit((unsigned char)hex)){fail("Digest inválido.");return true;}

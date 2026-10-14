@@ -308,7 +308,7 @@ static void handle() {
       if(path=="/api/ir/profile"){String id=web.arg("id");if(id.length()>50||id.indexOf('/')>=0||id.indexOf('.')>=0||!streamFile("/profiles/"+id+".json.gz","application/json",true))error(404,"Perfil não encontrado.");return;}
       Doc data(768000),p(256);if(route(path,p.to<JsonObject>(),data))reply(200,data.as<JsonVariantConst>());else error(400,lastError);return;
     }
-    const char* names[]={"index.html","app.js","style.css","sw.js","manifest.webmanifest","icon.svg","apple-touch-icon.png","icon-192.png","icon-512.png"};
+    const char* names[]={"index.html","app.js", "visuals.js","style.css","sw.js","manifest.webmanifest","icon.svg","apple-touch-icon.png","icon-192.png","icon-512.png"};
     String name=path=="/"?"index.html":path.substring(1);bool allowed=false;for(auto v:names)if(name==v)allowed=true;
     String type=name.endsWith(".html")?"text/html":name.endsWith(".js")?"application/javascript":name.endsWith(".css")?"text/css":name.endsWith(".svg")?"image/svg+xml":name.endsWith(".webmanifest")?"application/manifest+json":"image/png";
     if(!allowed||!streamFile("/"+name+".gz",type,true))error(404,"Arquivo não encontrado.");return;

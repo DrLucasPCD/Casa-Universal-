@@ -22,3 +22,67 @@
 .eco-control:not(:disabled) .toggle-indicator:before{left:10px;background:#a4aa9e}
 
 .light-color-panel{display:grid;gap:18px;padding:24px;border:1px solid var(--line,#39413e);border-radius:24px;background:#202827}.light-color-panel h3{margin:0}.light-color-panel input[type=color]{width:100%;height:64px;padding:6px;border-radius:14px;background:transparent}.light-color-panel input[type=range]{padding:0;accent-color:#d9cbb0}.light-color-panel output{display:block;text-align:right;font-size:24px;font-weight:650;margin-top:8px}
+
+/* Product and motion treatment from the user's control reference. */
+:root{--motion-curve:cubic-bezier(.22,.8,.2,1);--panel:#111314;--muted:#8d9390}
+body{background:radial-gradient(ellipse at 85% 4%,#27353236,transparent 52%),#0c0f10}
+.controls{background:linear-gradient(145deg,#121516,#090b0c);border:1px solid #373d3b;border-radius:32px;box-shadow:0 28px 65px #0007,inset 0 1px 0 #ffffff08;position:relative;overflow:hidden}
+.controls:before{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;background:linear-gradient(125deg,#ffffff03,transparent 35%)}
+.remote-title{margin-bottom:22px;border-bottom-color:#252a29}.remote-title select{font-size:13px;color:#cbd0c8}.remote-title>.icon{background:#1e2422}
+.climate-controls{background:radial-gradient(ellipse at 50% 22%,#242c2724,transparent 36%),#080a0b;padding:25px 28px}
+.climate-header .ambient{font-size:12px;color:#858b85}.ambient strong{font-size:12px;color:#cbd2c7}.climate-header .ambient .icon{color:#a3977f}
+.power-control{width:45px;height:45px;background:linear-gradient(145deg,#191e1b,#101311);border-color:#292f29;box-shadow:inset 0 1px 2px #ffffff06,0 4px 8px #0005}
+.power-control:hover:not(:disabled){background:#242b24;box-shadow:0 0 23px #d6c5a411}.power-control .icon{color:#a39a87}
+.appliance-art.product-scene{isolation:isolate;perspective:800px;height:154px;--scene-x:0deg;--scene-y:0deg}
+.product-scene svg,.product-scene .air-volume{position:absolute;width:100%;height:100%;max-width:390px;inset:0;margin:auto;transform:rotateX(var(--scene-x)) rotateY(var(--scene-y));transition:transform .45s var(--motion-curve);filter:none}
+.product-scene svg{overflow:visible;z-index:2;filter:drop-shadow(0 13px 13px #0005)}
+.product-scene .air-volume{z-index:1;pointer-events:none;filter:blur(.7px);opacity:1;transition:opacity .8s}
+.appliance-art.product-scene.large{height:225px;margin:9px 0 19px}
+.climate-controls .appliance-art.product-scene.large{height:204px;margin:5px 0 16px}
+.product-body{transform-origin:190px 110px;transition:filter .75s,opacity .75s}
+.ac-flap{transform-origin:190px 113px;transform:scaleY(.65);transition:transform .85s var(--motion-curve)}
+.running .ac-flap{transform:translateY(2px) scaleY(1)}
+.product-indicator{opacity:.25;transition:opacity .6s,filter .6s}.running .product-indicator{opacity:1;filter:drop-shadow(0 0 2px #bedac7)}
+.ac-mini-temperature{opacity:.7;transition:opacity .5s}.state-off .ac-mini-temperature{opacity:0}
+.tv-picture{opacity:.12;transition:opacity .9s}.running .tv-picture{opacity:1}.tv-landscape{transform-origin:190px 100px}.running .tv-landscape{animation:landscape-drift 24s ease-in-out infinite alternate}
+@keyframes landscape-drift{from{transform:scale(1) translateX(0)}to{transform:scale(1.08) translateX(-4px)}}
+.fan-rotor{transform-origin:190px 86px;transform-box:view-box}.running .fan-rotor{animation:rotor var(--fan-duration,.82s) linear infinite}.running .fan-rotor path{opacity:.78}
+@keyframes rotor{to{transform:rotate(360deg)}}
+.curtain-left{transform-origin:75px 113px;transform:scaleX(var(--cloth-width,.7))}.curtain-right{transform-origin:307px 113px;transform:scaleX(var(--cloth-width,.7))}
+.position-transition .curtain-left,.position-transition .curtain-right{animation:cloth-settle 1.7s var(--motion-curve) both}
+@keyframes cloth-settle{from{transform:scaleX(var(--cloth-from))}to{transform:scaleX(var(--cloth-width))}}
+.visual-preview .curtain-left,.visual-preview .curtain-right{animation:cloth-preview 5s var(--motion-curve) infinite alternate}
+@keyframes cloth-preview{from{transform:scaleX(.85)}to{transform:scaleX(.18)}}
+.led-halo{opacity:0;transition:opacity .8s}.strip-diodes rect{fill:#6b776f;transition:fill .6s}.running .led-halo{opacity:calc(var(--light-level,.7)*.6)}.running .strip-diodes rect{fill:var(--light-color);filter:drop-shadow(0 0 3px var(--light-color))}
+.lock-handle{transform-origin:186px 139px;transition:transform .85s var(--motion-curve)}.state-unlocked .lock-handle{transform:rotate(17deg)}.visual-preview .lock-handle{animation:handle-preview 4s var(--motion-curve) infinite alternate}
+@keyframes handle-preview{0%,30%{transform:rotate(0deg)}75%,100%{transform:rotate(17deg)}}
+.projector-beam{opacity:0;transition:opacity 1s}.running .projector-beam{opacity:.16;animation:beam-breathe 5s ease-in-out infinite alternate}
+@keyframes beam-breathe{to{opacity:.22}}
+.running .speaker-cone{animation:cone-resonance .23s ease-in-out infinite alternate}
+@keyframes cone-resonance{to{transform:scale(1.028)}}
+.bridge-signal{opacity:.45}.visual-preview .bridge-signal{animation:receiver-pulse 1.8s ease-in-out infinite}
+@keyframes receiver-pulse{50%{opacity:1;filter:drop-shadow(0 0 4px #b9dcc7)}}
+.appliance-button:hover .product-scene svg{transform:translateY(-4px) rotateY(-4deg);filter:drop-shadow(0 19px 13px #0007)}
+.appliance-button:active .product-scene svg{transform:translateY(-1px) scale(.98)}
+.temperature-header{margin-top:1px;gap:18px}.temperature-number>span:first-child{font-size:64px;font-weight:500;letter-spacing:-4px;color:#dedfd4}.degree{font-size:23px;font-weight:450;color:#b2b5a8}.temperature-number small{margin-top:7px;color:#6b756d;font-size:8px}
+.eco-control{background:linear-gradient(140deg,#191d19,#111511);border-color:#252b23;padding:13px 15px;max-width:176px;min-width:137px;border-radius:13px;gap:9px;font-size:12px;color:#b1b6a8}.eco-control .icon{background:none;width:19px;height:19px;color:#858b7d}.eco-control .icon svg{width:18px;height:18px}.eco-control small{font-size:8px;color:#7d8478}.eco-control:disabled{opacity:.58}.toggle-indicator{width:36px;height:22px;background:#272d26;box-shadow:inset 0 1px 4px #0007;margin-left:auto}.toggle-indicator:before{width:17px;height:17px;top:2.5px;left:3px;background:#acae9f;transition:transform .3s var(--motion-curve),background .3s}
+.eco-control[aria-pressed=true] .toggle-indicator{background:#817660}.eco-control[aria-pressed=true] .toggle-indicator:before{transform:translateX(13px);left:3px;background:#dcd1ba}
+.temperature-slider{gap:13px;margin-top:20px}.temperature-slider .round-button{width:42px;height:42px;background:#151917;color:#aeb2a5;font-size:25px;box-shadow:inset 0 1px 0 #ffffff03}
+.temperature-slider input{height:47px;border-radius:14px;border:1px solid #1c211c;box-shadow:inset 0 4px 9px #0006;background:linear-gradient(100deg,#383b33,#877961 var(--range-progress),#080b0a var(--range-progress),#080b0a)}
+.temperature-slider input::-webkit-slider-thumb{height:39px;width:29px;border-radius:10px;background:linear-gradient(135deg,#d4cab5,#b5a88d);border:1px solid #d8cdb63b;box-shadow:0 1px 4px #0007,inset 0 1px 1px #e5dcc666}
+.temperature-slider input::-moz-range-thumb{height:39px;width:29px;border-radius:10px;background:linear-gradient(135deg,#d4cab5,#b5a88d);border:1px solid #d8cdb63b;box-shadow:0 1px 4px #0007}
+.slider-limits{padding:10px 56px 22px;color:#757e71;font-size:9px}
+.climate-options{grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.climate-option{background:linear-gradient(140deg,#181c19,#111512);border-color:#222821;border-radius:13px;padding:13px 11px;gap:9px;min-height:96px;color:#778272;font-size:9px;box-shadow:inset 0 1px 0 #ffffff03;position:relative}
+.climate-option>.icon{color:#9fa38f;height:25px;width:25px}.climate-option select,.climate-option strong{color:#cbd2bd;font-size:11px;margin-top:1px;min-height:18px;line-height:1.4}
+label.climate-option:after{content:"⌄";position:absolute;right:11px;top:12px;color:#777f70;font-size:14px;pointer-events:none}.climate-option select{appearance:none;padding-right:6px;cursor:pointer}.climate-option:disabled{opacity:.52}
+.climate-apply{margin-top:19px;border-radius:12px;font-size:11px;min-height:42px}.climate-hint{font-size:9px;line-height:1.7;color:#747f70}
+.control-foot{margin-top:17px;padding-top:13px;border-color:#222820}.control-foot .status{font-size:9px}
+.visual-preview-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid #252b25;margin-top:12px;padding:11px 0 0;font-size:9px;color:#88937f}.visual-preview-controls .button{font-size:9px;padding:6px 8px;min-height:30px;color:#afb7a1;background:transparent;border-color:#2d352b;border-radius:8px}.visual-preview-controls .button[aria-pressed=true]{border-color:#a49477;color:#d8cbb2;background:#38332880}.visual-preview-controls .preview-note{line-height:1.6;max-width:215px}.preview-note.active{color:#c3bca8}
+.remote-configuration{margin-top:18px;border-top:1px solid #272e26;padding-top:16px}.remote-configuration>summary{font-size:11px;cursor:pointer;color:#a4ad97;list-style:none;display:flex;justify-content:space-between;align-items:center}.remote-configuration>summary:after{content:"+";font-size:18px;color:#8e987f}.remote-configuration[open]>summary:after{content:"−"}.remote-configuration .subtext{font-size:10px}.remote-configuration>summary::-webkit-details-marker{display:none}.climate-catalog-options{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}.climate-catalog-options .button{font-size:9px;padding:7px 9px;min-height:31px;border-color:#2d352b}
+.visual-actions{gap:10px}.visual-action{background:linear-gradient(135deg,#202821,#121a14);border-color:#303b2e;border-radius:15px;box-shadow:inset 0 1px 0 #ffffff04,0 5px 12px #0002;transition:transform .22s var(--motion-curve),background .3s,box-shadow .3s}.visual-action:active:not(:disabled){transform:translateY(2px) scale(.97);box-shadow:inset 0 3px 7px #0005}.visual-state h2{font-size:25px;color:#d3d9c7}.position-track{box-shadow:inset 0 2px 4px #0006;background:#151c17}.position-track span{background:linear-gradient(90deg,#685f4c,#d0bfa0);transition:width 1.7s var(--motion-curve)}
+.device{background:radial-gradient(ellipse at 50% 10%,#29332a28,transparent 70%),linear-gradient(145deg,#1b201f,#111614);box-shadow:inset 0 1px 0 #ffffff03,0 12px 22px #0002;transition:border-color .3s,box-shadow .3s,transform .3s}.device:hover{transform:translateY(-2px);box-shadow:0 18px 27px #0004}
+.device .product-scene svg{filter:drop-shadow(0 13px 12px #0006)}.device .product-scene{margin:3px 0 7px;height:145px}.device.active{background:radial-gradient(ellipse at 50% 55%,#35473830,transparent 70%),#171f19}
+.light-color-panel{background:linear-gradient(135deg,#1c241e,#111913);padding:20px;border-color:#303c2e;border-radius:19px}.light-color-panel input[type=color]{height:52px}.light-color-panel output{font-size:23px;color:#d2d8c3}.light-color-panel input[type=range]{height:28px}
+@media(max-width:760px){.view-remote .controls{max-width:480px;margin-left:auto;margin-right:auto}.climate-controls .appliance-art.product-scene.large{height:187px;margin:2px 0 10px}.view-remote .remote-title{margin-bottom:18px}.climate-controls{padding:22px}.temperature-slider input{height:43px}.temperature-slider input::-webkit-slider-thumb{height:35px;width:26px}.temperature-slider input::-moz-range-thumb{height:35px;width:26px}.temperature-header{gap:10px}.temperature-number>span:first-child{font-size:62px}.eco-control{min-width:135px;max-width:166px}.device .product-scene{height:132px}}
+@media(max-width:420px){.controls{padding:20px;border-radius:27px}.climate-controls .appliance-art.product-scene.large{height:175px;margin:0 0 13px}.power-control{height:38px;width:38px}.climate-options{gap:7px}.climate-option{padding:12px 9px;min-height:94px;font-size:8px}.climate-option select,.climate-option strong{font-size:10px}.eco-control{padding:11px;min-width:130px;gap:7px;font-size:11px}.eco-control .icon{width:16px}.temperature-number>span:first-child{font-size:58px}.degree{font-size:21px}.temperature-slider{gap:9px;margin-top:18px}.temperature-slider .round-button{height:37px;width:37px;font-size:24px;flex-shrink:0}.slider-limits{padding-left:46px;padding-right:46px}.appliance-art.product-scene.large{height:218px}.device .product-scene{height:113px}.visual-preview-controls{font-size:8px}.preview-note{max-width:160px}}
+@media(prefers-reduced-motion:reduce){.product-scene *{animation:none!important;transition:none!important}.product-scene svg,.product-scene canvas{transform:none!important}}

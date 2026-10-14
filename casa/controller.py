@@ -32,7 +32,7 @@ FIELDS = {
     "pending": {"bluetooth_id", "bluetooth_name"},
     "samsung": {"ip", "port", "mac", "token"},
     "broadlink": {"ip", "mac", "devtype", "commands", "feedback_url", "feedback_entity", "feedback_token", "feedback_enabled"},
-    "tuya": {"ip", "device_id", "local_key", "version", "dp", "cover_type", "temperature_dp", "target_temperature_dp", "position_dp", "temperature_divisor", "temperature_unit", "humidity_dp", "humidity_divisor", "display_type"},
+    "tuya": {"ip", "device_id", "local_key", "version", "dp", "cover_type", "temperature_dp", "target_temperature_dp", "position_dp", "temperature_divisor", "temperature_unit", "humidity_dp", "humidity_divisor", "display_type", "color_dp","mode_dp","target_position_dp","position_inverted","auto_discover"},
     "sonoff_diy": {"ip", "port", "device_id", "diy_confirmed"},
     "sonoff_lan": {"ip", "port", "device_id", "device_key", "channels"},
     "homeassistant": {"url", "token", "entity_id", "commands", "remote_device"},
@@ -176,11 +176,12 @@ class Controller:
             cfg["dp"] = int(cfg.get("dp", 1))
             if not 1 <= cfg["dp"] <= 255:
                 raise DeviceError("DP deve ficar entre 1 e 255.")
-            for key in ("temperature_dp","target_temperature_dp","position_dp","humidity_dp"):
+            for key in ("temperature_dp","target_temperature_dp","position_dp","humidity_dp","color_dp","mode_dp","target_position_dp"):
                 if cfg.get(key) not in (None,""):
                     cfg[key]=int(cfg[key])
                     if not 1<=cfg[key]<=255:raise DeviceError("DP de leitura deve ficar entre 1 e 255.")
                 else:cfg.pop(key,None)
+            if 'position_inverted' in cfg and type(cfg['position_inverted'])!=bool:raise DeviceError('Inversão da posição inválida.')
             cfg["temperature_divisor"]=float(cfg.get("temperature_divisor",1) or 1)
             if cfg["temperature_divisor"] not in (1,10,100):raise DeviceError("Divisor de temperatura deve ser 1, 10 ou 100.")
             cfg["humidity_divisor"]=float(cfg.get("humidity_divisor",1) or 1)
@@ -292,7 +293,20 @@ class Controller:
         plug = cls(cfg["device_id"], cfg["ip"], cfg["local_key"], version=cfg["version"])
         plug.set_socketTimeout(4)
         plug.set_socketRetryLimit(1)
+        plug.set_retry(False)
         return plug
+
+    def adjust_light(self,id_,params):
+        from .lighting import light_values
+        device=self.store.get(id_);cfg=device['config']
+        if device['kind']!='light' or device['adapter']!='tuya' or not cfg.get('color_dp') or not cfg.get('mode_dp'):raise DeviceError('Configure os DPs de cor e modo de uma luz Tuya.')
+        with self.device_lock(id_):
+            plug=self._tuya(device)
+            try:
+                current=self._tuya_result(plug.status());mode,value=light_values(current.get('dps',{}).get(str(cfg['color_dp'])),params)
+                self._tuya_result(plug.set_multiple_values({str(cfg['mode_dp']):mode,str(cfg['color_dp']):value}))
+            finally:plug.close()
+        return {'sent':True,'message':'Cor/intensidade enviadas. Energia preservada; consulte o aparelho para confirmar.'}
 
     @staticmethod
     def _tuya_result(result):
@@ -348,8 +362,11 @@ class Controller:
                     public["telemetry"]=tuya_telemetry(result,cfg)
                     value = result.get("dps", {}).get(str(cfg["dp"]))
                     if device["kind"] == "cover":
-                        # Directional DP values are commands/motion, not proof of fully open/closed position.
-                        public.update(available=True, state="unknown", message="Cortina respondeu. A posição final não foi confirmada pelo DP de movimento.")
+                        position=public["telemetry"].get("position_percent")
+                        if position is not None:
+                            public.update(available=True,state="closed" if position==0 else "open" if position==100 else "partial",state_source="Tuya · percentual informado pelo motor",message="Posição informada pelo DP configurado do motor.")
+                        else:
+                            public.update(available=True, state="unknown", message="Cortina respondeu. Configure um DP de posição medido; o comando de movimento não confirma a posição.")
                     elif device["kind"] == "sensor":
                         public.update(available=True,state="online",message="Leituras consultadas no sensor pelos DPs configurados.")
                     else:

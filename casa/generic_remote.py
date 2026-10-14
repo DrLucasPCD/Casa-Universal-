@@ -18,6 +18,9 @@ TEMPLATES = {
     "projector":{"label":"Projetor","buttons":buttons("Energia",POWER)+buttons("Navegação",NAV)+buttons("Imagem",[("source","Entrada"),("hdmi","HDMI"),("focus_up","Foco +"),("focus_down","Foco −"),("zoom_up","Zoom +"),("zoom_down","Zoom −"),("keystone_up","Correção +"),("keystone_down","Correção −"),("picture_mode","Modo de imagem")])+buttons("Som",[("volume_up","Volume +"),("volume_down","Volume −"),("mute","Mudo")])},
     "fan":{"label":"Ventilador","buttons":buttons("Principal",POWER+[("speed","Velocidade"),("swing","Oscilar"),("timer","Temporizador"),("mode","Modo")])},
     "audio":{"label":"Som / receiver","buttons":buttons("Principal",POWER+[("volume_up","Volume +"),("volume_down","Volume −"),("mute","Mudo"),("source","Entrada"),("play","Reproduzir"),("pause","Pausar"),("next","Próxima"),("previous","Anterior")])},
+    "light":{"label":"Iluminação / fita LED","buttons":buttons("Energia",POWER)+buttons("Luz",[("brightness_up","Brilho +"),("brightness_down","Brilho −"),("red","Vermelho"),("green","Verde"),("blue","Azul"),("white","Branco"),("scene","Cena"),("color_next","Próxima cor")])},
+    "cover":{"label":"Cortina / persiana","buttons":buttons("Movimento",[("open","Abrir"),("stop","Parar"),("close","Fechar")])+buttons("Posições",[("position_25","25% aberta"),("position_50","50% aberta"),("position_75","75% aberta")])},
+    "switch":{"label":"Tomada / interruptor","buttons":buttons("Energia",POWER)+buttons("Canais",[("channel_1","Canal 1"),("channel_2","Canal 2"),("channel_3","Canal 3"),("timer","Temporizador")])},
     "other":{"label":"Outro aparelho","buttons":buttons("Principal",POWER)},
 }
 
@@ -67,6 +70,21 @@ class GenericRemotes:
             device["generic_remote"]["buttons"].append({"id":button_id,"label":label,"section":"Meus botões"})
             self.c.store.save(device)
         return self.c.public(device)
+
+    def climate_slot(self,payload):
+        id_=payload.get('id');mode=payload.get('mode');fan=payload.get('fan');swing=payload.get('swing','stop');temp=payload.get('temperature')
+        if type(temp)!=int or not 16<=temp<=32 or mode not in ('cool','heat','auto','dry','fan_only') or fan not in ('auto','low','medium','high') or swing not in ('stop','swing'):raise DeviceError('Ajuste de ar-condicionado inválido.')
+        with self.c.device_lock(id_):
+            device=self.get(id_)
+            if device['generic_remote']['type']!='climate':raise DeviceError('Escolha um ar-condicionado personalizado.')
+            slot=f'{mode}_{fan}_{swing}_{temp}';items=device['generic_remote']['buttons']
+            if not any(b['id']==slot for b in items):
+                if len(items)>=80:raise DeviceError('Limite de 80 botões por controle.')
+                modes={'cool':'Resfriar','heat':'Aquecer','auto':'Automático','dry':'Desumidificar','fan_only':'Ventilar'}
+                fans={'auto':'Auto','low':'Baixa','medium':'Média','high':'Alta'}
+                items.append({'id':slot,'label':f'{modes[mode]} · {temp} °C · {fans[fan]} · '+('Parada' if swing=='stop' else 'Oscilando'),'section':'Meus ajustes','preset':{'temperature':temp,'mode':mode,'fan':fan,'swing':swing}})
+                self.c.store.save(device)
+        return {'button_id':slot,'message':'Ajuste preparado. Aprenda o sinal completo do controle físico.'}
 
     def rename_button(self,id_,button_id,label):
         label=str(label).strip()

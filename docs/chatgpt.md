@@ -47,3 +47,11 @@ O ID do último pedido é gravado na NVS **antes** de enviar o comando. Assim, u
 `npm ci` instala a dependência Netlify Blobs; `npm test` verifica autenticação, consentimento, expiração, refresh, indisponibilidade e a entrega única da fila. `python3 scripts/build_site.py` continua copiando somente os arquivos públicos. A função fica em `netlify/functions/casa.mjs` e o núcleo em `netlify/lib/bridge.mjs`.
 
 O firmware usa validação TLS com a raiz DigiCert Global Root G2 verificada contra o emissor do certificado atual do Netlify. Uma mudança de autoridade certificadora exige atualizar a raiz; nunca usar `setInsecure()` como solução. Compilar e gravar somente o firmware preserva LittleFS/NVS e os controles cadastrados.
+
+## Novos comandos visuais e configuração pelo chat
+
+A ponte expõe 18 ferramentas. Recarregue as ferramentas da conexão se o ChatGPT ainda enxergar apenas as cinco anteriores. A autorização de somente consulta continua impedindo ajustes, testes e aprendizado.
+
+Exemplos de pedidos: “Qual a posição da cortina?”, “Qual a intensidade do Led da mesa?”, “Ajuste o Led da mesa para azul a 40%”, “Prepare no Philco um ajuste de refrigeração a 24 graus, ventilação automática e oscilação parada” e “Aprenda esse ajuste do meu controle físico”. O assistente deve avisar antes de iniciar a captura e você pressiona o controle físico apontado para o BroadLink. Consulte [o guia de controles](controles.md).
+
+IR e RF sem sensores de retorno não confirmam que um aparelho está ligado ou a temperatura ambiente. Um ajuste salvo é a intenção transmitida; consultas retornam apenas leituras efetivamente recebidas. Não repita automaticamente comandos físicos quando a resposta estiver incerta.

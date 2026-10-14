@@ -25,9 +25,9 @@ Em **Controles → Controle BroadLink → Adicionar aparelho por marca** ou **Co
 3. Observe a resposta do aparelho. Teste outros botões; se falharem, escolha outro perfil da marca.
 4. Marque **Testei no aparelho e este controle funcionou**, dê um nome e toque em **Funcionou — salvar controle**.
 
-O controle completo fica salvo como um novo aparelho. Ele usa a conexão do BroadLink principal, inclusive quando o IP desse BroadLink for atualizado. Você também pode aprender botões do controle físico. Aprendizado de RF não está implementado.
+O controle completo fica salvo como um novo aparelho. Ele usa a conexão do BroadLink principal, inclusive quando o IP desse BroadLink for atualizado. Você também pode aprender botões do controle físico. Na central ESP32, o RM pro/pro+ compatível também aprende RF em duas etapas: identificar a frequência e capturar o botão. A alternativa Python aprende apenas IR.
 
-O catálogo local contém **387 perfis, 160 marcas e 98.852 códigos IR**: 50 perfis de TV/áudio, 323 de ar-condicionado, 11 de ventilador e 3 de iluminação. Os perfis são contribuições públicas e precisam ser testados no seu modelo. A fonte está identificada em cada perfil e em `catalog/index.json`, com licença em `catalog/LICENSE-SmartIR.txt`. Não é a base privada da BroadLink. Foram excluídos outros transportes, códigos RF, sequências e três arquivos com JSON inválido. Códigos sem apoio no catálogo podem ser aprendidos do controle original.
+O catálogo local contém **387 perfis, 160 marcas e 98.988 códigos IR**: 50 perfis de TV/áudio, 323 de ar-condicionado, 11 de ventilador e 3 de iluminação. Os perfis são contribuições públicas e precisam ser testados no seu modelo. A fonte está identificada em cada perfil e em `catalog/index.json`, com licença em `catalog/LICENSE-SmartIR.txt`. Não é a base privada da BroadLink. Foram excluídos outros transportes, códigos RF, sequências e três arquivos com JSON inválido. Códigos sem apoio no catálogo podem ser aprendidos do controle original.
 
 ## Controles genéricos: botão por botão
 
@@ -113,3 +113,13 @@ No console Firebase, Authentication → Método de login → Anônimo precisa es
 Validação: 33 testes passaram, incluindo preservação entre reinícios, exclusão de credenciais, bloqueio de envio com regras abertas, falhas e reenvio, alterações concorrentes e restauração de botões sem importar destinos de rede da nuvem.
 
 Referências: [Firestore REST](https://firebase.google.com/docs/firestore/use-rest-api), [Firebase Authentication REST](https://firebase.google.com/docs/reference/rest/auth), [regras de acesso](https://firebase.google.com/docs/firestore/security/rules-conditions).
+
+## Controles visuais e ajustes completos
+
+A central ESP32 oferece controles personalizados de TV, ar-condicionado, projetor, ventilador, áudio, iluminação, cortina, tomada e outros aparelhos. Cada botão pode aprender IR ou RF no BroadLink compatível. Os sinais permanecem na central e as configurações portáteis são sincronizadas com o Firestore.
+
+O ar-condicionado tem display de temperatura alvo e seletores de modo, velocidade e oscilação. Cada combinação aprendida guarda o sinal completo do controle físico; configurações sem sinal pedem aprendizado. A temperatura alvo escolhida não é uma leitura ambiente. O perfil público Philco climate_3000 agora inclui 409 sinais (408 ajustes e desligar), incluindo os modos declarados fora do bloco commands na fonte original. Capacidade de 12.000 BTU e inverter não identificam o protocolo: teste a compatibilidade ou aprenda o controle original.
+
+Na fita Tuya com HSV12, cor e intensidade são enviadas juntas sem alterar implicitamente a energia. A posição da cortina usa um DP de percentual configurado, com opção de inverter a direção (0 fechado, 100 aberto na interface). Sem esse DP ou sem resposta, a posição permanece desconhecida.
+
+O MCP remoto do ChatGPT oferece 18 ferramentas, incluindo ajustar luz/clima, preparar ajustes e aprender botões por sessões. Veja [o guia de controles](docs/controles.md). O servidor Python por stdio continua sendo a alternativa local com 11 ferramentas.

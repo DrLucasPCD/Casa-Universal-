@@ -139,6 +139,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(200, controller.configure(payload["id"], payload))
             if path == "/api/action":
                 return self.send(200, controller.execute(payload["id"], payload["action"], source="panel", confirmation=payload.get("confirmation", "")))
+            if path == "/api/light":
+                return self.send(200,controller.adjust_light(payload['id'],payload))
             if path == "/api/unlock-confirmation":
                 return self.send(200, {"confirmation": controller.confirmation(payload["id"])})
             if path == "/api/learn":
@@ -151,6 +153,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.send(200, self.server.ir_flow.save(payload))
             if path == "/api/remotes/create":
                 return self.send(200,self.server.generic_remotes.create(payload))
+            if path == "/api/remotes/climate-slot":
+                return self.send(200,self.server.generic_remotes.climate_slot(payload))
             if path == "/api/remotes/map-button":
                 return self.send(200,self.server.generic_remotes.map_catalog(payload,self.server.ir_flow))
             if path == "/api/remotes/add-button":

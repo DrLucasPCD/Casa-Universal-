@@ -9,7 +9,7 @@
 #include <Preferences.h>
 #include <ESPmDNS.h>
 #include <esp_system.h>
-#include "vendor/miniz_tinfl.h"
+#include "vendor/miniz.h"
 #include <map>
 
 Doc house(0);
@@ -21,6 +21,8 @@ struct Session {String key;uint32_t expires;};
 std::vector<Session> sessions;
 struct Trial {String profile,command;uint32_t expires;};
 std::map<String,Trial> trials;
+struct Learning {String token,id,slot,transport,stage;uint32_t expires;};
+static Learning learning;
 Doc history(0);
 static uint32_t badLoginAt=0;static uint8_t badLogins=0;static bool mdnsStarted=false;
 
@@ -86,17 +88,24 @@ static bool execute(const String& id,const String& action,Doc& result) {
   else {lastError="Integração ainda pendente nesta central; nenhum comando foi enviado.";return false;}
   if(!result.containsKey("already_in_state"))audit(id,action,sent);if(!sent)return false;if(!result.containsKey("sent"))result["sent"]=true;if(!result.containsKey("message"))result["message"]="Comando enviado. O envio não confirma a reação física do aparelho.";return true;
 }
-static std::unique_ptr<Doc> loadProfile(const String& id) {
-  if(id.length()>50||id.indexOf('/')>=0||id.indexOf('.')>=0)return nullptr;
-  auto file=LittleFS.open("/profiles/"+id+".json.gz","r");if(!file||file.size()<18||file.size()>650000)return nullptr;
+static std::unique_ptr<Doc> loadCompressed(const String& path) {
+  auto file=LittleFS.open(path,"r");if(!file||file.size()<18||file.size()>650000)return nullptr;
   size_t size=file.size();auto compressed=(uint8_t*)ps_malloc(size);if(!compressed)return nullptr;file.read(compressed,size);file.close();
   if(compressed[0]!=31||compressed[1]!=139||compressed[2]!=8||compressed[3]!=0){free(compressed);return nullptr;}
   uint32_t rawSize=compressed[size-4]|(compressed[size-3]<<8)|(compressed[size-2]<<16)|(compressed[size-1]<<24);
   if(rawSize>2700000){free(compressed);return nullptr;}auto raw=(uint8_t*)ps_malloc(rawSize+1);if(!raw){free(compressed);return nullptr;}
-  auto actual=tinfl_decompress_mem_to_mem(raw,rawSize,compressed+10,size-18,0);free(compressed);
-  if(actual!=rawSize){free(raw);return nullptr;}raw[rawSize]=0;auto doc=std::unique_ptr<Doc>(new Doc(rawSize+256000));
+  // miniz's convenience wrapper puts its large state on the 8 KiB loop stack.
+  // Keep decompression state in PSRAM along with the bounded input/output buffers.
+  auto inflater=tinfl_decompressor_alloc();
+  if(!inflater){free(compressed);free(raw);return nullptr;}tinfl_init(inflater);
+  size_t inputSize=size-18,actual=rawSize;
+  auto status=tinfl_decompress(inflater,compressed+10,&inputSize,raw,raw,&actual,TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF);
+  tinfl_decompressor_free(inflater);free(compressed);
+  if(status!=TINFL_STATUS_DONE||actual!=rawSize){free(raw);return nullptr;}raw[rawSize]=0;auto doc=std::unique_ptr<Doc>(new Doc(rawSize+256000));
   auto err=deserializeJson(*doc,(const char*)raw,rawSize);free(raw);if(err)return nullptr;return doc;
 }
+static std::unique_ptr<Doc> loadProfile(const String& id){if(id.length()>50||id.indexOf('/')>=0||id.indexOf('.')>=0)return nullptr;return loadCompressed("/profiles/"+id+".json.gz");}
+static std::unique_ptr<Doc> loadCatalog(){if(LittleFS.exists("/catalog-index.json.gz"))return loadCompressed("/catalog-index.json.gz");auto file=LittleFS.open("/catalog-index.json");auto result=std::unique_ptr<Doc>(new Doc(256000));if(deserializeJson(*result,file))return nullptr;return result;}
 static bool testCode(const String& profile,const String& command,Doc& result) {
   auto doc=loadProfile(profile);if(!doc){lastError="Perfil não encontrado ou sem memória disponível.";return false;}String code=(*doc)["commands"][command]|"";
   if(!code.length()){lastError="Selecione um botão deste perfil.";return false;}auto broad=deviceById("broadlink");if(!broadlinkSend(connection(broad),code))return false;
@@ -110,6 +119,36 @@ static bool validButton(JsonObject d,const String& id) { for(auto b:d["generic_r
 static bool route(const String& path,JsonObject p,Doc& result) {
   lastError="";
   if(path=="/api/devices"||path=="/api/status") {auto arr=result.createNestedArray("devices");String selected=path=="/api/status"?String(p["id"]|""):String();for(auto d:house["devices"].as<JsonArray>())if(!selected.length()||d["id"]==selected)publicDevice(d,arr.createNestedObject(),path.endsWith("status"));return true;}
+  if(path=="/api/light") {auto d=deviceById(p["id"]|"");if(d.isNull()){lastError="Luz não encontrada.";return false;}bool ok=tuyaAdjustLight(d,p);audit(p["id"]|"","ajustar_luz",ok);if(!ok)return false;result["sent"]=true;result["message"]="Cor/intensidade enviadas. A energia não foi alterada; consulte a luz para confirmar o ajuste.";return true;}
+  if(path=="/api/climate"){
+    auto d=deviceById(p["id"]|"");int temp=p["temperature"]|0;String mode=p["mode"]|"",fan=p["fan"]|"auto",swing=p["swing"]|"stop";
+    if(d.isNull()||d["adapter"]!="broadlink"||(d["generic_remote"]["type"]!="climate"&&d["ir_profile"]["category"]!="climate")||!p["temperature"].is<int>()||p["temperature"].is<bool>()||temp<16||temp>32||(mode!="cool"&&mode!="heat"&&mode!="auto"&&mode!="dry"&&mode!="fan_only")||(fan!="auto"&&fan!="low"&&fan!="medium"&&fan!="high")||(swing!="stop"&&swing!="swing")){lastError="Ajuste de ar-condicionado inválido.";return false;}
+    for(auto pair:d["config"]["commands"].as<JsonObject>()){
+      String action=pair.key().c_str();bool matches=false;
+      for(auto b:d["generic_remote"]["buttons"].as<JsonArray>())if(b["id"]==action&&b["preset"]["temperature"]==temp&&b["preset"]["mode"]==mode&&b["preset"]["fan"]==fan&&b["preset"]["swing"]==swing)matches=true;
+      String code=d["generic_remote"]["sources"][action]["command"]|action.c_str(),suffix="_"+String(temp);
+      for(auto m:{mode,mode=="auto"?String("heat_cool"):mode})for(auto f:{fan,fan=="medium"?String("mid"):fan})if(code==m+"_"+f+"_"+swing+suffix||(swing=="stop"&&(code==m+"_"+f+suffix||(fan=="auto"&&code==m+suffix))))matches=true;
+      if(matches)return execute(p["id"]|"",action,result);
+    }
+    lastError="Este ajuste completo ainda não tem sinal salvo. Aprenda-o no controle personalizado ou teste um perfil compatível.";return false;
+  }
+  if(path=="/api/learn/start"){
+    auto d=deviceById(p["id"]|"");String slot=p["name"]|"",transport=p["transport"]|"ir";
+    if(d.isNull()||d["adapter"]!="broadlink"||!slot.length()||slot.length()>60||(d.containsKey("generic_remote")&&!validButton(d,slot))){lastError="Escolha um controle e um botão válido.";return false;}
+    for(char c:slot)if(!isalnum((unsigned char)c)&&c!='_'){lastError="ID de botão inválido.";return false;}
+    if(learning.token.length()&&(int32_t)(learning.expires-millis())>0){lastError="Conclua ou cancele o aprendizado atual.";return false;}
+    if(!broadlinkStartLearning(connection(d),transport))return false;
+    learning={randomToken(),p["id"],slot,transport,transport=="rf"&&(connection(d)["devtype"]|0)!=0x2712?"frequency":"packet",millis()+90000};
+    result["session_id"]=learning.token;result["phase"]=learning.stage;result["message"]=learning.stage=="frequency"?"Segure o botão do controle RF até identificar a frequência.":"Pressione o botão do controle físico para capturar o sinal.";return true;
+  }
+  if(path=="/api/learn/poll"||path=="/api/learn/cancel"){
+    if(!learning.token.length()||p["session_id"]!=learning.token){lastError="Sessão de aprendizado inválida.";return false;}
+    auto d=deviceById(learning.id);if(d.isNull()){learning.token="";lastError="Controle não encontrado.";return false;}
+    if(path.endsWith("cancel")||(int32_t)(learning.expires-millis())<=0){broadlinkCancelLearning(connection(d),learning.transport);learning.token="";result["phase"]="cancelled";result["message"]="Aprendizado encerrado; os sinais salvos foram preservados.";return true;}
+    String code;int state=broadlinkPollLearning(connection(d),learning.transport,learning.stage,code);if(state<0){String message=lastError;broadlinkCancelLearning(connection(d),learning.transport);learning.token="";lastError=message;return false;}
+    if(state==1){d["config"]["commands"][learning.slot]=code;if(d.containsKey("generic_remote")){auto source=d["generic_remote"]["sources"].createNestedObject(learning.slot);source["method"]="learned";source["transport"]=learning.transport;source["confirmed"]=false;}if(!saveHouse())return false;broadlinkCancelLearning(connection(d),learning.transport);learning.token="";result["phase"]="saved";result["message"]="Sinal salvo no botão. Teste-o no aparelho para confirmar.";return true;}
+    result["phase"]=learning.stage;result["message"]=learning.stage=="frequency"?"Continue segurando o botão RF para identificar a frequência.":learning.transport=="rf"?"Frequência pronta. Solte e pressione novamente o botão para capturar.":"Aponte o controle para o BroadLink e pressione o botão IR.";return true;
+  }
   if(path=="/api/network") {result["local"]=true;result["backend"]="esp32";result["controller"]="ESP32-S3";result["lan"]=WiFi.status()==WL_CONNECTED;result["tls"]=false;auto urls=result.createNestedArray("urls");if(WiFi.status()==WL_CONNECTED)urls.add("http://"+WiFi.localIP().toString());result["flash_bytes"]=ESP.getFlashChipSize();result["psram_bytes"]=ESP.getPsramSize();result["free_psram"]=ESP.getFreePsram();return true;}
   if(path=="/api/remote"){remoteStatus(result);return true;}
   if(path=="/api/cloud"||path=="/api/cloud/sync"){if(path.endsWith("sync"))cloudChanged();cloudStatus(result);return true;}
@@ -141,14 +180,19 @@ static bool route(const String& path,JsonObject p,Doc& result) {
     }trials.erase(p["test_id"].as<String>());return true;
   }
   if(path=="/api/remotes/create"){
-    String type=p["type"]|"",name=p["name"]|"",room=p["room"]|"Sala";auto file=LittleFS.open("/templates.json","r");Doc templates(32768);if(deserializeJson(templates,file)||!templates["templates"].containsKey(type)||!name.length()||name.length()>80||room.length()>60||house["devices"].size()>=50){lastError="Informe tipo, nome e cômodo válidos.";return false;}
+    String type=p["type"]|"",name=p["name"]|"",room=p["room"]|"Sala";Doc templates(32768);auto compressed=loadCompressed("/templates.json.gz");bool parsed=false;if(compressed){templates.set(*compressed);parsed=true;}else{auto file=LittleFS.open("/templates.json","r");parsed=!deserializeJson(templates,file);}if(!parsed||!templates["templates"].containsKey(type)||!name.length()||name.length()>80||room.length()>60||house["devices"].size()>=50){lastError="Informe tipo, nome e cômodo válidos.";return false;}
     auto d=house["devices"].createNestedObject();d["id"]="generic_"+randomToken(6);d["name"]=name;d["room"]=room;d["kind"]="remote";d["adapter"]="broadlink";auto cfg=d.createNestedObject("config");cfg["parent_id"]="broadlink";cfg.createNestedObject("commands");auto remote=d.createNestedObject("generic_remote");remote["type"]=type;remote["buttons"]=templates["templates"][type]["buttons"];remote.createNestedObject("sources");if(!saveHouse())return false;publicDevice(d,result.to<JsonObject>());return true;
+  }
+  if(path=="/api/remotes/climate-slot"){
+    auto d=deviceById(p["id"]|"");String mode=p["mode"]|"",fan=p["fan"]|"",swing=p["swing"]|"stop";int temp=p["temperature"]|0;
+    if(d["generic_remote"]["type"]!="climate"||!p["temperature"].is<int>()||p["temperature"].is<bool>()||temp<16||temp>32||(mode!="cool"&&mode!="heat"&&mode!="auto"&&mode!="dry"&&mode!="fan_only")||(fan!="auto"&&fan!="low"&&fan!="medium"&&fan!="high")||(swing!="stop"&&swing!="swing")){lastError="Informe um ajuste de ar-condicionado válido.";return false;}
+    String slot=mode+"_"+fan+"_"+swing+"_"+String(temp);auto buttons=d["generic_remote"]["buttons"].as<JsonArray>();if(!validButton(d,slot)){if(buttons.size()>=80){lastError="Limite de 80 botões atingido.";return false;}auto b=buttons.createNestedObject();b["id"]=slot;String modeLabel=mode=="cool"?"Resfriar":mode=="heat"?"Aquecer":mode=="auto"?"Automático":mode=="dry"?"Desumidificar":"Ventilar",fanLabel=fan=="auto"?"Auto":fan=="low"?"Baixa":fan=="medium"?"Média":"Alta";b["label"]=modeLabel+" · "+String(temp)+" °C · "+fanLabel+" · "+(swing=="stop"?"Parada":"Oscilando");b["section"]="Meus ajustes";auto preset=b.createNestedObject("preset");preset["mode"]=mode;preset["fan"]=fan;preset["swing"]=swing;preset["temperature"]=temp;if(!saveHouse())return false;}result["button_id"]=slot;result["message"]="Ajuste preparado. Aprenda o sinal completo com o controle físico nesse estado.";return true;
   }
   if(path=="/api/learn") {auto d=deviceById(p["id"]|"");String slot=p["name"]|"";if(d.isNull()||d["adapter"]!="broadlink"||!slot.length()||slot.length()>60){lastError="Escolha um controle BroadLink e um botão válido.";return false;}String code;if(!broadlinkLearn(connection(d),code))return false;d["config"]["commands"][slot]=code;if(!saveHouse())return false;result["message"]="Sinal aprendido e salvo na central. Teste o botão para confirmar.";return true;}
   if(path=="/api/remotes/clear-button"||path=="/api/remotes/rename-button"||path=="/api/remotes/add-button") {auto d=deviceById(p["id"]|"");String slot=p["button_id"]|"",label=p["label"]|"";
-    if(d.isNull()||!d.containsKey("generic_remote")){lastError="Escolha um controle genérico.";return false;}auto buttons=d["generic_remote"]["buttons"].as<JsonArray>();
+    if(d.isNull()||(!d.containsKey("generic_remote")&&!(path.endsWith("clear-button")&&d["adapter"]=="broadlink"))){lastError="Escolha um controle genérico.";return false;}auto buttons=d["generic_remote"]["buttons"].as<JsonArray>();
     if(path.endsWith("add-button")){if(!label.length()||label.length()>60||buttons.size()>=80){lastError="Nome ou limite de botões inválido.";return false;}auto b=buttons.createNestedObject();b["id"]="custom_"+randomToken(5);b["label"]=label;b["section"]="Meus botões";}
-    else {if(!validButton(d,slot)){lastError="Botão inválido.";return false;}if(path.endsWith("clear-button")){d["config"]["commands"].remove(slot);d["generic_remote"]["sources"].remove(slot);}else{if(!label.length()||label.length()>60){lastError="Informe um nome curto.";return false;}for(auto b:buttons)if(b["id"]==slot)b["label"]=label;}}
+    else {if(!validButton(d,slot)&&!(path.endsWith("clear-button")&&d["config"]["commands"].containsKey(slot))){lastError="Botão inválido.";return false;}if(path.endsWith("clear-button")){d["config"]["commands"].remove(slot);if(d.containsKey("generic_remote"))d["generic_remote"]["sources"].remove(slot);}else{if(!label.length()||label.length()>60){lastError="Informe um nome curto.";return false;}for(auto b:buttons)if(b["id"]==slot)b["label"]=label;}}
     if(!saveHouse())return false;publicDevice(d,result.to<JsonObject>());return true;
   }
   if(path=="/api/configure") {
@@ -159,7 +203,7 @@ static bool route(const String& path,JsonObject p,Doc& result) {
     if(tuya&&d["kind"]!="switch"&&d["kind"]!="cover"&&d["kind"]!="light"&&d["kind"]!="sensor"){lastError="Tipo de aparelho Tuya não suportado.";return false;}
     Doc next(32768);auto cfg=next.to<JsonObject>();if(adapter==d["adapter"])cfg.set(d["config"]);
     for(auto item:p["config"].as<JsonObject>()){
-      String k=item.key().c_str();bool dp=k=="dp"||k=="position_dp"||k=="temperature_dp"||k=="target_temperature_dp"||k=="humidity_dp";bool allowed=k=="ip"||k=="port"||k=="mac"||k=="devtype"||k=="display_type"||(sonoff&&(k=="device_id"||k=="device_key"||k=="channels"||k=="diy_confirmed"))||(tuya&&(dp||k=="device_id"||k=="local_key"||k=="version"||k=="auto_discover"||k=="cover_type"||k=="temperature_divisor"||k=="humidity_divisor"||k=="temperature_unit"));if(!allowed)continue;
+      String k=item.key().c_str();bool dp=k=="dp"||k=="position_dp"||k=="temperature_dp"||k=="target_temperature_dp"||k=="humidity_dp"||k=="color_dp"||k=="mode_dp"||k=="target_position_dp";bool allowed=k=="ip"||k=="port"||k=="mac"||k=="devtype"||k=="display_type"||(sonoff&&(k=="device_id"||k=="device_key"||k=="channels"||k=="diy_confirmed"))||(tuya&&(dp||k=="device_id"||k=="local_key"||k=="version"||k=="auto_discover"||k=="position_inverted"||k=="cover_type"||k=="temperature_divisor"||k=="humidity_divisor"||k=="temperature_unit"));if(!allowed)continue;
       if((k=="device_key"||k=="local_key")&&!String(item.value()|"").length())continue;
       if(dp&&k!="dp"&&item.value().as<String>()==""){cfg.remove(k);continue;}
       if(k=="port"||k=="channels"||(tuya&&(dp||k=="cover_type"))){String number=item.value().as<String>();if(!number.length()||number.length()>5){lastError="Confira porta, canais e DPs.";return false;}for(char c:number)if(!isdigit((unsigned char)c)){lastError="Porta, canais e DPs devem ser números inteiros.";return false;}cfg[k]=number.toInt();}
@@ -185,10 +229,27 @@ bool runRemoteTool(const String& name,JsonObject args,Doc& result){
   else if(name=="consultar_casa"||name=="consultar_dispositivo")path="/api/status";
   else if(name=="consultar_historico")path="/api/history";
   else if(name=="controlar_dispositivo")path="/api/action";
+  else if(name=="ajustar_luz")path="/api/light";
+  else if(name=="ajustar_clima")path="/api/climate";
+  else if(name=="criar_controle_generico"){path="/api/remotes/create";mapped.set(args);}
+  else if(name=="preparar_ajuste_clima")path="/api/remotes/climate-slot";
+  else if(name=="iniciar_aprendizado_botao"){path="/api/learn/start";mapped["name"]=args["button_id"];}
+  else if(name=="consultar_aprendizado_botao")path="/api/learn/poll";
+  else if(name=="cancelar_aprendizado_botao")path="/api/learn/cancel";
+  else if(name=="adicionar_botao_controle")path="/api/remotes/add-button";
+  else if(name=="renomear_botao_controle")path="/api/remotes/rename-button";
+  else if(name=="limpar_codigo_botao")path="/api/remotes/clear-button";
+  else if(name=="testar_codigo_ir")path="/api/ir/test";
+  else if(name=="configurar_botao_catalogo")path="/api/remotes/map-button";
+  else if(name=="consultar_catalogo_ir"){
+    String id=args["profile_id"]|"";if(id.length()){auto profile=loadProfile(id);if(!profile){lastError="Perfil não encontrado.";return false;}profile->remove("commands");result.set(*profile);return true;}
+    auto index=loadCatalog();if(!index){lastError="Catálogo indisponível.";return false;}auto arr=result.createNestedArray("profiles");String category=args["category"]|"climate",brand=args["brand"]|"";for(auto item:(*index)["profiles"].as<JsonArray>())if(item["category"]==category&&(!brand.length()||brand.equalsIgnoreCase(item["brand"].as<String>()))){auto meta=arr.createNestedObject();for(const char* key:{"id","brand","models","category","command_count"})meta[key]=item[key];}return !result.overflowed();
+  }
   else {lastError="Ferramenta indisponível na conexão remota.";return false;}
   bool ok=route(path,mapped.as<JsonObject>(),result);if(!ok)return false;
   // LAN addresses, credentials and arbitrary configuration stay local.
   for(auto device:result["devices"].as<JsonArray>())device.as<JsonObject>().remove("config");
+  result.remove("config");
   if(name=="consultar_dispositivo"){
     Doc one(16384);bool found=false;for(auto device:result["devices"].as<JsonArray>())if(device["id"]==args["device_id"]){one.set(device);found=true;break;}
     result.set(one);if(!found)lastError="Aparelho não encontrado.";return found;
@@ -220,13 +281,15 @@ static void mcp() {
       {"testar_codigo_ir","Teste IR REAL somente se solicitado; peça confirmação da reação.","{\"profile_id\":{\"type\":\"string\"},\"command\":{\"type\":\"string\"}}",false},
       {"configurar_botao_catalogo","Salva botão após confirmação humana explícita do teste exato.","{\"device_id\":{\"type\":\"string\"},\"button_id\":{\"type\":\"string\"},\"profile_id\":{\"type\":\"string\"},\"command\":{\"type\":\"string\"},\"test_id\":{\"type\":\"string\"},\"confirmed\":{\"type\":\"boolean\"}}",false}
     };
-    for(auto& def:definitions){auto tool=tools.createNestedObject();tool["name"]=def.name;tool["description"]=def.description;auto schema=tool.createNestedObject("inputSchema");schema["type"]="object";Doc properties(2048);deserializeJson(properties,def.schema);schema["properties"]=properties;schema["additionalProperties"]=false;auto required=schema.createNestedArray("required");if(String(def.name)!="consultar_catalogo_ir")for(auto property:properties.as<JsonObject>())if(String(property.key().c_str())!="room")required.add(property.key().c_str());tool["annotations"]["readOnlyHint"]=def.readonly;tool["annotations"]["destructiveHint"]=false;tool["annotations"]["openWorldHint"]=true;}
+    auto extended=loadCompressed("/mcp-tools.json.gz");if(extended)for(auto tool:(*extended)["tools"].as<JsonArray>()){bool duplicate=false;for(auto& def:definitions)if(tool["name"]==def.name)duplicate=true;if(!duplicate)tools.add(tool);}
+    for(auto& def:definitions){auto tool=tools.createNestedObject();tool["name"]=def.name;tool["description"]=def.description;auto schema=tool.createNestedObject("inputSchema");schema["type"]="object";Doc properties(2048);deserializeJson(properties,def.schema);schema["properties"]=properties;schema["additionalProperties"]=false;auto required=schema.createNestedArray("required");if(String(def.name)!="consultar_catalogo_ir")for(auto property:properties.as<JsonObject>())if(String(property.key().c_str())!="room"&&(String(def.name)!="ajustar_luz"||String(property.key().c_str())=="device_id"))required.add(property.key().c_str());tool["annotations"]["readOnlyHint"]=def.readonly;tool["annotations"]["destructiveHint"]=false;tool["annotations"]["openWorldHint"]=true;}
   }else if(method=="tools/call") {
     String name=input["params"]["name"]|"";auto args=input["params"]["arguments"].as<JsonObject>();Doc data(768000),mapped(32768);mapped.set(args);mapped["id"]=args["device_id"];if(args.containsKey("button_id"))mapped["name"]=args["button_id"];
     bool ok=false;String path;
-    if(name=="listar_dispositivos")path="/api/devices";else if(name=="consultar_casa"||name=="consultar_dispositivo")path="/api/status";else if(name=="consultar_historico")path="/api/history";else if(name=="controlar_dispositivo")path="/api/action";else if(name=="buscar_dispositivos")path="/api/discover/"+String(args["provider"]|"");else if(name=="criar_controle_generico"){path="/api/remotes/create";mapped.set(args);}else if(name=="aprender_botao_controle")path="/api/learn";else if(name=="testar_codigo_ir")path="/api/ir/test";else if(name=="configurar_botao_catalogo")path="/api/remotes/map-button";
-    if(name=="consultar_catalogo_ir") {String id=args["profile_id"]|"";if(id.length()){auto profile=loadProfile(id);if(profile){profile->remove("commands");data.set(*profile);ok=true;}}
-      else {auto file=LittleFS.open("/catalog-index.json");Doc index(256000);if(!deserializeJson(index,file)){auto out=data.createNestedArray("profiles");String category=args["category"]|"media_player",brand=args["brand"]|"";for(auto p:index["profiles"].as<JsonArray>())if(p["category"]==category&&(!brand.length()||brand.equalsIgnoreCase(p["brand"].as<String>())))out.add(p);ok=true;}}}
+    if(name=="ajustar_luz")path="/api/light";else if(name=="listar_dispositivos")path="/api/devices";else if(name=="consultar_casa"||name=="consultar_dispositivo")path="/api/status";else if(name=="consultar_historico")path="/api/history";else if(name=="controlar_dispositivo")path="/api/action";else if(name=="buscar_dispositivos")path="/api/discover/"+String(args["provider"]|"");else if(name=="criar_controle_generico"){path="/api/remotes/create";mapped.set(args);}else if(name=="aprender_botao_controle")path="/api/learn";else if(name=="testar_codigo_ir")path="/api/ir/test";else if(name=="configurar_botao_catalogo")path="/api/remotes/map-button";
+    if(name=="ajustar_clima"||name=="iniciar_aprendizado_botao"||name=="consultar_aprendizado_botao"||name=="cancelar_aprendizado_botao"||name=="preparar_ajuste_clima"||name=="adicionar_botao_controle"||name=="renomear_botao_controle"||name=="limpar_codigo_botao")ok=runRemoteTool(name,args,data);
+    else if(name=="consultar_catalogo_ir") {String id=args["profile_id"]|"";if(id.length()){auto profile=loadProfile(id);if(profile){profile->remove("commands");data.set(*profile);ok=true;}}
+      else {auto index=loadCatalog();if(index){auto out=data.createNestedArray("profiles");String category=args["category"]|"media_player",brand=args["brand"]|"";for(auto p:(*index)["profiles"].as<JsonArray>())if(p["category"]==category&&(!brand.length()||brand.equalsIgnoreCase(p["brand"].as<String>())))out.add(p);ok=true;}}}
     else if(path.length())ok=route(path,mapped.as<JsonObject>(),data);
     if(ok&&name=="consultar_dispositivo"){Doc one(32768);bool found=false;for(auto d:data["devices"].as<JsonArray>())if(d["id"]==args["device_id"]){one.set(d);found=true;break;}data.set(one);ok=found;}
     result["isError"]=!ok;if(!ok){data.clear();data["error"]=lastError.length()?lastError:"Ferramenta ou argumento inválido.";}String text;serializeJson(data,text);auto content=result.createNestedArray("content").createNestedObject();content["type"]="text";content["text"]=text;result["structuredContent"]=data;
@@ -240,8 +303,8 @@ static void handle() {
   if(web.method()==HTTP_GET){
     if(path=="/api/session"){Doc d(256);d["authenticated"]=true;d["local"]=true;reply(200,d.as<JsonVariantConst>());return;}
     if(path.startsWith("/api/")){
-      if(path=="/api/ir/catalog"){if(!streamFile("/catalog-index.json","application/json"))error(404,"Catálogo não encontrado.");return;}
-      if(path=="/api/remotes/templates"){streamFile("/templates.json","application/json");return;}
+      if(path=="/api/ir/catalog"){if(!streamFile(LittleFS.exists("/catalog-index.json.gz")?"/catalog-index.json.gz":"/catalog-index.json","application/json"))error(404,"Catálogo não encontrado.");return;}
+      if(path=="/api/remotes/templates"){streamFile(LittleFS.exists("/templates.json.gz")?"/templates.json.gz":"/templates.json","application/json");return;}
       if(path=="/api/ir/profile"){String id=web.arg("id");if(id.length()>50||id.indexOf('/')>=0||id.indexOf('.')>=0||!streamFile("/profiles/"+id+".json.gz","application/json",true))error(404,"Perfil não encontrado.");return;}
       Doc data(768000),p(256);if(route(path,p.to<JsonObject>(),data))reply(200,data.as<JsonVariantConst>());else error(400,lastError);return;
     }

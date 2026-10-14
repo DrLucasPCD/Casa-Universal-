@@ -128,14 +128,18 @@ class FirestoreSync:
             for key,value in commands.items():
                 if not isinstance(key,str) or not 1<=len(key)<=100:raise CloudError('Nome de botão na nuvem inválido.')
                 packet=base64.b64decode(value,validate=True)
-                if not 6<=len(packet)<=4096 or packet[0]!=0x26:raise CloudError('Sinal infravermelho na nuvem inválido.')
+                if not 6<=len(packet)<=4096 or packet[0] not in (0x26,0xb2,0xd7):raise CloudError('Sinal IR/RF na nuvem inválido.')
             restored={'id':id_,'name':name,'room':room,'kind':'remote','adapter':'broadlink','config':{'parent_id':'broadlink','commands':commands}}
             if data.get('generic_remote'):
                 meta=data['generic_remote'];buttons=meta.get('buttons',[])
-                if meta.get('type') not in ('tv','climate','projector','fan','audio','other') or not isinstance(buttons,list) or not 1<=len(buttons)<=80:raise CloudError('Modelo de controle na nuvem inválido.')
+                if meta.get('type') not in ('tv','climate','projector','fan','audio','light','cover','switch','other') or not isinstance(buttons,list) or not 1<=len(buttons)<=80:raise CloudError('Modelo de controle na nuvem inválido.')
                 ids=set()
                 for b in buttons:
+                    if not isinstance(b,dict):raise CloudError('Botão de controle na nuvem inválido.')
                     if not re.fullmatch(r'[a-zA-Z0-9_-]{1,80}',b.get('id','')) or b['id'] in ids or not isinstance(b.get('label'),str) or not 1<=len(b['label'])<=60 or not isinstance(b.get('section'),str) or len(b['section'])>80:raise CloudError('Botão de controle na nuvem inválido.')
+                    if 'preset' in b:
+                        preset=b['preset']
+                        if meta['type']!='climate' or not isinstance(preset,dict) or set(preset)!={'temperature','mode','fan','swing'} or type(preset['temperature'])!=int or not 16<=preset['temperature']<=32 or preset['mode'] not in ('cool','heat','auto','dry','fan_only') or preset['fan'] not in ('auto','low','medium','high') or preset['swing'] not in ('stop','swing'):raise CloudError('Ajuste de ar-condicionado na nuvem inválido.')
                     ids.add(b['id'])
                 if set(commands)-ids:raise CloudError('A nuvem contém botões fora do modelo.')
                 restored['generic_remote']={'type':meta['type'],'buttons':buttons,'sources':meta.get('sources',{})}

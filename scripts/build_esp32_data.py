@@ -4,6 +4,7 @@ import hashlib
 import json
 import shutil
 import ssl
+import subprocess
 from pathlib import Path
 import sys
 
@@ -34,6 +35,8 @@ def build():
         largest=max(largest,len(raw))
         (profiles/(source.stem+'.json.gz')).write_bytes(gzip.compress(raw,mtime=0))
     (target/'templates.json').write_text(json.dumps({'templates':TEMPLATES},ensure_ascii=False))
+    tools=subprocess.check_output(['node','--input-type=module','-e','import {TOOL_CATALOG} from "./netlify/lib/bridge.mjs"; process.stdout.write(JSON.stringify({tools:TOOL_CATALOG}));'],cwd=ROOT)
+    (target/'mcp-tools.json.gz').write_bytes(gzip.compress(tools,mtime=0))
     store=Store();devices=store.devices()
     cert=ROOT/'data/esp32/tv-cert.pem'
     if cert.exists():

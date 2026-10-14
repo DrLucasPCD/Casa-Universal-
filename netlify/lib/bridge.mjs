@@ -18,6 +18,28 @@ const headers = {
 const json = (value, status = 200, extra = {}) => Response.json(value, {status, headers:{...headers,'Content-Type':'application/json; charset=utf-8',...extra}});
 const page = (body, status = 200, extra = {}) => new Response(`<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Casa Universal · ChatGPT</title><style>body{background:#101416;color:#eeeae1;font:17px system-ui;margin:0;padding:28px}main{max-width:560px;margin:50px auto}h1{font-size:38px;letter-spacing:-1.6px}p{line-height:1.6;color:#b7beb9}label{display:block;margin:24px 0}input[type=password]{box-sizing:border-box;width:100%;background:#202629;color:#fff;border:1px solid #46504c;border-radius:12px;padding:15px;font:inherit}button,a{background:#d9cbb0;color:#111719;border:0;border-radius:13px;padding:15px 20px;font:inherit;font-weight:650;text-decoration:none;cursor:pointer}small{color:#d9cbb0}code{overflow-wrap:anywhere}</style><main><small>CASA UNIVERSAL · CHATGPT</small>${body}</main></html>`, {status, headers:{...headers,'Content-Type':'text/html; charset=utf-8',...extra}});
 
+export const TOOL_CATALOG = [
+    ['listar_dispositivos','Liste os aparelhos cadastrados e seus comandos disponíveis, sem acionar nada.',{},READ],
+    ['consultar_casa','Consulte os estados atuais. Estado desconhecido não significa desligado. IR não mede temperatura.',{},READ],
+    ['consultar_dispositivo','Consulte o estado de um aparelho pelo ID retornado na lista.',{device_id:{type:'string',minLength:1,maxLength:80}},READ],
+    ['consultar_historico','Consulte os comandos enviados desde que a central ligou.',{},READ],
+    ['controlar_dispositivo','Use somente para enviar o comando exato solicitado pelo usuário a um aparelho listado. O envio IR não confirma o estado. Não destranca fechaduras.',{device_id:{type:'string',minLength:1,maxLength:80},action:{type:'string',minLength:1,maxLength:80}},CONTROL],
+    ['ajustar_clima','Envie somente um ajuste completo de ar-condicionado já aprendido ou testado. Requer pedido explícito; IR não confirma temperatura ambiente.',{device_id:{type:'string',maxLength:80},temperature:{type:'integer',minimum:16,maximum:32},mode:{type:'string',enum:['cool','heat','auto','dry','fan_only']},fan:{type:'string',enum:['auto','low','medium','high']},swing:{type:'string',enum:['stop','swing']}},CONTROL,['device_id','temperature','mode']],
+    ['ajustar_luz','Ajuste cor #RRGGBB e/ou intensidade 0–100 de uma luz Tuya. Requer pedido explícito; não liga automaticamente.',{device_id:{type:'string',maxLength:80},color:{type:'string',pattern:'^#[0-9a-fA-F]{6}$'},brightness:{type:'number',minimum:0,maximum:100},hue:{type:'number',minimum:0,maximum:360},saturation:{type:'number',minimum:0,maximum:100},mode:{type:'string',enum:['colour','white','scene','music']}},CONTROL,['device_id']],
+    ['criar_controle_generico','Crie controle personalizado vazio de tv, climate, projector, fan, audio, light, cover, switch ou other. Não envia sinais.',{type:{type:'string',enum:['tv','climate','projector','fan','audio','light','cover','switch','other']},name:{type:'string',maxLength:80},room:{type:'string',maxLength:60}},CONTROL,['type','name']],
+    ['preparar_ajuste_clima','Prepare botão para um ajuste completo de ar-condicionado. Ainda precisa aprender o sinal físico; não aciona nada.',{device_id:{type:'string',maxLength:80},temperature:{type:'integer',minimum:16,maximum:32},mode:{type:'string',enum:['cool','heat','auto','dry','fan_only']},fan:{type:'string',enum:['auto','low','medium','high']},swing:{type:'string',enum:['stop','swing']}},CONTROL,['device_id','temperature','mode','fan']],
+    ['iniciar_aprendizado_botao','Inicie captura IR/RF no BroadLink RM pro+ para o botão escolhido. Avise o usuário para pressionar seu controle físico. RF exige segurar e depois pressionar novamente.',{device_id:{type:'string',maxLength:80},button_id:{type:'string',maxLength:60},transport:{type:'string',enum:['ir','rf']}},CONTROL],
+    ['consultar_aprendizado_botao','Verifique a captura iniciada. Salva apenas o sinal recebido no botão escolhido; não transmite IR/RF.',{session_id:{type:'string',pattern:'^[a-f0-9]{48}$'}},CONTROL],
+    ['cancelar_aprendizado_botao','Encerre a captura preservando sinais já salvos.',{session_id:{type:'string',pattern:'^[a-f0-9]{48}$'}},CONTROL],
+    ['adicionar_botao_controle','Adicione um botão vazio ao controle personalizado.',{device_id:{type:'string',maxLength:80},label:{type:'string',maxLength:60}},CONTROL],
+    ['renomear_botao_controle','Renomeie um botão mantendo seu sinal.',{device_id:{type:'string',maxLength:80},button_id:{type:'string',maxLength:60},label:{type:'string',maxLength:60}},CONTROL],
+    ['limpar_codigo_botao','Remova o sinal do botão escolhido para reconfigurá-lo; preserva demais botões.',{device_id:{type:'string',maxLength:80},button_id:{type:'string',maxLength:60}},CONTROL],
+    ['consultar_catalogo_ir','Consulte perfis públicos e botões por classe/marca. Não testa nem declara compatibilidade. Philco inverter/BTU não identificam protocolo.',{category:{type:'string',enum:['climate','media_player','fan','light']},brand:{type:'string',maxLength:80},profile_id:{type:'string',maxLength:50}},READ,[]],
+    ['testar_codigo_ir','Envie um teste REAL do botão exato somente se solicitado. Pergunte se o aparelho respondeu antes de salvar.',{profile_id:{type:'string',maxLength:50},command:{type:'string',maxLength:80}},CONTROL],
+    ['configurar_botao_catalogo','Salve no botão apenas o código testado após confirmação humana explícita da reação.',{device_id:{type:'string',maxLength:80},button_id:{type:'string',maxLength:60},profile_id:{type:'string',maxLength:50},command:{type:'string',maxLength:80},test_id:{type:'string',maxLength:60},confirmed:{type:'boolean'}},CONTROL]
+
+  ].map(([name,description,properties,scope,required=Object.keys(properties)]) => ({name,description,inputSchema:{type:'object',properties,required,additionalProperties:false},annotations:{readOnlyHint:scope===READ,destructiveHint:false,openWorldHint:false},securitySchemes:[{type:'oauth2',scopes:[scope]}],_meta:{securitySchemes:[{type:'oauth2',scopes:[scope]}]}}));
+
 // Remote access is deliberately a separate, single-house service. No LAN key,
 // Wi-Fi password, device credentials or Firebase identity enters this service.
 export function createBridge({env, store, now = Date.now, wait = ms => new Promise(r => setTimeout(r, ms))}) {
@@ -86,13 +108,7 @@ export function createBridge({env, store, now = Date.now, wait = ms => new Promi
   }
   function bridgeAuth(req) { if (!equal(req.headers.get('Authorization') || '',`Bearer ${env.CASA_BRIDGE_TOKEN}`)) fail(401,'Central não autorizada.'); }
 
-  const tools = [
-    ['listar_dispositivos','Liste os aparelhos cadastrados e seus comandos disponíveis, sem acionar nada.',{},READ],
-    ['consultar_casa','Consulte os estados atuais. Estado desconhecido não significa desligado. IR não mede temperatura.',{},READ],
-    ['consultar_dispositivo','Consulte o estado de um aparelho pelo ID retornado na lista.',{device_id:{type:'string',minLength:1,maxLength:80}},READ],
-    ['consultar_historico','Consulte os comandos enviados desde que a central ligou.',{},READ],
-    ['controlar_dispositivo','Use somente para enviar o comando exato solicitado pelo usuário a um aparelho listado. O envio IR não confirma o estado. Não destranca fechaduras.',{device_id:{type:'string',minLength:1,maxLength:80},action:{type:'string',minLength:1,maxLength:80}},CONTROL]
-  ].map(([name,description,properties,scope]) => ({name,description,inputSchema:{type:'object',properties,required:Object.keys(properties),additionalProperties:false},annotations:{readOnlyHint:scope===READ,destructiveHint:false,openWorldHint:false},securitySchemes:[{type:'oauth2',scopes:[scope]}],_meta:{securitySchemes:[{type:'oauth2',scopes:[scope]}]}}));
+  const tools = TOOL_CATALOG;
 
   async function callTool(params, access) {
     const tool = tools.find(t => t.name === params?.name);
@@ -101,7 +117,10 @@ export function createBridge({env, store, now = Date.now, wait = ms => new Promi
     if (!access.scopes.includes(required)) fail(403,'A conexão foi autorizada somente para consultas. Reconecte para permitir comandos.');
     const args = params.arguments || {}, fields = Object.keys(tool.inputSchema.properties);
     if (typeof args !== 'object' || args === null || Array.isArray(args) || Object.keys(args).some(k => !fields.includes(k))
-      || fields.some(k => typeof args[k] !== 'string' || args[k].length < 1 || args[k].length > 80)) fail(400,'Argumentos inválidos.');
+      || tool.inputSchema.required.some(k => !(k in args))
+      || Object.entries(args).some(([k,v]) => {const p=tool.inputSchema.properties[k];if(p.type==='string')return typeof v!=='string'||v.length<1||v.length>(p.maxLength||80)||(p.enum&&!p.enum.includes(v))||(p.pattern&&!new RegExp(p.pattern).test(v));if(p.type==='integer')return !Number.isInteger(v)||v<p.minimum||v>p.maximum;if(p.type==='number')return typeof v!=='number'||!Number.isFinite(v)||v<p.minimum||v>p.maximum;if(p.type==='boolean')return typeof v!=='boolean';return true;})) fail(400,'Argumentos inválidos.');
+    if (tool.name==='ajustar_luz' && !('color' in args) && !('brightness' in args) && !('hue' in args) && !('saturation' in args)) fail(400,'Informe cor ou intensidade.');
+    if (tool.name==='ajustar_luz' && 'color' in args && ('hue' in args || 'saturation' in args)) fail(400,'Escolha HEX ou matiz/saturação.');
     if (args.action === 'unlock') fail(400,'Destrancamento de fechadura indisponível.');
     await limit('tool-calls',30);
     const heartbeat = await get('heartbeat');

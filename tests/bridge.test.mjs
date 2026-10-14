@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { createBridge, digest } from '../netlify/lib/bridge.mjs';
+import { createBridge, digest, TOOL_CATALOG } from '../netlify/lib/bridge.mjs';
 
 const base = 'https://casa-universal.netlify.app';
 const env = {CASA_PUBLIC_URL:base,CASA_BRIDGE_TOKEN:'B'.repeat(43),CASA_OAUTH_SECRET:'S'.repeat(43),CASA_PAIRING_HASH:digest('test-pairing-key')};
@@ -94,7 +94,7 @@ test('query-only consent cannot enqueue a command and accepts supported read too
   const s=setup(),{tokens}=await s.authorize();
   const result=await (await s.call(tokens.access_token,'controlar_dispositivo',{device_id:'tv',action:'power'})).json();
   assert.equal(result.result.isError,true);assert.match(result.result.content[0].text,/somente para consultas/);assert.equal(await s.store.get('pending'),null);
-  assert.equal((await (await s.rpc(tokens.access_token,'tools/list',{})).json()).result.tools.length,5);
+  assert.equal((await (await s.rpc(tokens.access_token,'tools/list',{})).json()).result.tools.length,TOOL_CATALOG.length);
 });
 test('offline central, arbitrary arguments and unlock never create a pending command',async () => {
   const s=setup(),{tokens}=await s.authorize(true);
@@ -136,4 +136,25 @@ test('refresh token rotates; replay and expired access tokens are rejected',asyn
   const refresh=await s.request('/oauth/token','POST',form);assert.equal(refresh.status,200);assert.notEqual((await refresh.json()).refresh_token,tokens.refresh_token);
   assert.equal((await s.request('/oauth/token','POST',form)).status,400);
   s.advance(601000);assert.equal((await s.rpc(tokens.access_token,'tools/list',{})).status,401);
+});
+
+test('new light and remote tools preserve read-only grants and reject invalid parameters before queueing',async()=>{
+ const s=setup(),read=await s.authorize(),control=await s.authorize(true);
+ for(const name of ['ajustar_luz','iniciar_aprendizado_botao','preparar_ajuste_clima']){
+  const r=await (await s.call(read.tokens.access_token,name,{})).json();assert.equal(r.result.isError,true);assert.equal(await s.store.get('pending'),null);
+ }
+ for(const args of [{device_id:'tuya_led'},{device_id:'tuya_led',brightness:true},{device_id:'tuya_led',brightness:101},{device_id:'tuya_led',brightness:-1},{device_id:'tuya_led',color:'#gg0000'},{device_id:'tuya_led',color:'#ff0000',ip:'8.8.8.8'},{device_id:'tuya_led',color:'#ff0000',hue:0}]){
+  const r=await (await s.call(control.tokens.access_token,'ajustar_luz',args)).json();assert.equal(r.result.isError,true);assert.equal(await s.store.get('pending'),null);
+ }
+});
+test('light percentages and HSV restoration are forwarded exactly without an implicit power command',async()=>{
+ const s=setup(),{tokens}=await s.authorize(true);await s.request('/bridge/poll','POST',{},s.bridgeHeaders);
+ const args={device_id:'tuya_led',hue:103,saturation:0,brightness:64.2,mode:'colour'};
+ s.onWait(async()=>{const {job}=await (await s.request('/bridge/poll','POST',{},s.bridgeHeaders)).json();if(!job)return;assert.deepEqual(job.arguments,args);assert.equal(job.name,'ajustar_luz');await s.request('/bridge/result','POST',{id:job.id,result:{isError:false,content:[{type:'text',text:'verified'}],structuredContent:{sent:true}}},s.bridgeHeaders);});
+ const r=await (await s.call(tokens.access_token,'ajustar_luz',args)).json();assert.equal(r.result.structuredContent.sent,true);
+});
+test('new schemas support per-button IR/RF and full climate presets',()=>{
+ assert.equal(new Set(TOOL_CATALOG.map(t=>t.name)).size,TOOL_CATALOG.length);
+ const learn=TOOL_CATALOG.find(t=>t.name==='iniciar_aprendizado_botao');assert.deepEqual(learn.inputSchema.properties.transport.enum,['ir','rf']);
+ const preset=TOOL_CATALOG.find(t=>t.name==='preparar_ajuste_clima');assert.equal(preset.inputSchema.properties.temperature.maximum,32);assert.deepEqual(preset.inputSchema.properties.swing.enum,['stop','swing']);
 });

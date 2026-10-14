@@ -3517,7 +3517,7 @@
       "models": [
         "Philco AC"
       ],
-      "command_count": 273,
+      "command_count": 409,
       "source": "https://github.com/smartHomeHub/SmartIR/blob/e4df2957ad915536f41ffb39daa96886d7cfe040/codes/climate/3000.json",
       "source_sha256": "919da2934406a7d0e82e98f2a752a031a30fd75c0235637dbc20d10824eb858b"
     },

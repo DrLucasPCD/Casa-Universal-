@@ -7,14 +7,16 @@ Firmware Arduino/PlatformIO para ESP32-S3 com **16 MB de flash e 8 MB de PSRAM O
 | Função | Implementação |
 | --- | --- |
 | Samsung | Descoberta SSDP/API local, leitura de `PowerState`, controle WebSocket TLS com identidade do certificado importada e token persistente. Ligar/desligar consultam o estado antes de enviar KEY_POWER; se já está no estado solicitado, não enviam outro botão. Wake-on-LAN é alternativa quando a API está inacessível e não confirma que ligou. |
-| BroadLink RM pro+ | Descoberta UDP, autenticação, envio e aprendizado IR; catálogo público de 387 perfis; controles genéricos por botão. Não aprende RF. |
+| BroadLink RM pro+ | Descoberta UDP, autenticação, envio e aprendizado IR; catálogo público de 387 perfis; controles genéricos por botão. Aprendizado RF em duas etapas nos RM pro/pro+ compatíveis, além de IR. |
 | Bluetooth | Busca anúncios, nomes, intensidade do sinal e serviços. Não faz pareamento nem abre a fechadura HAHA. |
 | Sonoff | SonoffLAN: mDNS, LAN criptografada, estados e interruptores de 1 a 4 canais; importação eWeLink uma vez pelo USB. Depende do modo LAN e da chave pessoal. |
-| Tuya | Protocolos 3.3/3.4: anúncios UDP, LAN AES-128 e negociação autenticada por sessão, tomadas, cortina, fita LED liga/desliga e sensor; leitura tipada de temperatura/umidade pelos DPs configurados; importação das local keys pelo USB. Protocolo 3.5 e gateways não suportados. |
+| Tuya | Protocolos 3.3/3.4: anúncios UDP, LAN AES-128 e negociação autenticada por sessão, tomadas, cortina, fita LED com cor/intensidade HSV12 e sensor; leitura tipada de temperatura/umidade pelos DPs configurados; importação das local keys pelo USB. Protocolo 3.5 e gateways não suportados. |
 | Firestore | Sincronização das configurações pela identidade existente da central; TLS com raízes Google, validação de regras privadas e exclusão de credenciais. |
-| MCP | 11 ferramentas por HTTP Streamable, endpoint `/mcp`, protegido pela chave da central. |
+| MCP | 20 ferramentas por HTTP Streamable, incluindo as 18 da ponte ChatGPT e duas ferramentas locais de descoberta/aprendizado legado, endpoint `/mcp`, protegido pela chave da central. |
 
 Cadastros preservados não significam que todos os aparelhos são controláveis. Dispositivos pendentes não enviam comandos. IR não fornece temperatura real, energia, trancamento ou posição. Nenhum comando físico é reenviado automaticamente.
+
+Controles personalizados para nove classes, com ajustes completos de clima e botões IR/RF: veja [o guia de controles](../../docs/controles.md). A posição da cortina vem do DP configurado do motor; pode ser invertida para mostrar porcentagem aberta.
 
 ## Preparar e gravar
 

@@ -75,7 +75,7 @@ bool receive34(WiFiClient& client,const uint8_t* key,uint32_t expected,std::vect
   }
   lastError="Tuya 3.4 não respondeu. Confira IP, chave e conexão LAN.";return false;
 }
-bool request34(JsonObject d,bool writing,JsonVariantConst value,Doc& result){
+bool request34(JsonObject d,bool writing,JsonVariantConst value,Doc& result,JsonObjectConst changes=JsonObjectConst()){
   auto cfg=d["config"].as<JsonObject>();String master=cfg["local_key"];IPAddress ip;if(!localIP(cfg["ip"]|"",ip))return false;
   WiFiClient client;if(!client.connect(ip,cfg["port"]|6668,1800)){lastError="Tuya 3.4 sem conexão TCP.";return false;}
   uint8_t local[16];esp_fill_random(local,16);const uint8_t* key=(const uint8_t*)master.c_str();std::vector<uint8_t> body(local,local+16),reply;
@@ -83,7 +83,7 @@ bool request34(JsonObject d,bool writing,JsonVariantConst value,Doc& result){
   uint8_t tag[32];signedDigest(key,local,16,tag);if(!sameBytes(tag,reply.data()+16,32)){client.stop();lastError="Tuya 3.4 não confirmou a identidade da sessão.";return false;}
   signedDigest(key,reply.data(),16,tag);body.assign(tag,tag+32);if(!send34(client,5,body,key)){client.stop();lastError="Negociação Tuya 3.4 não enviada.";return false;}
   std::vector<uint8_t> session(16);for(int i=0;i<16;i++)session[i]=local[i]^reply[i];if(!crypt(session,key,false)){client.stop();return false;}
-  Doc payload(2048);payload.to<JsonObject>();if(writing){payload["protocol"]=5;payload["t"]=(unsigned long)time(nullptr);payload["data"]["dps"][String(cfg["dp"]|1)]=value;}
+  Doc payload(2048);payload.to<JsonObject>();if(writing){payload["protocol"]=5;payload["t"]=(unsigned long)time(nullptr);if(changes.isNull())payload["data"]["dps"][String(cfg["dp"]|1)]=value;else payload["data"]["dps"]=changes;}
   String raw;serializeJson(payload,raw);body.assign((const uint8_t*)raw.c_str(),(const uint8_t*)raw.c_str()+raw.length());uint32_t cmd=writing?13:16;
   if(!send34(client,cmd,body,session.data(),writing)){client.stop();lastError="Envio Tuya 3.4 incompleto; confira o aparelho antes de repetir.";return false;}
   uint32_t until=millis()+3000;
@@ -99,14 +99,14 @@ bool request34(JsonObject d,bool writing,JsonVariantConst value,Doc& result){
   client.stop();lastError="Tuya 3.4 não confirmou o pedido.";return false;
 }
 // One TCP send per request. Status may try device22 only after explicit rejection.
-bool request(JsonObject d,bool writing,JsonVariantConst value,bool special,Doc& result,bool& device22){
+bool request(JsonObject d,bool writing,JsonVariantConst value,bool special,Doc& result,bool& device22,JsonObjectConst changes=JsonObjectConst()){
   auto cfg=d["config"].as<JsonObject>();if(!tuyaValidate(cfg))return false;
-  if(cfg["version"]=="3.4")return request34(d,writing,value,result);
+  if(cfg["version"]=="3.4")return request34(d,writing,value,result,changes);
   String key=cfg["local_key"],id=cfg["device_id"],dp=String(cfg["dp"]|1);
   Doc payload(4096);payload["devId"]=id;payload["uid"]=id;payload["t"]=String((unsigned long)time(nullptr));
   if(!writing&&!special)payload["gwId"]=id;
   uint32_t cmd=writing?7:special?13:10;
-  if(writing)payload["dps"][dp]=value;
+  if(writing){if(changes.isNull())payload["dps"][dp]=value;else payload["dps"]=changes;}
   else if(special){auto requested=payload.createNestedObject("dps");requested[dp]=nullptr;for(const char* field:{"position_dp","temperature_dp","target_temperature_dp","humidity_dp"})if(cfg[field].is<int>()&&cfg[field].as<int>()>0)requested[String(cfg[field].as<int>())]=nullptr;}
   String text;serializeJson(payload,text);size_t len=(text.length()/16+1)*16;
   std::vector<uint8_t> body(len,(uint8_t)(len-text.length()));memcpy(body.data(),text.c_str(),text.length());
@@ -144,7 +144,8 @@ bool tuyaValidate(JsonObject cfg){
   if((!localIP(cfg["ip"]|"",ip)&&!unresolved)||id.length()<16||id.length()>40||key.length()!=16||dp<1||dp>255||port<1||port>65535){lastError="Confira IP privado, device ID, local key de 16 caracteres e DP Tuya.";return false;}
   for(char c:id)if(!isalnum((unsigned char)c)){lastError="Device ID Tuya inválido.";return false;}
   if(version!="3.3"&&version!="3.4"){lastError="A central suporta Tuya 3.3 e 3.4 nesta versão.";return false;}
-  for(const char* field:{"position_dp","temperature_dp","target_temperature_dp","humidity_dp"})if(cfg.containsKey(field)){int n=cfg[field]|0;if(n<1||n>255){lastError="DP opcional Tuya inválido.";return false;}}
+  if(cfg.containsKey("position_inverted")&&!cfg["position_inverted"].is<bool>()){lastError="A inversão de posição deve ser verdadeira ou falsa.";return false;}
+  for(const char* field:{"position_dp","target_position_dp","color_dp","mode_dp","temperature_dp","target_temperature_dp","humidity_dp"})if(cfg.containsKey(field)){int n=cfg[field]|0;if(n<1||n>255){lastError="DP opcional Tuya inválido.";return false;}}
   int type=cfg["cover_type"]|1;if(type<1||type>8){lastError="Confira o tipo da cortina (1 a 8).";return false;}
   for(const char* field:{"temperature_divisor","humidity_divisor"})if(cfg.containsKey(field)&&(!isfinite(cfg[field].as<float>())||cfg[field].as<float>()<=0)){lastError="O divisor de leitura deve ser positivo.";return false;}return true;
 }
@@ -159,6 +160,36 @@ bool tuyaSend(JsonObject d,const String& action){
   }else{lastError="Comando Tuya não permitido.";return false;}
   Doc result(16384);bool special=false;return request(d,true,value["value"],false,result,special);
 }
+namespace {
+bool hsvValue(const String& raw,int& h,int& s,int& v){
+  if(raw.length()!=12)return false;for(char c:raw)if(!isxdigit((unsigned char)c))return false;
+  h=strtol(raw.substring(0,4).c_str(),nullptr,16);s=strtol(raw.substring(4,8).c_str(),nullptr,16);v=strtol(raw.substring(8,12).c_str(),nullptr,16);return h<=360&&s<=1000&&v<=1000;
+}
+String rgbColor(int h,int s){
+  float chroma=s/1000.0f,x=chroma*(1-fabs(fmod(h/60.0f,2)-1)),m=1-chroma,r=0,g=0,b=0;
+  if(h<60){r=chroma;g=x;}else if(h<120){r=x;g=chroma;}else if(h<180){g=chroma;b=x;}else if(h<240){g=x;b=chroma;}else if(h<300){r=x;b=chroma;}else{r=chroma;b=x;}
+  char out[8];snprintf(out,8,"#%02x%02x%02x",(int)round((r+m)*255),(int)round((g+m)*255),(int)round((b+m)*255));return String(out);
+}
+}
+bool tuyaAdjustLight(JsonObject d,JsonObject p){
+  auto cfg=d["config"].as<JsonObject>();if(d["kind"]!="light"||d["adapter"]!="tuya"||!cfg["color_dp"].is<int>()||!cfg["mode_dp"].is<int>()){lastError="Configure os DPs de cor HSV12 e modo desta luz.";return false;}
+  if(!p.containsKey("brightness")&&!p.containsKey("color")&&!p.containsKey("hue")&&!p.containsKey("saturation")){lastError="Informe cor ou intensidade.";return false;}
+  int brightness=-1;if(p.containsKey("brightness")){float n=p["brightness"].as<float>();if((!p["brightness"].is<float>()&&!p["brightness"].is<int>())||p["brightness"].is<bool>()||!isfinite(n)||n<0||n>100){lastError="Intensidade deve ser de 0 a 100.";return false;}brightness=round(n*10);}
+  if(p.containsKey("color")&&(p.containsKey("hue")||p.containsKey("saturation"))){lastError="Escolha cor HEX ou matiz/saturação.";return false;}
+  for(const char* field:{"hue","saturation"})if(p.containsKey(field)){float n=p[field].as<float>();if((!p[field].is<float>()&&!p[field].is<int>())||p[field].is<bool>()||!isfinite(n)||n<0||n>(String(field)=="hue"?360:100)){lastError="Matiz ou saturação fora do intervalo.";return false;}}
+  String mode=p["mode"]|"colour";if(mode!="colour"&&mode!="white"&&mode!="scene"&&mode!="music"){lastError="Modo de luz inválido.";return false;}
+  String color=p["color"]|"";if(p.containsKey("color")){if(color.length()!=7||color[0]!='#'){lastError="Cor deve usar #RRGGBB.";return false;}for(int i=1;i<7;i++)if(!isxdigit((unsigned char)color[i])){lastError="Cor inválida.";return false;}}
+  Doc current(16384);if(!poll(d,current))return false;int h,s,v;if(!hsvValue(current["dps"][String(cfg["color_dp"].as<int>())]|"",h,s,v)){lastError="A luz não confirmou um valor HSV12 válido. Nenhum ajuste enviado.";return false;}
+  if(color.length()){
+    float r=strtol(color.substring(1,3).c_str(),nullptr,16)/255.0f,g=strtol(color.substring(3,5).c_str(),nullptr,16)/255.0f,b=strtol(color.substring(5,7).c_str(),nullptr,16)/255.0f;
+    float high=std::max(r,std::max(g,b)),low=std::min(r,std::min(g,b)),delta=high-low,hue=0;
+    if(delta>0){if(high==r)hue=60*fmod((g-b)/delta,6);else if(high==g)hue=60*((b-r)/delta+2);else hue=60*((r-g)/delta+4);if(hue<0)hue+=360;}
+    h=round(hue);s=high>0?round(delta/high*1000):0;
+  }
+  if(p.containsKey("hue"))h=round(p["hue"].as<float>());if(p.containsKey("saturation"))s=round(p["saturation"].as<float>()*10);if(brightness>=0)v=brightness;
+  if(color=="#000000")v=0;
+  char raw[13];snprintf(raw,13,"%04x%04x%04x",h,s,v);Doc changes(512),result(16384);auto values=changes.to<JsonObject>();values[String(cfg["mode_dp"].as<int>())]=mode;values[String(cfg["color_dp"].as<int>())]=String(raw);bool special=false;return request(d,true,JsonVariantConst(),false,result,special,values);
+}
 void tuyaStatus(JsonObject d,JsonObject out){
   IPAddress ip;if(!localIP(d["config"]["ip"]|"",ip)){out["available"]=false;out["state"]="unavailable";out["message"]="Chave salva. Aguardando anúncio do aparelho no Wi-Fi para identificar IP e protocolo.";return;}
   Doc result(16384);bool ok=poll(d,result);out["available"]=ok;out["state"]=ok?"unknown":"unavailable";out["state_source"]="Tuya "+String(d["config"]["version"]|"3.3")+" · rede local";
@@ -167,9 +198,13 @@ void tuyaStatus(JsonObject d,JsonObject out){
   if((d["kind"]=="switch"||d["kind"]=="light")&&value.is<bool>())out["state"]=value.as<bool>()?"on":"off";
   if(d["kind"]=="sensor")out["state"]="online";
   auto telemetry=out.createNestedObject("telemetry");
+  if(d["kind"]=="light"&&cfg["color_dp"].is<int>()){
+    int h,s,v;if(hsvValue(dps[String(cfg["color_dp"].as<int>())]|"",h,s,v)){telemetry["brightness_percent"]=v/10.0;telemetry["color_hex"]=rgbColor(h,s);telemetry["color_hue"]=h;telemetry["color_saturation"]=s/10.0;telemetry["light_mode"]=dps[String(cfg["mode_dp"]|21)];}
+  }
   if(d["kind"]=="cover"){
+    if(cfg["target_position_dp"].is<int>()){auto n=dps[String(cfg["target_position_dp"].as<int>())];if(n.is<int>()&&n.as<int>()>=0&&n.as<int>()<=100)telemetry["target_position_percent"]=n;}
     if(cfg["position_dp"].is<int>()){
-      auto position=dps[String(cfg["position_dp"].as<int>())];if(position.is<int>()&&position.as<int>()>=0&&position.as<int>()<=100){int n=position.as<int>();telemetry["position_percent"]=n;out["state"]=n==0?"closed":n==100?"open":"partial";}
+      auto position=dps[String(cfg["position_dp"].as<int>())];if(position.is<int>()&&position.as<int>()>=0&&position.as<int>()<=100){int n=position.as<int>();if(cfg["position_inverted"]==true)n=100-n;telemetry["position_percent"]=n;telemetry["position_source"]="Percentual informado pelo motor";out["state"]=n==0?"closed":n==100?"open":"partial";}
     }
     // Movement enum describes a command, not a confirmed end position.
     if(value.is<const char*>())telemetry["movement"]=value;

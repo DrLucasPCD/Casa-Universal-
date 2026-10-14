@@ -33,10 +33,11 @@ static bool parseHex(String s,uint8_t* b,size_t n) {
 static uint16_t sum16(const uint8_t* p,size_t n) { uint32_t s=0xbeaf;for(size_t i=0;i<n;i++)s+=p[i];return s&0xffff; }
 static void put16(uint8_t* p,uint16_t n){p[0]=n&255;p[1]=n>>8;}
 static uint16_t get16(const uint8_t* p){return p[0]|(p[1]<<8);}
-static uint8_t blKey[16],blId[4];static String blIdentity;static uint16_t blCount=0x8000;
+static uint8_t blKey[16],blId[4];static String blIdentity;static uint16_t blCount=0x8000,blDeviceError=0;
 static const uint8_t initialKey[]={0x09,0x76,0x28,0x34,0x3f,0xe9,0x9e,0x23,0x76,0x5c,0x15,0x13,0xac,0xcf,0x8b,0x02};
 static const uint8_t initialIV[]={0x56,0x2e,0x17,0x99,0x6d,0x09,0x3d,0x28,0xdd,0xb3,0xba,0x69,0x5a,0x2e,0x6f,0x58};
 static bool blPacket(JsonObject cfg,uint16_t type,const std::vector<uint8_t>& raw,std::vector<uint8_t>& output) {
+  blDeviceError=0;
   IPAddress ip;uint8_t mac[6];if(!localIP(cfg["ip"]|"",ip)||!parseHex(cfg["mac"]|"",mac,6)){lastError="Configure IP e MAC locais do BroadLink.";return false;}
   std::vector<uint8_t> padded=raw;padded.resize((raw.size()+15)/16*16,0);std::vector<uint8_t> packet(56+padded.size(),0);
   const uint8_t header[]={0x5a,0xa5,0xaa,0x55,0x5a,0xa5,0xaa,0x55};memcpy(packet.data(),header,8);
@@ -50,9 +51,9 @@ static bool blPacket(JsonObject cfg,uint16_t type,const std::vector<uint8_t>& ra
   while((int32_t)(deadline-millis())>0){int n=udp.parsePacket();if(n){if(udp.remoteIP()!=ip||udp.remotePort()!=80||n<56||n>8192){while(udp.available())udp.read();continue;}
     std::vector<uint8_t> response(n);udp.read(response.data(),n);uint16_t expected=get16(response.data()+0x20);response[0x20]=response[0x21]=0;
     if(sum16(response.data(),n)!=expected||get16(response.data()+0x28)!=(uint16_t)(blCount|0x8000))continue;
-    if(get16(response.data()+0x22)){lastError="BroadLink recusou a solicitação.";udp.stop();return false;}
+    if(get16(response.data()+0x22)){blDeviceError=get16(response.data()+0x22);lastError="BroadLink recusou a solicitação.";udp.stop();return false;}
     size_t len=n-56;if(len%16){lastError="Resposta BroadLink inválida.";udp.stop();return false;}output.resize(len);memcpy(iv,initialIV,16);mbedtls_aes_init(&aes);mbedtls_aes_setkey_dec(&aes,blKey,128);
-    rc=mbedtls_aes_crypt_cbc(&aes,MBEDTLS_AES_DECRYPT,len,iv,response.data()+56,output.data());mbedtls_aes_free(&aes);udp.stop();return rc==0;
+    rc=mbedtls_aes_crypt_cbc(&aes,MBEDTLS_AES_DECRYPT,len,iv,response.data()+56,output.data());mbedtls_aes_free(&aes);udp.stop();if(rc||sum16(output.data(),output.size())!=get16(response.data()+0x34)){lastError="Resposta BroadLink com integridade inválida.";blIdentity="";return false;}return true;
   }delay(2);}udp.stop();lastError="BroadLink não respondeu; o envio não confirma a reação do aparelho.";return false;
 }
 bool broadlinkAuth(JsonObject cfg,bool refresh) {
@@ -61,8 +62,9 @@ bool broadlinkAuth(JsonObject cfg,bool refresh) {
   memset(raw.data()+4,0x31,16);raw[0x1e]=raw[0x2d]=1;memcpy(raw.data()+0x30,"Test 1",6);
   if(!blPacket(cfg,0x65,raw,out)||out.size()<20)return false;memcpy(blId,out.data(),4);memcpy(blKey,out.data()+4,16);blIdentity=identity;return true;
 }
+bool broadlinkSupportsRF(JsonObject cfg){int type=cfg["devtype"]|0;for(int id:{0x2712,0x272a,0x273d,0x277c,0x2783,0x2787,0x278b,0x2797,0x279d,0x27a1,0x27a6,0x27a9,0x27c3})if(type==id)return true;return false;}
 bool broadlinkSend(JsonObject cfg,const String& code) {
-  auto data=unbase64(code);if(data.size()<6||data.size()>4096||data[0]!=0x26){lastError="Código IR inválido.";return false;}if(!broadlinkAuth(cfg))return false;
+  auto data=unbase64(code);if(data.size()<6||data.size()>4096||(data[0]!=0x26&&!((data[0]==0xb2||data[0]==0xd7)&&broadlinkSupportsRF(cfg)))){lastError="Sinal IR/RF inválido ou RF não suportado neste BroadLink.";return false;}if(!broadlinkAuth(cfg))return false;
   std::vector<uint8_t> raw(4,0),out;raw[0]=2;raw.insert(raw.end(),data.begin(),data.end());return blPacket(cfg,0x6a,raw,out);
 }
 bool broadlinkLearn(JsonObject cfg,String& code) {
@@ -71,6 +73,25 @@ bool broadlinkLearn(JsonObject cfg,String& code) {
   while((int32_t)(deadline-millis())>0){delay(500);if(blPacket(cfg,0x6a,raw,out)&&out.size()>10&&out[4]==0x26){size_t len=out[6]|(out[7]<<8);len+=8;if(len>out.size()-4)len=out.size()-4;if(len>4096)break;code=base64(out.data()+4,len);return true;}yield();}
   lastError="Nenhum sinal IR recebido. Aponte o controle físico para o BroadLink.";return false;
 }
+bool broadlinkStartLearning(JsonObject cfg,const String& transport){
+  if(transport!="ir"&&transport!="rf"){lastError="Escolha IR ou RF.";return false;}
+  if(transport=="rf"&&!broadlinkSupportsRF(cfg)){lastError="RF requer um RM pro/pro+ compatível.";return false;}
+  if(!broadlinkAuth(cfg))return false;std::vector<uint8_t> raw(4,0),out;raw[0]=transport=="rf"&&(cfg["devtype"]|0)!=0x2712?0x19:3;return blPacket(cfg,0x6a,raw,out);
+}
+int broadlinkPollLearning(JsonObject cfg,const String& transport,String& stage,String& code){
+  if(!broadlinkAuth(cfg))return -1;std::vector<uint8_t> raw(4,0),out;
+  if(transport=="rf"&&stage=="frequency"){
+    raw[0]=0x1a;if(!blPacket(cfg,0x6a,raw,out))return -1;
+    if(out.size()<5){lastError="Resposta de frequência inválida.";return -1;}
+    if(!out[4])return 0;
+    raw[0]=0x1b;if(!blPacket(cfg,0x6a,raw,out))return -1;stage="packet";return 0;
+  }
+  raw[0]=4;if(!blPacket(cfg,0x6a,raw,out)){if(blDeviceError==0xfff6||blDeviceError==0xfffb){lastError="";return 0;}return -1;}
+  if(out.size()<10)return 0;uint8_t prefix=out[4];bool expected=transport=="ir"?prefix==0x26:(prefix==0xb2||prefix==0xd7);
+  if(!expected)return 0;size_t n=(out[6]|(out[7]<<8))+4;if(n<6||n>4096||n>out.size()-4){lastError="Sinal recebido com tamanho inválido.";return -1;}
+  code=base64(out.data()+4,n);return 1;
+}
+void broadlinkCancelLearning(JsonObject cfg,const String& transport){if(transport!="rf"||(cfg["devtype"]|0)==0x2712)return;std::vector<uint8_t> raw(4,0),out;raw[0]=0x1e;blPacket(cfg,0x6a,raw,out);}
 
 // Samsung TLS is accepted only after comparing the exact device certificate hash,
 // before any HTTP request, saved authorization token or WebSocket data is sent.

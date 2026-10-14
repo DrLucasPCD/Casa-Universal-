@@ -33,7 +33,10 @@ def tuya(result,cfg):
             elif field=='humidity_dp' and isinstance(value,(int,float)) and not isinstance(value,bool):
                 value=value/float(cfg.get('humidity_divisor',1))
             value=number(value,low,high)
-            if value is not None:values[target]=value
+            if value is not None:values[target]=100-value if field=='position_dp' and cfg.get('position_inverted') is True else value
     if "temperature" in values or "target_temperature" in values:
         values["temperature_unit"]=cfg.get("temperature_unit","°C")
+    if cfg.get('color_dp'):
+        from .lighting import readings
+        values.update(readings(dps.get(str(cfg['color_dp'])),dps.get(str(cfg.get('mode_dp',21)))))
     return values

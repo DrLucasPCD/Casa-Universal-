@@ -30,6 +30,15 @@ def flatten(value, prefix="", result=None):
     # Lists may represent sequences: omit instead of sending only the first step.
     return result
 
+def extract_commands(data):
+    commands=flatten(data.get('commands',{}))
+    # Some source profiles place a declared operation mode at the root (Philco
+    # 3000 has heat there). Keep its original signals, without inventing codes.
+    for mode in data.get('operationModes',[]):
+        if isinstance(mode,str) and re.fullmatch(r'[a-z_]{1,30}',mode) and isinstance(data.get(mode),dict) and mode not in data.get('commands',{}):
+            flatten(data[mode],mode,commands)
+    return commands
+
 
 def main():
     OUT.mkdir(exist_ok=True)
@@ -44,7 +53,7 @@ def main():
             continue
         if data.get("supportedController") != "Broadlink" or data.get("commandsEncoding") != "Base64":
             continue
-        commands = flatten(data.get("commands", {}))
+        commands = extract_commands(data)
         if not commands:
             continue
         id_ = file.parent.name + "_" + file.stem

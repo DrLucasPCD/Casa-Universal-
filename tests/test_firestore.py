@@ -78,3 +78,13 @@ class FirestoreTests(unittest.TestCase):
         row=next(r for r in self.store.cloud_pending() if r['id']=='tv');self.store.cloud_ack(row)
         self.store.update_config('tv',{'token':'new-secret'})
         self.assertFalse(any(r['id']=='tv' for r in self.store.cloud_pending()))
+
+    def test_climate_preset_and_rf_survive_restore_and_invalid_preset_is_rejected(self):
+        d={'id':'generic_123456abcdef','name':'Ar aprendido','room':'Sala','kind':'remote','adapter':'broadlink','config':{'commands':{'cool_auto_stop_24':base64.b64encode(b'\xd7\0\x02\0\x01\x02').decode()}},'generic_remote':{'type':'climate','buttons':[{'id':'cool_auto_stop_24','label':'24 °C','section':'Meus ajustes','preset':{'temperature':24,'mode':'cool','fan':'auto','swing':'stop'}}]}}
+        def cloud_doc(device):
+            payload=serialize(device);doc=document({'payload':payload,'hash':digest(payload)});doc['name']='projects/test/databases/(default)/documents/casas/test-owner/controles/'+device['id'];return doc
+        self.cloud.restore_missing([cloud_doc(d)])
+        self.assertEqual(self.store.get(d['id'])['generic_remote']['buttons'][0]['preset']['temperature'],24)
+        d['id']='generic_abcdef123456';d['generic_remote']['buttons'][0]['preset']['temperature']=True
+        from casa.firestore import CloudError
+        with self.assertRaises(CloudError):self.cloud.restore_missing([cloud_doc(d)])

@@ -4,6 +4,8 @@ Painel local para Samsung, BroadLink, Smart Life/Tuya e Sonoff/eWeLink, com desc
 
 Marca visual: **casa.**. Para publicar a entrada pública e a demonstração no Netlify pelo GitHub, veja [publicação e arquitetura](docs/publicacao.md). O build já está configurado em `netlify.toml`. Os controles reais e o MCP continuam na central da casa; o site publicado abre o painel dessa central pelo endereço informado.
 
+**Pesquisa de gestos com Echo Show:** o [teste de câmera](https://casa-universal.netlify.app/camera) deve ser aberto na própria Echo, pelo Silk. O acesso ao vídeo e o controle por gestos ainda não estão confirmados. Veja a [análise com REA, limitações e próximos passos](docs/gestos-echo-show.md).
+
 **Central ESP32-S3 N16R8:** há uma versão de firmware para manter painel, Samsung, BroadLink, SonoffLAN, Tuya 3.3/3.4 e MCP na placa, sem o Mac ligado. Veja [instalação, suporte e limitações](firmware/esp32/README.md) e [como conectar os Sonoff](docs/sonoff.md). Tuya requer as local keys dos aparelhos; veja [configuração Smart Life](docs/tuya.md). O driver da fechadura HAHA permanece pendente; a descoberta Bluetooth está disponível. As instruções abaixo descrevem a central Python no Mac.
 
 ## Abrir e usar

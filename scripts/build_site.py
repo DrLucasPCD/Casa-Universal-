@@ -7,6 +7,7 @@ OUTPUT = ROOT / "dist"
 ASSETS = (
     "index.html", "app.js", "visuals.js", "style.css", "sw.js", "manifest.webmanifest",
     "icon.svg", "icon-192.png", "icon-512.png", "apple-touch-icon.png",
+    "echo-camera.html", "echo-camera.js", "echo-camera.css",
 )
 
 

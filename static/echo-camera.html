@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>casa. · Teste de câmera da Echo</title>
+  <link rel="icon" href="/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/echo-camera.css">
+  <script src="/echo-camera.js" defer></script>
+</head>
+<body>
+<main id="camera-probe">
+  <header><a class="brand" href="/">casa<span>.</span></a><span class="tag">LABORATÓRIO · GESTOS</span></header>
+  <section class="intro">
+    <p class="eyebrow">PRIMEIRO PASSO · CÂMERA</p>
+    <h1>Sua casa,<br>na ponta dos dedos.</h1>
+    <p class="lead">Vamos descobrir se o navegador da sua Echo libera a câmera para o controle por gestos.</p>
+    <p class="notice"><strong>Abra esta página na própria Echo Show, pelo Silk.</strong> Em um celular ou computador, o teste usa a câmera desse outro aparelho e não verifica a Echo.</p>
+  </section>
+  <section class="test-grid" aria-label="Diagnóstico da câmera">
+    <div class="preview">
+      <video id="camera-video" autoplay muted playsinline aria-label="Imagem local da câmera"></video>
+      <div id="camera-placeholder"><span class="camera-symbol" aria-hidden="true">◎</span><p>A imagem aparecerá aqui<br>se o sistema permitir o acesso.</p></div>
+      <span class="privacy">IMAGEM SOMENTE NESTE APARELHO · SEM ÁUDIO</span>
+    </div>
+    <div class="panel">
+      <p id="camera-phase" class="eyebrow">PRONTO PARA TESTAR</p>
+      <h2 id="camera-title">Aguardando seu toque</h2>
+      <p id="camera-message" role="status" aria-live="polite">A câmera só será solicitada ao tocar no botão abaixo.</p>
+      <div class="actions"><button id="camera-start" type="button">Testar câmera</button><button id="camera-stop" class="secondary" type="button" disabled>Parar</button></div>
+      <p class="small">Abra a tampa física da câmera. Se aparecer uma solicitação de permissão, permita o vídeo. Nenhuma imagem é gravada ou enviada ao servidor.</p>
+      <details><summary>Resultado técnico</summary><pre id="camera-report"></pre></details>
+      <button id="camera-copy" class="secondary copy" type="button">Copiar resultado</button>
+      <p id="copy-result" class="small" role="status"></p>
+    </div>
+  </section>
+  <section class="next">
+    <p class="eyebrow">DEPOIS DE CONFIRMAR O VÍDEO</p>
+    <h2>Os gestos que vamos construir</h2>
+    <div class="gesture-grid">
+      <article><span aria-hidden="true">↕</span><h3>Cortina</h3><p>Selecionar a cortina e mover a mão. O controle de posição ainda precisa ser validado no motor.</p></article>
+      <article><span aria-hidden="true">☞</span><h3>Luzes e ventilador</h3><p>Apontar e confirmar o alvo para alternar a energia uma vez por gesto.</p></article>
+      <article><span aria-hidden="true">✥</span><h3>Projetor</h3><p>Deslizar para navegar e fazer um gesto de confirmação para OK, com os botões IR configurados.</p></article>
+    </div>
+    <p class="small">Esta página apenas testa o acesso à câmera. O reconhecimento de gestos e o acionamento dos aparelhos ainda não estão ativos.</p>
+  </section>
+</main>
+</body>
+</html>

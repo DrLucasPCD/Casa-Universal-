@@ -4,6 +4,8 @@
 
 O acesso à câmera da Echo Show original **ainda não foi confirmado**. O fluxo de gestos não está ativo. Nenhum comando real foi enviado nesta investigação.
 
+**Atualização:** o usuário forneceu o XAPK Alexa 2.2.720364.0 e confirmou que vê a câmera no app. A [análise do aplicativo fornecido](alexa-oficial.md) rastreou LiveView/RTCSC e identificou implementação WebRTC. Isso amplia o estudo inicial do cliente de terceiros descrito abaixo, mas ainda não demonstra uma sessão independente no Casa Universal.
+
 O prefixo de hardware informado pelo usuário sugere **Echo Show 8 de 2ª geração, athena, A8H3N2**. Essa identificação é uma inferência baseada na [tabela técnica do projeto connect-the-dots](https://github.com/gilderchuck/connect-the-dots/wiki), que também alerta que os prefixos nem sempre determinam o modelo. Não incluímos número de série nem MAC nos arquivos públicos.
 
 O [Monitoramento residencial da Amazon](https://digprjsurvey.amazon.com/csad/help/node/GQ5DDPCH5JXERYPB) permite ver a câmera pelo app Alexa ou por outra Echo compatível. Isso não demonstra a existência de uma API pública que entregue os frames ao Casa Universal. A [CameraStreamController](https://developer.amazon.com/en-US/docs/alexa/device-apis/alexa-camerastreamcontroller.html) trata da outra direção: disponibilizar uma câmera externa para exibição na Alexa.

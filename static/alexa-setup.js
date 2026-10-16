@@ -1,6 +1,7 @@
 (() => {
   'use strict';
   const byId = id => document.getElementById(id);
+  const rtc = window.CasaAlexaRTC.create({video: byId('echo-video'), message: byId('rtc-status')});
   const messages = {disconnected: 'Conexão ainda não iniciada.', starting: 'Preparando a página de login…', awaiting_login: 'A página de login está pronta. Toque em Continuar login e entre na sua conta Amazon.', authenticated: 'Login concluído. Cliente Amazon registrado; o vídeo ainda será verificado.', authenticated_memory: 'Login concluído. Sessão disponível apenas na memória.', refreshing: 'Renovando a conexão salva…', login_expired: 'A Amazon não renovou o acesso. Reinicie a ponte para entrar novamente.', login_failed: 'O login não foi concluído. Você pode tentar novamente.'};
   let opening = false, busy = false, operationId = 0, deviceFingerprint = '';
   async function post(path, body = {}) {
@@ -12,9 +13,16 @@
   async function operate(path, body = {}, interrupt = false) {
     if (busy && !interrupt) return;
     const current = ++operationId;
+    if (path === '/api/channel/stop') {rtc.stop(); byId('rtc-status').textContent = 'Transmissão encerrada neste navegador.';}
     busy = true; byId('operation').textContent = 'Aguardando resposta da Amazon…';
     await status();
-    try {await post(path, body); if (current === operationId) byId('operation').textContent = 'Consulta concluída. Veja o resultado abaixo.';}
+    try {
+      await post(path, body);
+      if (current === operationId) {
+        if (path === '/api/camera/start') rtc.start();
+        byId('operation').textContent = 'Consulta concluída. Veja o resultado abaixo.';
+      }
+    }
     catch (error) {if (current === operationId) byId('operation').textContent = error.message;}
     finally {if (current === operationId) busy = false; await status();}
   }
@@ -30,9 +38,9 @@
     byId('channel').disabled = !state.authenticated || busy;
     const channel = state.channel || {};
     byId('channel-status').textContent = 'Canal Amazon: ' + (channel.phase || 'disconnected') + (channel.httpStatus ? ' · HTTP ' + channel.httpStatus : '');
-    const phases = {disconnected: 'ainda não conectado', requesting: 'solicitando à Amazon', awaiting_directive: 'solicitação enviada; aguardando sessão', session_received: 'sessão recebida; negociação do vídeo pendente', rejected: 'a Amazon recusou a solicitação'};
-    byId('video').textContent = 'Vídeo: ' + (phases[state.video?.phase] || 'ainda não conectado') + '. Nenhuma imagem recebida.';
-    byId('diagnostic').textContent = JSON.stringify({login: state.phase, discovery: state.discoveryPhase, channel, video: state.video, recentDirectives: state.recentDirectives || []}, null, 2);
+    const phases = {disconnected: 'ainda não conectado', requesting: 'solicitando à Amazon', awaiting_directive: 'solicitação enviada; aguardando sessão', session_received: 'sessão recebida; negociação do vídeo pendente', rejected: 'a Amazon recusou a solicitação', ended: 'sessão encerrada pela Amazon', streaming: 'recebendo imagem', stalled: 'imagem sem atualização recente'};
+    byId('video').textContent = 'Vídeo: ' + (phases[state.video?.phase] || 'ainda não conectado') + (state.video?.frames ? ` · ${state.video.frames} frames verificados no navegador.` : '. Nenhuma imagem recebida.');
+    byId('diagnostic').textContent = JSON.stringify({login: state.phase, discovery: state.discoveryPhase, channel, video: state.video, lastEvent: state.lastEvent, recentDirectives: state.recentDirectives || []}, null, 2);
     const fingerprint = JSON.stringify([state.devices || [], channel.phase, busy]);
     if (fingerprint !== deviceFingerprint) {
       deviceFingerprint = fingerprint; byId('devices').replaceChildren();

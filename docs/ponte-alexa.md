@@ -1,6 +1,6 @@
 # Ponte local Alexa — experimental
 
-A ponte executa no Mac, separada do site Netlify e da central ESP32. O login manual já foi concluído em um teste pelo usuário. Ainda não foi demonstrado um canal LiveView autorizado, uma negociação WebRTC independente ou um frame da Echo. Os gestos não estão habilitados para acionar aparelhos.
+A ponte executa no Mac, separada do site Netlify e da central ESP32. Em 16/10/2026, o login manual, a descoberta da Echo Show 8 de 2ª geração e a recepção WebRTC foram confirmados com o aparelho real. O vídeo chegou a 1280 × 720, com mais de 5 mil frames verificados no navegador. O teste foi encerrado pelo painel sem perder o login. Os gestos ainda não estão habilitados para acionar aparelhos.
 
 ## Executar
 
@@ -15,7 +15,7 @@ Por padrão, tokens e cookies ficam apenas na memória do processo. Fechar ou re
 1. **Login concluído** confirma o registro do cliente, sem comprovar vídeo.
 2. **Buscar câmeras da conta** consulta os dispositivos e os endpoints pela sessão Amazon. O painel não publica números de série ou credenciais. Um resultado vazio ou uma consulta recusada precisa ser investigado antes de solicitar vídeo.
 3. **Testar canal de vídeo** tenta o downchannel HTTP/2 no gateway escolhido. HTTP 200 com multipart válido confirma apenas o transporte de diretivas.
-4. **Solicitar vídeo desta câmera** envia `RequestStartLiveView` ao endpoint descoberto. `StartLiveView` confirma uma sessão recebida; não significa que existem frames. A negociação WebRTC ainda precisa ser implementada/validada com as diretivas reais.
+4. **Solicitar vídeo desta câmera** envia `RequestStartLiveView` ao endpoint descoberto. `StartLiveView` confirma uma sessão recebida; não significa que existem frames. O receptor WebRTC do navegador responde a `InitiateSession` com uma oferta SDP, aplica a resposta de `StartPeerConnection` e informa `SessionConnected`. A imagem só é anunciada depois de um callback de frame decodificado, com dimensões positivas e trilha de vídeo viva.
 5. **Encerrar canal** envia `RequestStopLiveView` quando há um ID de sessão recebido e fecha a conexão local mesmo se esse envio falhar. Aceitação HTTP não é uma confirmação física de encerramento na Echo.
 
 Os perfis atual e anterior usam gateways América identificados no código analisado. O perfil de notificações é somente um diagnóstico de autenticação; não se deve confundir uma conexão de notificações com vídeo. Não há URL RTSP inventada, extração da sessão do iPhone ou execução do APK.
@@ -29,7 +29,21 @@ A [análise do app oficial](alexa-oficial.md) foi ampliada com um recorte de `cl
 - O payload observado de `RequestStartLiveView` contém `sessionType`, `targets`, `requestId` e `deviceRequestStartTime`; a versão interna V2 não justifica inventar `payloadVersion: 2`.
 - Os modelos RTC incluem troca DTLS/SDES, ICE, oferta e resposta SDP. A presença desses modelos não confirma a sequência negociada pela Echo do usuário.
 
-O cliente independente usa o registro iOS comunitário e uma troca de token por pacote `com.amazon.echo`. A análise do Android não prova que esse registro obtenha as mesmas permissões de vídeo. Essa equivalência precisa de teste real, sem ampliar permissões ou substituir credenciais por valores fictícios.
+O cliente independente usa o registro iOS comunitário e uma troca de token por pacote `com.amazon.echo`. A análise do Android não prova que esse registro obtenha as mesmas permissões de vídeo. O teste real confirmou o uso desse registro nesta Echo, incluindo a troca de token por pacote e a negociação DTLS. Isso não demonstra renovação prolongada ou suporte a todos os modelos e contas.
+
+## Correção do registro LiveView e resultado real
+
+A biblioteca comunitária registra inicialmente `Alexa.Camera.LiveViewController` 1.0. O app Android fornecido publica 2.2, com `supportedDisplayModes: [FULL_SCREEN]` e `supportedTalkModes: [PRESS_AND_HOLD]`. A chamada `LiveViewControllerCapabilityAgentServiceV2.getLiveViewControllerCapability` foi confirmada pelo REA, evidência `ev_af8b158ae7d408274a5911034b37393231d40ae785cc21e805bccb6d54f79ac6`; os valores das constantes foram lidos diretamente no DEX preservado.
+
+Antes do ajuste, `RequestStartLiveView` retornava HTTP 500 e `INTERNAL_SERVICE_EXCEPTION`, apesar do login válido, Echo on-line e downchannel HTTP 200. O erro ocorreu nos gateways atual e anterior. Testar apenas `payloadVersion: 1.0` não resolveu. Depois de publicar o manifesto do cliente com LiveView 2.2, a mesma solicitação recebeu HTTP 200, `InitiateSession` e `StartLiveView`. O receptor enviou `OfferGeneratedForSession`, recebeu `StartPeerConnection` e confirmou `SessionConnected` com HTTP 204. A imagem foi observada na interface.
+
+`bridge/alexa-capabilities.json` preserva o manifesto móvel da biblioteca alexa-cookie2 5.0.6 (MIT), alterando somente a declaração LiveView conforme a evidência do app. O registro é do cliente Casa Universal, não uma alteração das capacidades físicas da Echo. A ponte publica esse manifesto antes de abrir o canal, uma vez por registro de login.
+
+A conversão do evento do app também foi rastreada em um novo recorte com `classes12.dex` e `classes14.dex`, SHA-256 `a8384b8fa262bbc840eef3406561449a40357a7107eb8a7049adcf80b2c965fd`. Evidências REA `ev_556ff11ca8dc8738d4508bb30b872d44634c6debea3bb97a0c48087117cbef02` e `ev_05f5b429bd4b269adbf8bc273e407d484fc4b1e16b5d2865c9c14951bb5bb1dd` confirmam a conversão do header e o payload JSON. São observações estáticas distintas do teste de rede e vídeo.
+
+O navegador recebe somente a sinalização RTC necessária. Tokens de conta, cookies, correlation tokens e chaves do cabeçalho LiveView não entram no endpoint de sinalização. Credenciais ICE transitórias chegam ao navegador para estabelecer WebRTC, ficam em memória e não são enviadas ao Firestore. O vídeo não é gravado pelo app; a reprodução de áudio fica desativada e não há solicitação da câmera ou microfone do Mac. A confirmação de frames no backend é um relato do navegador, não o armazenamento de imagens.
+
+Sair da aba fecha o receptor e solicita encerramento da sessão; `RequestStopLiveView` usa o ID recebido. Respostas tardias de conexões canceladas são ignoradas. O modo validado é DTLS sem trickle ICE. Outros modos são recusados explicitamente.
 
 ## Gestos e limites atuais
 
@@ -39,6 +53,6 @@ Não há reconhecimento de mãos conectado a essa biblioteca, calibração da sa
 
 ## Verificação
 
-`npm test` inclui testes de memória/persistência da sessão, proteção de origem e Host, parsing multipart fragmentado, cancelamento, rejeição de autorização, encerramento e regras dos gestos. Esses testes usam respostas simuladas e não substituem um teste com imagem real.
+`npm test` inclui testes de memória/persistência da sessão, proteção de origem e Host, parsing multipart fragmentado, cancelamento, rejeição de autorização, encerramento e regras dos gestos. Esses testes usam respostas simuladas; o teste real com imagem descrito acima foi uma verificação separada. Os testes do receptor cobrem cancelamento tardio, saída da aba, captura local ausente e distinção entre conexão e frame decodificado.
 
 O `cookie` transitivo está fixado em 0.7.2 para incluir a correção de validação de cookies. Em 16/10/2026, `npm audit` ainda informa a cadeia transitiva `braces`/`micromatch`/`http-proxy-middleware`/`alexa-cookie2` (GHSA-vfj7-8cjw-p6xm), sem versão corrigida de `braces` no registro consultado. O proxy usa contexto padrão estático, sem padrões glob vindos do usuário, e escuta somente no loopback. A auditoria não está limpa; não exponha as portas 8877/8878 à internet.

@@ -114,6 +114,7 @@ function transport(status = 200) {
   };
   const cloud = new AlexaCloud({registration: {}}, {connectImpl() {queueMicrotask(() => client.emit('connect')); return client;}});
   cloud.accessToken = async () => 'test-only-token';
+  cloud.prepareViewer = async () => {};
   return {cloud, client, streams};
 }
 
@@ -137,10 +138,12 @@ test('an authorization rejection fails the channel and releases the transport', 
 });
 
 test('canceling while a token is pending prevents a late network connection', async () => {
-  let finishToken, connections = 0;
+  let finishToken, tokenStarted, connections = 0;
+  const started = new Promise(resolve => {tokenStarted = resolve;});
   const cloud = new AlexaCloud({}, {connectImpl() {connections++;}});
-  cloud.accessToken = () => new Promise(resolve => {finishToken = resolve;});
-  const opening = cloud.openChannel(); cloud.stop(); finishToken('test-token');
+  cloud.prepareViewer = async () => {};
+  cloud.accessToken = () => new Promise(resolve => {finishToken = resolve; tokenStarted();});
+  const opening = cloud.openChannel(); await started; cloud.stop(); finishToken('test-token');
   await assert.rejects(opening, /cancelada/);
   assert.equal(connections, 0); assert.equal(cloud.channel.phase, 'disconnected');
 });
@@ -159,4 +162,95 @@ test('stop requests use the received session and close locally even if Amazon re
   assert.equal(event.header.name, 'RequestStopLiveView'); assert.deepEqual(event.payload, {sessionId: 'test-session'});
   assert.equal(client.destroyed, true); assert.equal(cloud.channel.phase, 'disconnected');
   assert.equal(cloud.status().video.phase, 'disconnected'); assert.deepEqual(cloud.rawCameraDirectives, []);
+});
+
+test('viewer registration announces LiveView 2.2 before opening the camera channel', async () => {
+  let manifest, authorization;
+  const login = {registration: {accessToken: 'private-access'}};
+  const cloud = new AlexaCloud(login, {fetchImpl: async (url, options) => {
+    assert.equal(url, 'https://api.amazonalexa.com/v1/devices/@self/capabilities');
+    manifest = JSON.parse(options.body); authorization = options.headers.authorization;
+    return new Response(null, {status: 204});
+  }});
+  cloud.accessToken = async () => 'private-bearer';
+  await cloud.prepareViewer();
+  const liveView = manifest.capabilities.find(item => item.interface === 'Alexa.Camera.LiveViewController');
+  assert.equal(liveView.version, '2.2');
+  assert.deepEqual(liveView.configurations.supportedDisplayModes, ['FULL_SCREEN']);
+  assert.equal(authorization, 'Bearer private-bearer');
+  assert.ok(!JSON.stringify(cloud.status()).includes('private-'));
+});
+
+test('canceling token renewal prevents a delayed capability publication', async () => {
+  let finishToken, calls = 0;
+  const cloud = new AlexaCloud({registration: {}}, {fetchImpl() {calls++;}});
+  cloud.accessToken = () => new Promise(resolve => {finishToken = resolve;});
+  const registration = cloud.prepareViewer(); cloud.stop(); finishToken('test-token');
+  await assert.rejects(registration, /cancelada/); assert.equal(calls, 0);
+});
+
+test('RTC signaling forwards only session directives and never LiveView encryption keys', async () => {
+  const cloud = new AlexaCloud({});
+  cloud.onJSON({directive: {header: {namespace: 'Alexa.RTCSessionController', name: 'InitiateSession', correlationToken: 'private-correlation'}, payload: {sessionId: 'test-session', sessionDomain: 'test-domain', iceServers: []}}});
+  cloud.onJSON({directive: {header: {namespace: 'Alexa.Camera.LiveViewController', name: 'StartLiveView', keys: 'private-keys'}, payload: {sessionId: 'test-session'}}});
+  assert.equal(cloud.signaling().signals.length, 1);
+  assert.equal(cloud.signaling(1).signals.length, 0);
+  assert.throws(() => cloud.signaling(-1));
+  assert.ok(!JSON.stringify(cloud.signaling()).includes('private-'));
+  const events = []; cloud.sendEvent = async event => {events.push(event); return {httpStatus: 200};};
+  await assert.rejects(cloud.offer('unrecognized-session', 'v=0\r\nm=video test\r\n'), /indisponível/);
+  await assert.rejects(cloud.offer('test-session', 'not SDP'), /inválida/);
+  await cloud.offer('test-session', 'v=0\r\nm=video test\r\n');
+  assert.equal(events[0].header.correlationToken, 'private-correlation');
+  assert.equal(events[0].header.payloadVersion, '3.1');
+  assert.equal(events[0].payload.offer.format, 'SDP');
+  assert.ok(!JSON.stringify(cloud.status()).includes('private-'));
+});
+
+test('frame telemetry requires a real known session, positive dimensions and increasing frames', () => {
+  const cloud = new AlexaCloud({});
+  const frame = {sessionId: 'test-session', frames: 1, width: 1280, height: 720};
+  assert.throws(() => cloud.reportFrames(frame), /indisponível/);
+  cloud.rtcSessions.set('test-session', {}); cloud.lastLiveView = {sessionId: 'test-session', phase: 'session_received'};
+  assert.throws(() => cloud.reportFrames({...frame, width: 0}), /inválido/);
+  assert.equal(cloud.reportFrames(frame).phase, 'streaming');
+  assert.throws(() => cloud.reportFrames(frame), /inválido/);
+  cloud.onJSON({directive: {header: {namespace: 'Alexa.Camera.LiveViewController', name: 'StopLiveView'}, payload: {sessionId: 'previous-session'}}});
+  assert.equal(cloud.status().video.phase, 'streaming');
+  cloud.onJSON({directive: {header: {namespace: 'Alexa.Camera.LiveViewController', name: 'StopLiveView'}, payload: {sessionId: 'test-session'}}});
+  assert.equal(cloud.status().video.phase, 'ended'); assert.equal(cloud.status().video.frames, 0);
+});
+
+test('Amazon event errors expose the error code without leaking response descriptions', async () => {
+  const {cloud, client} = transport(); await cloud.openChannel();
+  client.request = () => {
+    const stream = new EventEmitter(); stream.close = () => {};
+    stream.end = () => queueMicrotask(() => {
+      stream.emit('response', {':status': 500, 'content-type': 'application/json'});
+      stream.emit('data', Buffer.from(JSON.stringify({payload: {code: 'INTERNAL_SERVICE_EXCEPTION', description: 'private-diagnostic'}})));
+      stream.emit('end');
+    });
+    return stream;
+  };
+  try {
+    await assert.rejects(cloud.sendEvent(liveViewEvent('amzn1.alexa.endpoint.test')), /HTTP 500/);
+    assert.equal(cloud.status().lastEvent.errorCode, 'INTERNAL_SERVICE_EXCEPTION');
+    assert.ok(!JSON.stringify(cloud.status()).includes('private-diagnostic'));
+  } finally {cloud.stop();}
+});
+
+test('late event responses after stopping cannot resurrect a camera session', async () => {
+  const {cloud, client} = transport(); await cloud.openChannel();
+  let stream, sent;
+  const started = new Promise(resolve => {sent = resolve;});
+  client.request = () => {
+    stream = new EventEmitter(); stream.close = () => stream.emit('close'); stream.end = () => sent(); return stream;
+  };
+  cloud.targets.set('camera', {endpoint: 'amzn1.alexa.endpoint.test'});
+  const opening = cloud.startCamera('camera'); await started;
+  await cloud.stopCamera();
+  stream.emit('response', {':status': 200, 'content-type': 'multipart/mixed; boundary=test'});
+  stream.emit('data', Buffer.from('--test\r\nContent-Type: application/json\r\n\r\n{"directive":{"header":{"namespace":"Alexa.Camera.LiveViewController","name":"StartLiveView"},"payload":{"sessionId":"late-session"}}}\r\n--test--\r\n'));
+  stream.emit('end'); await assert.rejects(opening, /cancelada/);
+  assert.equal(cloud.status().video.phase, 'disconnected'); assert.equal(cloud.rtcSessions.size, 0);
 });

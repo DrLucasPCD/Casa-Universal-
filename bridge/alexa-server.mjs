@@ -1,0 +1,67 @@
+import {createServer} from 'node:http';
+import {readFile} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import {resolve} from 'node:path';
+import {AlexaLogin} from './alexa-login.mjs';
+import {AlexaCloud} from './alexa-cloud.mjs';
+
+const ROOT = fileURLToPath(new URL('../', import.meta.url));
+
+export function createAlexaBridge({port = 8877, login = new AlexaLogin(), cloud = new AlexaCloud(login), restore = true} = {}) {
+  const assets = {'/': ['alexa-setup.html', 'text/html; charset=utf-8'],
+    '/alexa-setup.js': ['alexa-setup.js', 'text/javascript; charset=utf-8'],
+    '/alexa-webrtc.js': ['alexa-webrtc.js', 'text/javascript; charset=utf-8'],
+    '/alexa-setup.css': ['echo-camera.css', 'text/css; charset=utf-8']};
+  const server = createServer(async (request, response) => {
+    const actualPort = server.address().port;
+    const origin = `http://127.0.0.1:${actualPort}`;
+    function send(status, body, type = 'application/json; charset=utf-8') {
+      response.writeHead(status, {'Content-Type': type, 'Cache-Control': 'no-store',
+        'X-Content-Type-Options': 'nosniff', 'Referrer-Policy': 'no-referrer',
+        'Content-Security-Policy': "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"});
+      response.end(type.startsWith('application/json') ? JSON.stringify(body) : body);
+    }
+    if (request.headers.host !== `127.0.0.1:${actualPort}` || !['127.0.0.1', '::ffff:127.0.0.1'].includes(request.socket.remoteAddress)) {
+      return send(403, {error: 'Abra este painel no próprio Mac, pelo endereço 127.0.0.1.'});
+    }
+    const path = new URL(request.url, origin).pathname;
+    if (request.method === 'GET') {
+      if (path === '/api/status') return send(200, {...login.status(), ...cloud.status()});
+      if (path === '/api/rtc') {
+        try {return send(200, cloud.signaling(Number(new URL(request.url, origin).searchParams.get('after') || 0)));}
+        catch {return send(400, {error: 'Cursor RTC inválido.'});}
+      }
+      const asset = assets[path];
+      if (!asset) return send(404, {error: 'Página não encontrada.'});
+      try { return send(200, await readFile(resolve(ROOT, 'static', asset[0])), asset[1]); }
+      catch { return send(404, {error: 'Arquivo indisponível.'}); }
+    }
+    if (request.method !== 'POST') return send(405, {error: 'Método não permitido.'});
+    if (request.headers.origin !== origin) return send(403, {error: 'Origem não autorizada.'});
+    if (request.headers['content-type']?.split(';')[0] !== 'application/json') return send(415, {error: 'Envie JSON.'});
+    try {
+      let body = '';
+      for await (const chunk of request) { body += chunk; if (Buffer.byteLength(body) > (path === '/api/rtc/offer' ? 65536 : 2048)) return send(413, {error: 'Solicitação muito grande.'}); }
+      const payload = JSON.parse(body);
+      if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error();
+      if (path === '/api/login') return send(200, await login.begin({remember: payload.remember === true}));
+      if (path === '/api/discover') return send(200, await cloud.discover());
+      if (path === '/api/channel') return send(200, await cloud.openChannel(payload.profile));
+      if (path === '/api/camera/start') return send(200, await cloud.startCamera(payload.id));
+      if (path === '/api/rtc/offer') return send(200, await cloud.offer(payload.sessionId, payload.sdp));
+      if (path === '/api/rtc/connected') return send(200, await cloud.rtcEvent(payload.sessionId, 'SessionConnected'));
+      if (path === '/api/rtc/frames') return send(200, cloud.reportFrames(payload));
+      if (path === '/api/channel/stop') {const result = await cloud.stopCamera(); return send(200, {...cloud.status(), ...result});}
+      return send(404, {error: 'Operação não encontrada.'});
+    } catch (error) {
+      const safe = typeof error?.message === 'string' && /^(A Amazon |Faça login |Escolha uma câmera |Encerre a solicitação |Conecte o canal |O canal |Canal inválido|Conexão cancelada|Falha na conexão segura|Resposta de diretivas|Falha ao interpretar|O fluxo de diretivas|O envio do evento|Resposta do evento|Não foi possível enviar|Resposta Amazon muito grande|A Amazon devolveu|Região Amazon|Sessão RTC |Oferta RTC |Relato de imagem)/.test(error.message);
+      return send(400, {error: safe ? error.message : 'Não foi possível concluir a operação. Confira a conexão da ponte com a Amazon.'});
+    }
+  });
+  return {server, login, cloud, async start() {
+    await new Promise((done, fail) => {server.once('error', fail); server.listen(port, '127.0.0.1', done);});
+    if (restore) await login.restore();
+    return originURL(server.address().port);
+  }, async close() {try {await cloud.stopCamera?.();} finally {cloud.stop(); login.close(); await new Promise(done => server.close(done));}}};
+}
+function originURL(port) { return `http://127.0.0.1:${port}/`; }

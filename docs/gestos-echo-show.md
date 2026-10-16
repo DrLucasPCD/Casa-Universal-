@@ -1,10 +1,10 @@
 # Gestos com a câmera da Echo Show
 
-## Situação em 15/10/2026
+## Situação em 16/10/2026
 
-O acesso à câmera da Echo Show original **ainda não foi confirmado**. O fluxo de gestos não está ativo. Nenhum comando real foi enviado nesta investigação.
+O acesso à câmera da Echo Show foi confirmado pela [ponte local Alexa](ponte-alexa.md): vídeo WebRTC real até 1280 × 720, sem alterar o sistema da Echo. O fluxo de gestos ainda não está ativo. Nenhum comando de gesto foi enviado aos aparelhos.
 
-**Atualização:** o usuário forneceu o XAPK Alexa 2.2.720364.0 e confirmou que vê a câmera no app. A [análise do aplicativo fornecido](alexa-oficial.md) rastreou LiveView/RTCSC e identificou implementação WebRTC. Isso amplia o estudo inicial do cliente de terceiros descrito abaixo, mas ainda não demonstra uma sessão independente no Casa Universal.
+**Atualização:** o usuário forneceu o XAPK Alexa 2.2.720364.0 e confirmou que vê a câmera no app. A [análise do aplicativo fornecido](alexa-oficial.md) rastreou LiveView/RTCSC e identificou implementação WebRTC. Isso amplia o estudo inicial do cliente de terceiros descrito abaixo, e a investigação posterior demonstrou uma sessão independente com imagem real no navegador.
 
 O prefixo de hardware informado pelo usuário sugere **Echo Show 8 de 2ª geração, athena, A8H3N2**. Essa identificação é uma inferência baseada na [tabela técnica do projeto connect-the-dots](https://github.com/gilderchuck/connect-the-dots/wiki), que também alerta que os prefixos nem sempre determinam o modelo. Não incluímos número de série nem MAC nos arquivos públicos.
 
@@ -38,7 +38,7 @@ O botão **Parar**, sair da página ou ocultar a aba encerra as trilhas. Uma aut
 
 `NotAllowedError` pode significar recusa de permissão ou restrição do sistema. `NoCameraAPI` significa que o navegador não expõe a API naquele contexto. Nenhum desses resultados deve ser anunciado como prova de que o hardware não tem câmera. Consulte a documentação de [getUserMedia](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia).
 
-## Integração a construir depois de validar a entrada de vídeo
+## Integração de gestos a construir sobre a entrada de vídeo validada
 
 O caminho proposto é **vídeo → reconhecimento local das mãos → seleção de alvo calibrado → comandos existentes da central ESP32**. Não é necessário passar cada frame pelo ChatGPT/MCP. O processamento no próprio navegador da Echo depende de compatibilidade e desempenho ainda não medidos. Se for necessário outro processador permanente, isso será uma dependência nova: o Mac do usuário está disponível apenas durante testes. Não há implementação de visão para esta tarefa no ESP32-S3.
 

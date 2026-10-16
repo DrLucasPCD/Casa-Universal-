@@ -4,11 +4,11 @@ Painel local para Samsung, BroadLink, Smart Life/Tuya e Sonoff/eWeLink, com desc
 
 Marca visual: **casa.**. Para publicar a entrada pública e a demonstração no Netlify pelo GitHub, veja [publicação e arquitetura](docs/publicacao.md). O build já está configurado em `netlify.toml`. Os controles reais e o MCP continuam na central da casa; o site publicado abre o painel dessa central pelo endereço informado.
 
-**Pesquisa de gestos com Echo Show:** o [teste de câmera](https://casa-universal.netlify.app/camera) deve ser aberto na própria Echo, pelo Silk. O acesso ao vídeo e o controle por gestos ainda não estão confirmados. Veja a [análise com REA, limitações e próximos passos](docs/gestos-echo-show.md).
+**Câmera Echo Show:** a ponte local Alexa recebeu vídeo real via WebRTC até 1280 × 720. O reconhecimento de gestos ainda está pendente. O [teste de câmera pelo Silk](https://casa-universal.netlify.app/camera) continua disponível como uma abordagem separada. Veja a [análise com REA, limitações e próximos passos](docs/gestos-echo-show.md).
 
-O [estudo do XAPK Alexa fornecido](docs/alexa-oficial.md) identifica a implementação LiveView/RTCSC/WebRTC presente no aplicativo e os pontos que ainda faltam validar para uma conexão independente.
+O [estudo do XAPK Alexa fornecido](docs/alexa-oficial.md) identifica a implementação LiveView/RTCSC/WebRTC presente no aplicativo e registra o avanço até a conexão independente com imagem real.
 
-A [ponte local Alexa experimental](docs/ponte-alexa.md) abre o login manual Amazon com `npm run alexa` e prepara a busca da Echo e o teste do canal de diretivas. Ainda não recebe vídeo nem executa comandos por gestos.
+A [ponte local Alexa experimental](docs/ponte-alexa.md) abre o login manual Amazon com `npm run alexa` e prepara a busca da Echo e o teste do canal de diretivas. Recebe vídeo WebRTC da Echo no navegador; ainda não executa comandos por gestos.
 
 **Central ESP32-S3 N16R8:** há uma versão de firmware para manter painel, Samsung, BroadLink, SonoffLAN, Tuya 3.3/3.4 e MCP na placa, sem o Mac ligado. Veja [instalação, suporte e limitações](firmware/esp32/README.md) e [como conectar os Sonoff](docs/sonoff.md). Tuya requer as local keys dos aparelhos; veja [configuração Smart Life](docs/tuya.md). O driver da fechadura HAHA permanece pendente; a descoberta Bluetooth está disponível. As instruções abaixo descrevem a central Python no Mac.
 

@@ -1,12 +1,12 @@
 # Câmera da Echo: análise do aplicativo Alexa fornecido
 
-Análise estática realizada em 15/10/2026. O usuário confirmou que consegue ver a câmera da Echo pelo aplicativo Alexa. Não executamos o aplicativo, não fizemos login Amazon, não iniciamos transmissão e não enviamos comandos aos aparelhos.
+Análise estática inicial realizada em 15/10/2026. Naquele levantamento não executamos o aplicativo nem iniciamos transmissão. Em 16/10/2026, a investigação prosseguiu com login autorizado e um receptor independente: **a imagem real da Echo chegou a 1280 × 720 no navegador**, sem acesso à câmera ou microfone do Mac. A [ponte Alexa](ponte-alexa.md) documenta a correção LiveView 2.2, a sinalização e o teste. O restante deste relatório preserva as evidências e limites do levantamento estático inicial.
 
 ## Resultado
 
 O pacote contém uma implementação real de sessões de câmera com **LiveView, RTCSC e WebRTC**, incluindo um ramo de classificação de aparelhos Amazon (1P). Foi possível rastrear chamadas Java de início de sessão, envio de eventos pelo Alexa Mobile Framework, recebimento de sessão e sinalização de prontidão. Isso justifica investigar o caminho usado pelo aplicativo oficial, além do teste de câmera no navegador.
 
-**O vídeo ainda não está conectado ao Casa Universal.** Não obtivemos um frame, uma URL reutilizável nem uma sessão autenticada independente. Os caminhos identificados são observações estáticas; não demonstram que todos eles sejam os escolhidos para a Echo específica do usuário.
+**Atualização de execução:** a ponte local recebeu vídeo da Echo em 16/10/2026. Não há URL RTSP reutilizável; o acesso depende de login e de uma sessão LiveView/RTC/WebRTC. Os caminhos abaixo foram inicialmente identificados por análise estática e não devem ser confundidos com um trace integral do app oficial em execução.
 
 ## Identidade e cobertura
 
@@ -76,7 +76,7 @@ Hashes das bibliotecas: `librtcsc-jni.so` = `4377eedcb3bdd1afd364ba0ba5ef45ef7d2
 
 ## Autenticação: conclusão limitada
 
-O envio de eventos e o recebimento de diretivas dependem do Alexa Mobile Framework. O XAPK distribuído fornece código; não contém a sessão autenticada que o usuário mantém no aplicativo do iPhone. A análise não estabeleceu uma sequência de autenticação/registro que o Casa Universal possa reproduzir e renovar.
+O envio de eventos e o recebimento de diretivas dependem do Alexa Mobile Framework. O XAPK distribuído fornece código; não contém a sessão autenticada que o usuário mantém no aplicativo do iPhone. A análise estática inicial, por si só, não estabeleceu a reprodução e renovação desse registro. A implementação e o teste posteriores estão documentados na ponte Alexa.
 
 Investigamos `com.amazon.rtcsc.service.OAuthProviderImpl`: ele usa `MAPAccountManager`, `TokenManagement` e uma chave de token por pacote. Entretanto, `getAccessToken` implementa a interface OAuth do cliente **Minerva para métricas**, e a referência de entrada encontrada no recorte é `RtcscCustomMetricsPublisherAdapter`. **Não tratamos esse token como credencial do vídeo.** Nenhuma credencial pessoal foi extraída.
 
@@ -89,14 +89,14 @@ Evidências: `alexa-oauth-get-token.json` (`ev_adf1f74a8ccfc7b6751ac925d94f96bda
 | O app fornecido tem infraestrutura de vídeo de câmera? | Respondida por código Android e vínculos nativos. |
 | Existem tratamento 1P e configuração de Monitoramento residencial? | Evidências estáticas no Hermes; uso exato na Echo do usuário ainda não observado. |
 | Como pede e associa uma sessão? | Parcialmente respondida: eventos LiveView, endpoint, sessão RTCSC e prontidão. |
-| Como autenticar e registrar um cliente independente? | Não resolvida; fluxo de conta/dispositivo, permissões e renovação ainda precisam ser demonstrados. |
-| Como reproduzir a sinalização, SDP/ICE e obter frames da Echo? | Implementação presente no app; reprodução fora dele ainda não demonstrada. |
+| Como autenticar e registrar um cliente independente? | Login, registro e uso no teste real demonstrados pela ponte; renovação prolongada ainda a validar. |
+| Como reproduzir a sinalização, SDP/ICE e obter frames da Echo? | Receptor DTLS/WebRTC implementado e testado no navegador com esta Echo, até 1280 × 720. |
 | Gestos já funcionam? | Não. Falta vídeo contínuo, acesso aos frames, desempenho medido e calibração dos alvos. |
 
-O próximo marco verificável é uma ponte local que, com autenticação legítima, descubra a Echo, abra uma sessão e receba **um frame real**, encerrando-a corretamente. Isso exige resolver o registro e a sinalização. As bibliotecas JNI Android dependem do ambiente Android; a integração web precisa de um cliente compatível ou de uma ponte que entregue o vídeo ao processador de gestos.
+Esse marco foi alcançado em 16/10/2026: a ponte local descobriu a Echo, abriu a sessão e recebeu frames reais, depois encerrou o receptor e enviou `RequestStopLiveView`. As bibliotecas JNI Android dependem do ambiente Android; a integração web precisa de um cliente compatível ou de uma ponte que entregue o vídeo ao processador de gestos.
 
-Se a recepção de vídeo for viável, o reconhecimento de mãos precisará rodar em um processador com desempenho medido. A central ESP32 continua responsável pelos comandos dos aparelhos; não foi implementado nela um decodificador de vídeo e reconhecimento de mãos. O Mac está disponível somente para testes, portanto a operação contínua ainda requer uma solução de processamento definida. O controle de cortina por percentual e a calibração dos gestos continuam pendentes conforme [o documento de gestos](gestos-echo-show.md).
+Com a recepção de vídeo validada nesta Echo, o reconhecimento de mãos ainda precisa rodar em um processador com desempenho medido. A central ESP32 continua responsável pelos comandos dos aparelhos; não foi implementado nela um decodificador de vídeo e reconhecimento de mãos. O Mac está disponível somente para testes, portanto a operação contínua ainda requer uma solução de processamento definida. O controle de cortina por percentual e a calibração dos gestos continuam pendentes conforme [o documento de gestos](gestos-echo-show.md).
 
 ## Evidência local e publicação
 
-Os registros brutos estão em `research/evidence/`, ignorados pelo Git: `alexa-official-inventory.json`, `alexa-camera-slice-provenance.json`, `alexa-rtc-slice-provenance.json`, `alexa-official-evidence-index.json`, `alexa-bundle-summary.json` e os arquivos por operação listados acima. APKs, splits, bibliotecas e código decompilado não são publicados. Este relatório resume observações e limites; nenhuma alteração funcional de câmera foi anunciada como concluída.
+Os registros brutos estão em `research/evidence/`, ignorados pelo Git: `alexa-official-inventory.json`, `alexa-camera-slice-provenance.json`, `alexa-rtc-slice-provenance.json`, `alexa-official-evidence-index.json`, `alexa-bundle-summary.json` e os arquivos por operação listados acima. APKs, splits, bibliotecas e código decompilado não são publicados. Este relatório preserva observações e limites da análise estática. A ponte local e a validação posterior de vídeo são documentadas separadamente, sem publicar sessões, imagens privadas ou credenciais.

@@ -13,6 +13,7 @@ node_modules/
 research/apks/
 research/*-js/
 research/evidence/*.txt
+research/evidence/*.md
 research/ir-source/
 .codex/
 artifacts/

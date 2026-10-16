@@ -8,6 +8,8 @@ Marca visual: **casa.**. Para publicar a entrada pública e a demonstração no 
 
 O [estudo do XAPK Alexa fornecido](docs/alexa-oficial.md) identifica a implementação LiveView/RTCSC/WebRTC presente no aplicativo e os pontos que ainda faltam validar para uma conexão independente.
 
+A [ponte local Alexa experimental](docs/ponte-alexa.md) abre o login manual Amazon com `npm run alexa` e prepara a busca da Echo e o teste do canal de diretivas. Ainda não recebe vídeo nem executa comandos por gestos.
+
 **Central ESP32-S3 N16R8:** há uma versão de firmware para manter painel, Samsung, BroadLink, SonoffLAN, Tuya 3.3/3.4 e MCP na placa, sem o Mac ligado. Veja [instalação, suporte e limitações](firmware/esp32/README.md) e [como conectar os Sonoff](docs/sonoff.md). Tuya requer as local keys dos aparelhos; veja [configuração Smart Life](docs/tuya.md). O driver da fechadura HAHA permanece pendente; a descoberta Bluetooth está disponível. As instruções abaixo descrevem a central Python no Mac.
 
 ## Abrir e usar

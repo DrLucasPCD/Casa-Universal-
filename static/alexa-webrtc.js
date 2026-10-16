@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   // Receive-only camera client. Never requests the Mac's camera or microphone.
-  function create({video, message}) {
+  function create({video, message, onStop = () => {}}) {
     let active = false, generation = 0, peer = null, sessionId = null, cursor = 0, timer = null;
     let frames = 0, lastReport = -Infinity, frameCallback = null, notifiedConnected = false;
     const say = text => {message.textContent = text;};
@@ -12,6 +12,7 @@
       return result;
     }
     function stop(notify = false) {
+      onStop();
       active = false; generation++; clearTimeout(timer); timer = null;
       if (frameCallback !== null && video.cancelVideoFrameCallback) video.cancelVideoFrameCallback(frameCallback);
       frameCallback = null;

@@ -1,9 +1,10 @@
 (() => {
   'use strict';
   const byId = id => document.getElementById(id);
-  const rtc = window.CasaAlexaRTC.create({video: byId('echo-video'), message: byId('rtc-status')});
+  const gestures = window.CasaGesturePreview.create({video: byId('echo-video'), canvas: byId('hand-overlay')});
+  const rtc = window.CasaAlexaRTC.create({video: byId('echo-video'), message: byId('rtc-status'), onStop: () => gestures.stop()});
   const messages = {disconnected: 'Conexão ainda não iniciada.', starting: 'Preparando a página de login…', awaiting_login: 'A página de login está pronta. Toque em Continuar login e entre na sua conta Amazon.', authenticated: 'Login concluído. Cliente Amazon registrado; o vídeo ainda será verificado.', authenticated_memory: 'Login concluído. Sessão disponível apenas na memória.', refreshing: 'Renovando a conexão salva…', login_expired: 'A Amazon não renovou o acesso. Reinicie a ponte para entrar novamente.', login_failed: 'O login não foi concluído. Você pode tentar novamente.'};
-  let opening = false, busy = false, operationId = 0, deviceFingerprint = '';
+  let opening = false, busy = false, operationId = 0, deviceFingerprint = '', lastAuthenticated = null, latestState = {};
   async function post(path, body = {}) {
     const response = await fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
     const result = await response.json();
@@ -19,7 +20,7 @@
     try {
       await post(path, body);
       if (current === operationId) {
-        if (path === '/api/camera/start') rtc.start();
+        if (path === '/api/camera/start') {rtc.start(); gestures.setCamera(body.id);}
         byId('operation').textContent = 'Consulta concluída. Veja o resultado abaixo.';
       }
     }
@@ -27,6 +28,9 @@
     finally {if (current === operationId) busy = false; await status();}
   }
   function render(state) {
+    latestState = state;
+    if (lastAuthenticated !== state.authenticated) {byId('login-panel').open = !state.authenticated; lastAuthenticated = state.authenticated;}
+    byId('open-camera').disabled = !state.authenticated || busy || ['requesting','awaiting_directive','session_received','streaming','stalled'].includes(state.video?.phase);
     byId('status').textContent = messages[state.phase] || 'Verificando conexão…';
     byId('connection').textContent = state.authenticated ? 'Amazon: cliente registrado.' : 'Amazon: aguardando login.';
     const link = byId('open-login');
@@ -68,6 +72,23 @@
     finally {opening = false; await status();}
   });
   byId('discover').addEventListener('click', () => operate('/api/discover'));
+  byId('open-camera').addEventListener('click', async () => {
+    if (busy) return;
+    busy = true; const current = ++operationId;
+    byId('operation').textContent = 'Preparando a câmera da Echo…'; await status();
+    try {
+      let devices = latestState.devices || [];
+      if (!devices.length) devices = (await post('/api/discover')).devices;
+      if (current !== operationId) return;
+      const cameras = devices.filter(d => d.manufacturer === 'Amazon' && d.cameraEndpointAvailable);
+      if (cameras.length !== 1) throw new Error('Escolha a câmera em “Fonte de vídeo e diagnóstico”.');
+      if (latestState.channel?.phase !== 'ready') await post('/api/channel', {profile:'modern'});
+      if (current !== operationId) return;
+      await post('/api/camera/start', {id:cameras[0].id});
+      if (current === operationId) {rtc.start(); gestures.setCamera(cameras[0].id); byId('operation').textContent = 'Câmera solicitada. Aguardando a imagem…';}
+    } catch (error) {if (current === operationId) byId('operation').textContent = error.message;}
+    finally {if (current === operationId) busy = false; await status();}
+  });
   byId('channel').addEventListener('click', () => operate('/api/channel', {profile: byId('gateway').value}));
   byId('stop-channel').addEventListener('click', () => operate('/api/channel/stop', {}, true));
   status(); setInterval(status, 2000);

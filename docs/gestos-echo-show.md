@@ -2,7 +2,7 @@
 
 ## Situação em 16/10/2026
 
-O acesso à câmera da Echo Show foi confirmado pela [ponte local Alexa](ponte-alexa.md): vídeo WebRTC real até 1280 × 720, sem alterar o sistema da Echo. O fluxo de gestos ainda não está ativo. Nenhum comando de gesto foi enviado aos aparelhos.
+O acesso à câmera da Echo Show foi confirmado pela [ponte local Alexa](ponte-alexa.md): vídeo WebRTC real até 1280 × 720, sem alterar o sistema da Echo. A prévia local reconhece mãos e desenha os 21 pontos sobre o vídeo. O usuário confirmou os pontos na imagem real da Echo após o ajuste do reconhecimento. A calibração de alvos e as intenções de gestos estão implementadas para teste; nenhum comando de gesto foi enviado aos aparelhos.
 
 **Atualização:** o usuário forneceu o XAPK Alexa 2.2.720364.0 e confirmou que vê a câmera no app. A [análise do aplicativo fornecido](alexa-oficial.md) rastreou LiveView/RTCSC e identificou implementação WebRTC. Isso amplia o estudo inicial do cliente de terceiros descrito abaixo, e a investigação posterior demonstrou uma sessão independente com imagem real no navegador.
 
@@ -38,9 +38,30 @@ O botão **Parar**, sair da página ou ocultar a aba encerra as trilhas. Uma aut
 
 `NotAllowedError` pode significar recusa de permissão ou restrição do sistema. `NoCameraAPI` significa que o navegador não expõe a API naquele contexto. Nenhum desses resultados deve ser anunciado como prova de que o hardware não tem câmera. Consulte a documentação de [getUserMedia](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia).
 
-## Integração de gestos a construir sobre a entrada de vídeo validada
+## Usar a prévia de mãos e gestos
 
-O caminho proposto é **vídeo → reconhecimento local das mãos → seleção de alvo calibrado → comandos existentes da central ESP32**. Não é necessário passar cada frame pelo ChatGPT/MCP. O processamento no próprio navegador da Echo depende de compatibilidade e desempenho ainda não medidos. Se for necessário outro processador permanente, isso será uma dependência nova: o Mac do usuário está disponível apenas durante testes. Não há implementação de visão para esta tarefa no ESP32-S3.
+1. No Mac, execute `npm ci` e `npm run alexa`. A preparação baixa o modelo oficial de mãos se necessário, verifica seu SHA-256 e prepara o pacote local. Abra **http://127.0.0.1:8877/**.
+2. Faça login manualmente se a sessão não estiver disponível. Clique em **Abrir câmera da Echo** e aguarde a mensagem de imagem recebida.
+3. Clique em **Iniciar teste de gestos**. Mostre uma mão inteira, iluminada, perto da câmera no primeiro teste. Os pontos acompanham a mão. Pontos âmbar indicam detecção que ainda não permite selecionar um alvo, por exemplo, mão pequena ou parcialmente fora da imagem. O diagnóstico mostra quantidade de mãos e tempo de processamento.
+4. Adicione um aparelho e use **1. Marcar na imagem** para clicar na localização dele no vídeo. Depois clique em **2. Aprender direção**: são 3 segundos para se posicionar e 2 segundos para apontar, mantendo a mão inteira visível. A direção só é aceita com amostras suficientes e estáveis.
+5. Clique em **Salvar calibração**. A configuração fica em `data/gestures/calibration.json`, com acesso somente pelo usuário do Mac. Ela é vinculada à câmera e carregada nas próximas aberturas. Esta calibração ainda não é sincronizada com o Firestore.
+6. Aponte para selecionar e espere o nome aparecer em **Alvo selecionado**. Faça uma pinça para confirmar. Na cortina, informe a abertura inicial, segure a pinça e suba/desça a mão; no projetor, deslize em quatro direções ou faça a pinça para OK. As intenções aparecem no painel, sem acionar os aparelhos. **Rearmar seleção** permite repetir o teste de energia.
+
+Mantenha a câmera fixa e use a mesma posição na sala durante a calibração e o teste. Esta versão compara a direção estimada do dedo com as direções aprendidas; ela não reconhece objetos nem calcula a posição absoluta da pessoa na sala. Alvos com direções muito próximas são recusados como ambíguos. A calibração com a mão perto da câmera não substitui calibrar a posição de uso pretendida.
+
+O reconhecimento usa [MediaPipe Hand Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker/web_js), pacote `@mediapipe/tasks-vision` fixado em `0.10.32`, em um Worker com CPU. Os scripts, WASM e modelo são servidos pela ponte local. Os frames são analisados neste navegador; não são gravados nem enviados ao Firestore ou a um serviço de IA. O vídeo continua usando a conexão Amazon autorizada.
+
+Modelo: [hand_landmarker.task, float16/1](https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task), SHA-256 `fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1`. Pacote e modelo conservam suas licenças de origem; não são artefatos obtidos do APK Alexa.
+
+A análise usa a resolução recebida, até 1280 px de largura, com no máximo um frame em processamento e captura até 10 vezes por segundo. Não há solicitação da câmera ou do microfone do Mac. Mãos incompletas, múltiplas mãos, perda de imagem e resultados atrasados impedem a seleção. Ocultar/sair da aba, parar o teste ou encerrar o vídeo termina o reconhecimento e limpa as marcações.
+
+`GET /api/gestures/status` e a seção `gestures` de `/api/status` mostram apenas estado recente da prévia, quantidade de mãos, motivo padronizado, alvo selecionado e tempo de inferência. O estado expira em 2 segundos; não contém imagem nem coordenadas da mão. `commandsEnabled` é sempre `false`. Ainda não há ferramenta MCP de gestos publicada.
+
+## Integração com os aparelhos: pendente
+
+O caminho é **vídeo → reconhecimento local das mãos → seleção de alvo calibrado → comandos existentes da central ESP32**. As três primeiras etapas têm implementação de prévia. A última depende da calibração real e do mapeamento de cada alvo para um controle existente. Não é necessário passar cada frame pelo ChatGPT/MCP.
+
+O processamento desta versão ocorre no navegador do Mac e a ponte Amazon precisa permanecer ligada. O Mac do usuário está disponível apenas durante testes. Ainda não validamos outro processador permanente, processamento na própria Echo ou no ESP32-S3.
 
 | Alvo | Intenção | Condição antes de habilitar |
 | --- | --- | --- |
@@ -51,8 +72,11 @@ O caminho proposto é **vídeo → reconhecimento local das mãos → seleção 
 
 Apontar para um objeto exige calibrar a câmera e os alvos na sala; a posição de um dedo na imagem, isoladamente, não identifica o objeto no espaço. O desenho da interação deve mostrar o alvo selecionado antes de executar ações.
 
-O controle de cortina precisará limitar/coalescer comandos e encerrar movimento ao perder a mão. Não enviaremos comandos por frame. O MCP poderá consultar/configurar o módulo quando ele existir, usando as mesmas ações validadas da central. Não há ferramenta MCP de visão ou gesto anunciada como funcional nesta etapa.
+O controle de cortina precisará limitar/coalescer comandos e encerrar movimento ao perder a mão. Não enviaremos comandos por frame. O MCP poderá consultar/configurar o módulo por uma integração futura, usando as mesmas ações validadas da central. A prévia local não publica sua configuração nem uma ferramenta de visão no MCP remoto.
 
 ## Verificação da página
 
 `node --test tests/camera-probe.test.mjs` cobre início explícito sem áudio, recusa de permissão, autorização tardia depois de cancelar, ausência de frames, chegada de imagem, cancelamento durante espera, contexto sem API/sem HTTPS e encerramento pelo sistema. Esses testes validam o código; não substituem o teste físico na Echo.
+
+
+`npm test` cobre a extração de características, desenho de mãos pequenas/parciais, rejeição de múltiplas mãos para seleção, direções ambíguas, calibração estável, validação/persistência privada e expiração do estado. Os testes HTTP usam uma ponte simulada e não enviam comandos aos aparelhos. O motor de intenções tem testes de permanência, pinça, navegação, arraste de cortina, perda da mão e frames atrasados. A confirmação dos pontos pelo usuário é a validação física feita nesta etapa; seleção de alvo e execução de gestos ainda precisam de validação na sala.

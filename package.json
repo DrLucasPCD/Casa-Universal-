@@ -7,11 +7,18 @@
   },
   "scripts": {
     "test": "node --test tests/*.test.mjs",
-    "alexa": "node bridge/alexa-bridge.mjs"
+    "alexa": "node bridge/alexa-bridge.mjs",
+    "vision:prepare": "node scripts/prepare_hand_model.mjs",
+    "prealexa": "npm run vision:prepare"
   },
   "dependencies": {
+    "@mediapipe/tasks-vision": "0.10.32",
     "@netlify/blobs": "11.1.4",
     "alexa-cookie2": "5.0.6"
   },
-  "overrides": {"alexa-cookie2": {"cookie": "0.7.2"}}
+  "overrides": {
+    "alexa-cookie2": {
+      "cookie": "0.7.2"
+    }
+  }
 }

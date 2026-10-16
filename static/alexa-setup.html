@@ -1,4 +1,42 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Casa · Conectar Alexa</title><link rel="stylesheet" href="/alexa-setup.css"><script src="/alexa-webrtc.js" defer></script><script src="/alexa-setup.js" defer></script></head>
-<body><main><header><span class="brand">casa.</span><span class="tag">PONTE LOCAL · ALEXA</span></header><section class="intro"><p class="eyebrow">ECHO SHOW · CONEXÃO AMAZON</p><h1>Entre com sua<br>conta da Alexa.</h1><p class="lead">O login manual usa o fluxo de registro do aplicativo. Conecte a Echo e receba a imagem neste navegador. O reconhecimento de gestos ainda está em preparação.</p></section>
-<section class="panel"><h2>Login manual</h2><p>Você fará login na página da Amazon apresentada pelo intermediário local neste Mac. A senha é encaminhada por HTTPS à Amazon e não é gravada pelo Casa Universal.</p><p>Ao concluir, a Amazon registra um cliente chamado <strong>Casa Universal</strong>. A conexão não comprova acesso à câmera; vamos testar o canal de vídeo em seguida.</p><label><input id="remember" type="checkbox"> Manter a conexão neste Mac, salvando os tokens localmente.</label><div class="actions"><button id="login" type="button">Abrir login manual Amazon</button><a id="open-login" class="brand" hidden target="_blank" rel="noopener noreferrer">Continuar login →</a></div><p id="status" role="status" aria-live="polite">Consultando conexão…</p><p class="small">Sem marcar a opção acima, a sessão permanece apenas na memória. Os dados de login não são enviados ao Netlify ou ao Firestore. Não compartilhe tokens ou a URL de retorno na conversa.</p></section>
-<section class="next panel"><p class="eyebrow">2 · DISPOSITIVOS E VÍDEO</p><h2>Conectar a Echo</h2><p id="connection">Amazon: aguardando login.</p><div class="actions"><button id="discover" disabled>Buscar câmeras da conta</button><select id="gateway" aria-label="Canal Amazon"><option value="modern">Canal atual · América</option><option value="legacy">Canal anterior · América</option><option value="push">Canal de notificações · diagnóstico</option></select><button id="channel" disabled>Testar canal de vídeo</button><button id="stop-channel" class="secondary">Encerrar canal</button></div><p id="channel-status" role="status"></p><div id="devices"></div><p id="operation" role="status" aria-live="polite"></p><div class="preview"><video id="echo-video" autoplay muted playsinline></video><div class="privacy">RECEPÇÃO LOCAL · SEM MICROFONE · SEM GRAVAÇÃO</div></div><p id="rtc-status" role="status">Nenhuma imagem recebida.</p><p id="video">Vídeo: ainda não conectado. Nenhuma imagem recebida.</p><details><summary>Diagnóstico sem credenciais</summary><pre id="diagnostic"></pre></details></section></main></body></html>
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Casa · Visão e gestos</title>
+<link rel="stylesheet" href="/alexa-setup.css"><link rel="stylesheet" href="/gesture-preview.css">
+<script src="/hand-features.js" defer></script><script src="/gesture-engine.js" defer></script>
+<script src="/gesture-preview.js" defer></script><script src="/alexa-webrtc.js" defer></script><script src="/alexa-setup.js" defer></script>
+</head>
+<body><main>
+<header><span class="brand">casa.</span><span class="tag">VISÃO LOCAL · ECHO SHOW</span></header>
+<section class="intro"><p class="eyebrow">SUA CASA, NO SEU MOVIMENTO</p><h1>Um gesto.<br>Uma intenção.</h1><p class="lead">Veja a imagem da Echo, ensine para onde está apontando e acompanhe a intenção de cada gesto.</p><p class="preview-badge">PRÉVIA VISUAL · NENHUM APARELHO SERÁ ACIONADO</p></section>
+<details id="login-panel" class="panel login-details" open><summary>Conexão com a Amazon</summary>
+<h2>Login manual</h2><p>Entre na página da Amazon apresentada pelo intermediário local no Mac. A senha segue por HTTPS para a Amazon e não é gravada pelo Casa Universal.</p>
+<label><input id="remember" type="checkbox"> Manter a conexão neste Mac, salvando os tokens localmente.</label>
+<div class="actions"><button id="login">Abrir login manual Amazon</button><a id="open-login" class="login-link" hidden target="_blank" rel="noopener noreferrer">Continuar login →</a></div>
+<p id="status" role="status">Consultando conexão…</p><p class="small">Sem marcar a opção, a sessão permanece na memória. Dados de login não são enviados ao Netlify ou Firestore.</p>
+</details>
+<div class="vision-workspace">
+<section class="next panel camera-panel"><p class="eyebrow">01 · A IMAGEM DA SUA CASA</p><h2>O que a Echo vê.</h2><p id="connection">Amazon: aguardando login.</p>
+<div class="actions"><button id="open-camera" disabled>Abrir câmera da Echo</button><button id="stop-channel" class="secondary">Encerrar câmera</button></div>
+<p id="operation" role="status" aria-live="polite"></p>
+<div class="preview"><video id="echo-video" autoplay muted playsinline></video><canvas id="hand-overlay" aria-label="Imagem da Echo com marcações da mão e dos aparelhos" data-marking="false"></canvas><div class="privacy">IMAGEM LOCAL · SEM GRAVAÇÃO</div></div>
+<p id="rtc-status" role="status">Nenhuma imagem recebida.</p><p id="video" class="small">Vídeo: ainda não conectado.</p>
+<div class="selection-readout"><span>ALVO SELECIONADO</span><strong id="selected-target">Nenhum aparelho selecionado</strong></div>
+<details class="camera-options"><summary>Fonte de vídeo e diagnóstico</summary><div class="actions"><button id="discover" disabled>Buscar câmeras da conta</button><select id="gateway" aria-label="Canal Amazon"><option value="modern">Canal atual · América</option><option value="legacy">Canal anterior · América</option><option value="push">Notificações · diagnóstico</option></select><button id="channel" disabled>Testar canal de vídeo</button></div><p id="channel-status"></p><div id="devices"></div><pre id="diagnostic"></pre></details>
+</section>
+<section class="panel gesture-panel"><p class="eyebrow">02 · ENSINE O SEU GESTO</p><h2>Da mão à intenção.</h2>
+<p class="small">O reconhecimento acontece neste navegador. Não identifica objetos sozinho: ele compara sua direção de apontar com as direções que você ensinar.</p>
+<div class="actions"><button id="hand-start">Iniciar teste de gestos</button><button id="hand-stop" class="secondary" disabled>Parar teste</button></div>
+<p id="hand-status" role="status" aria-live="polite">Reconhecimento desativado.</p><div class="hand-indicators"><span id="hand-pose">Sem mão detectada</span><span id="hand-latency">Modelo local</span>
+          <p id="hand-diagnostic" class="muted" aria-live="polite"></p></div>
+<p id="camera-calibration-note" class="small">Mantenha a Echo fixa. Se mudar a câmera ou sua posição na sala, refaça a calibração.</p><button id="use-camera" class="secondary" hidden>Recalibrar nesta câmera</button>
+<div class="calibration-block"><h3>Seus aparelhos na imagem</h3><div class="target-add"><select id="new-target" aria-label="Tipo de aparelho a adicionar"><option value="0">Cortina</option><option value="1">Ventilador</option><option value="2">Projetor</option><option value="3">Luminária</option><option value="4">Luz do quarto</option></select><button id="add-target" class="secondary">Adicionar</button></div>
+<label>Aparelho a calibrar<select id="gesture-target"></select></label><div class="target-fields"><label>Nome<input id="target-name" maxlength="60" autocomplete="off"></label><label>Controle<select id="target-kind"><option value="switch">Ligar / desligar</option><option value="curtain">Cortina</option><option value="projector">Projetor</option></select></label></div>
+<label id="curtain-start-row" hidden>Abertura inicial informada por você (%)<input id="curtain-start" type="number" min="0" max="100" placeholder="0 fechada · 100 aberta"></label>
+<p id="target-calibration" class="small">Adicione um aparelho para calibrar.</p><div class="actions"><button id="mark-target" class="secondary" disabled>1. Marcar na imagem</button><button id="learn-direction" class="secondary" disabled>2. Aprender direção</button></div>
+<p class="small">Ao aprender, você terá 3 segundos para apontar e 2 segundos para manter a direção. Deixe uma mão inteira visível e bem iluminada.</p>
+<div class="actions"><button id="save-calibration">Salvar calibração</button><button id="remove-target" class="text-button" disabled>Remover alvo</button></div><p id="calibration-state" class="small" role="status">Carregando calibração local…</p></div>
+<div class="intent-preview"><span class="eyebrow">03 · CONFIRA A PRÉVIA</span><p id="gesture-intention">Aponte para selecionar. Faça uma pinça para confirmar.</p><p class="small">Cortina: segure a pinça e suba/desça a mão. Projetor: deslize nos quatro sentidos; uma pinça representa OK. Para ligar/desligar: aponte e faça uma pinça.</p><div class="preview-progress"><span>Abertura proposta</span><output id="preview-position">—</output><progress id="preview-meter" max="100" value="0"></progress></div><button id="gesture-rearm" class="secondary">Rearmar seleção</button><ol id="gesture-events" aria-label="Intenções de gestos, sem comandos reais"></ol></div>
+</section></div>
+</main></body></html>

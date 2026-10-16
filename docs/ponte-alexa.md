@@ -56,3 +56,8 @@ Não há reconhecimento de mãos conectado a essa biblioteca, calibração da sa
 `npm test` inclui testes de memória/persistência da sessão, proteção de origem e Host, parsing multipart fragmentado, cancelamento, rejeição de autorização, encerramento e regras dos gestos. Esses testes usam respostas simuladas; o teste real com imagem descrito acima foi uma verificação separada. Os testes do receptor cobrem cancelamento tardio, saída da aba, captura local ausente e distinção entre conexão e frame decodificado.
 
 O `cookie` transitivo está fixado em 0.7.2 para incluir a correção de validação de cookies. Em 16/10/2026, `npm audit` ainda informa a cadeia transitiva `braces`/`micromatch`/`http-proxy-middleware`/`alexa-cookie2` (GHSA-vfj7-8cjw-p6xm), sem versão corrigida de `braces` no registro consultado. O proxy usa contexto padrão estático, sem padrões glob vindos do usuário, e escuta somente no loopback. A auditoria não está limpa; não exponha as portas 8877/8878 à internet.
+
+
+## Prévia local de gestos
+
+A tela da ponte agora inclui vídeo com sobreposição dos pontos da mão e calibração de alvos. Execute `npm ci` e `npm run alexa`; o passo `prealexa` prepara o modelo local verificado. O teste de gestos é iniciado explicitamente depois da imagem e exibe intenções sem comandar aparelhos. Consulte [Gestos com a Echo](gestos-echo-show.md) para calibração, persistência local, limites e etapas ainda pendentes. Nenhuma credencial ou imagem é incluída no site publicado no Netlify.

@@ -16,6 +16,11 @@ if (!model || digest(model) !== expected) {
   await writeFile(resolve(directory, 'hand_landmarker.task.tmp'), model, {mode: 0o600});
   await rename(resolve(directory, 'hand_landmarker.task.tmp'), resolve(directory, 'hand_landmarker.task'));
 }
+const poseURL='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
+const poseDigest='59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a';
+const posePath=resolve(directory,'pose_landmarker_lite.task');
+let pose;try{pose=await readFile(posePath);}catch{}
+if(!pose||digest(pose)!==poseDigest){const response=await fetch(poseURL,{signal:AbortSignal.timeout(90000)});if(!response.ok)throw new Error('Modelo de punho indisponível.');pose=Buffer.from(await response.arrayBuffer());if(digest(pose)!==poseDigest)throw new Error('Modelo de punho não corresponde à versão fixada.');await writeFile(posePath+'.tmp',pose,{mode:0o600});await rename(posePath+'.tmp',posePath);}
 // The pinned package's CommonJS build has no require imports. Wrap its exports
 // in a local object so it can load in a classic Worker without eval or a CDN.
 const pkg = JSON.parse(await readFile(resolve('node_modules/@mediapipe/tasks-vision/package.json'), 'utf8'));

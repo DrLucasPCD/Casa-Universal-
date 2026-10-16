@@ -1,184 +1,122 @@
 (() => {
   'use strict';
-  const $ = id => document.getElementById(id);
-  const connections = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[0,17],[17,18],[18,19],[19,20]];
-  const reasons = {'no-hand':'Mostre uma mão inteira para a Echo.','multiple-hands':'Use apenas uma mão no enquadramento.','too-small':'Aproxime a mão da Echo.','incomplete-hand':'Mantenha a mão inteira dentro da imagem.','no-direction':'Não foi possível estimar a direção da mão.'};
-  const presets = [['Cortina','curtain'],['Ventilador','switch'],['Projetor','projector'],['Luminária','switch'],['Luz do quarto','switch']];
-  function create({video, canvas}) {
-    const ctx = canvas.getContext('2d'), engine = CasaGestureEngine.create();
-    let config = {version:1,cameraId:null,targets:[]}, cameraId=null, worker=null, generation=0, active=false, ready=false;
-    let timer=null, frameCallback=null, frameBusy=false, lastCapture=-Infinity, lastResult=-Infinity, lastHand=null;
-    let pinch=false, selected=null, candidate=null, candidateAt=0, latched=false, marking=false, capture=null;
-    let inferenceMs=null, lastReport=0;
-    const say = text => {$('hand-status').textContent=text;};
-    const chosen = () => config.targets.find(t=>t.id===$('gesture-target').value);
-    const dirty = () => {$('calibration-state').textContent='Alterações ainda não salvas neste Mac.';};
-    async function post(path, body) {
-      const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-      const result=await response.json();if(!response.ok)throw new Error(result.error||'Não foi possível salvar.');return result;
+  const $=id=>document.getElementById(id);
+  const defaults={tracker:'arm',selection:'manual',side:'right',dwellMs:600,stability:.065,movement:.07,confidence:.4};
+  const connections=[[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[0,17],[17,18],[18,19],[19,20]];
+  const reasons={'no-hand':'Mostre a mão em sua posição confortável.','multiple-hands':'Deixe apenas uma mão no enquadramento.','too-small':'Aproxime um pouco a mão.','incomplete-hand':'Deixe a palma e o punho dentro da imagem.','no-direction':'A direção ainda não ficou definida.','no-arm':'Deixe o punho e o cotovelo visíveis para a Echo.','multiple-people':'Há mais de uma pessoa no enquadramento; seleção suspensa.'};
+  const presets=[['Cortina','curtain','curtain'],['Ventilador','switch','tuya_fan'],['Projetor','projector',null],['Luminária','switch','sonoff'],['Luz do quarto','switch','sonoff_tx1c']];
+  const keyNames={power:'Energia',up:'Cima',down:'Baixo',left:'Esquerda',right:'Direita',ok:'OK'};
+  function create({video,canvas}) {
+    const ctx=canvas.getContext('2d');
+    let config={version:1,cameraId:null,targets:[],settings:{...defaults}},cameraId=null,engine=CasaAccessibleGestures.create(defaults);
+    let worker=null,generation=0,active=false,ready=false,timer=null,frameCallback=null,frameBusy=false,lastCapture=-Infinity,lastResult=-Infinity,lastHand=null,inferenceMs=null,lastReport=0;
+    let marking=false,capture=null,devices=[],sessionId=null,sequence=0,commandBusy=false,selected=null,previousPoint=null,stopping=false,dirtyConfig=false;
+    const say=text=>{$('hand-status').textContent=text;};
+    const chosen=()=>config.targets.find(t=>t.id===$('gesture-target').value);
+    const dirty=()=>{dirtyConfig=true;$('calibration-state').textContent='Alterações ainda não salvas neste Mac.';};
+    async function post(path,body={}){const response=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const result=await response.json();if(!response.ok)throw new Error(result.error||'Não foi possível concluir.');return result;}
+    function mode(){ $('control-mode').textContent=sessionId?'COMANDOS REAIS ATIVOS · CONFIRMAÇÃO POR TEMPO':'MODO PRÉVIA · COMANDOS REAIS DESATIVADOS';$('enable-control').disabled=!ready||Boolean(sessionId);}
+    async function disable(){const had=sessionId;sessionId=null;mode();try{await post('/api/gestures/stop');$('command-status').textContent=had?'Comandos desativados. Cortina: parada solicitada, se estava em movimento.':'Prévia ativa. Nenhum comando será enviado.';}catch(error){$('command-status').textContent=error.message;}}
+    function reset(){engine.reset();selected=null;previousPoint=null;$('selected-target').textContent='Nenhum aparelho selecionado';$('dwell-progress').value=0;}
+    function note(text){const row=document.createElement('li');row.textContent=text;$('gesture-events').prepend(row);while($('gesture-events').children.length>6)$('gesture-events').lastChild.remove();return row;}
+    async function dispatch(intent,timestamp){
+      const target=config.targets.find(t=>t.id===intent.targetId);if(!target)return;
+      const label=intent.type==='activate'?'alternar energia':intent.type==='curtain-motion'?(intent.direction==='open'?'abrir um pouco e parar':'fechar um pouco e parar'):keyNames[intent.key];
+      const row=note(`${target.name} · ${label}${sessionId?' · enviando…':' · prévia'}`);
+      $('gesture-intention').textContent=`${sessionId?'Comando':'Prévia'}: ${target.name} → ${label}.`;
+      if(!sessionId)return;
+      if(commandBusy){row.textContent=`${target.name} · aguarde o comando anterior.`;return;}
+      const current=sessionId;commandBusy=true;
+      try{
+        const result=await post('/api/gestures/execute',{...intent,sessionId:current,sequence:++sequence,ageMs:performance.now()-timestamp});
+        row.textContent=`${target.name} · ${result.message}`;
+        $('command-status').textContent=result.message+(result.confirmed?` Estado informado: ${result.state}.`:'');
+        if(Number.isFinite(result.position)){$('preview-position').textContent=result.position+'%';$('preview-meter').value=result.position;}
+      }catch(error){row.textContent=`${target.name} · ${error.message}`;$('command-status').textContent=error.message;sessionId=null;mode();post('/api/gestures/stop').catch(()=>{});reset();}
+      finally{commandBusy=false;}
     }
-    function log(intent) {
-      const target=config.targets.find(t=>t.id===intent.targetId);
-      if(!target)return;
-      const text=intent.type==='activate'?'alternar energia':intent.type==='projector-key'?({up:'cima',down:'baixo',left:'esquerda',right:'direita',ok:'OK'})[intent.key]:intent.type==='curtain-position'?`abertura proposta: ${intent.position}%`:'parar cortina';
-      const row=document.createElement('li');row.textContent=`${target.name} · ${text}`;
-      $('gesture-events').prepend(row);while($('gesture-events').children.length>6)$('gesture-events').lastChild.remove();
-      $('gesture-intention').textContent=`Prévia: ${target.name} → ${text}. Nenhum comando enviado.`;
-      if(intent.type==='activate')latched=true;
-      if(intent.type==='curtain-position'){$('preview-position').textContent=intent.position+'%';$('preview-meter').value=intent.position;}
-    }
-    const dispatch = intents => {for(const intent of intents)log(intent);};
-    function disarm() {dispatch(engine.disarm(performance.now()));selected=null;candidate=null;pinch=false;$('selected-target').textContent='Nenhum aparelho selecionado';}
-    function renderTargets() {
-      const old=$('gesture-target').value; $('gesture-target').replaceChildren();
-      for(const target of config.targets) {const option=document.createElement('option');option.value=target.id;option.textContent=target.name+(target.anchor&&target.direction?' · calibrado':' · a calibrar');$('gesture-target').append(option);}
-      if(config.targets.some(t=>t.id===old))$('gesture-target').value=old;
-      showTarget();
-    }
-    function showTarget() {
+    function showSettings(){const settings={...defaults,...config.settings};config.settings=settings;for(const [id,key]of [['selection-method','selection'],['tracking-source','tracker'],['tracking-side','side'],['dwell-time','dwellMs'],['stability','stability'],['movement','movement'],['confidence','confidence']])$(id).value=String(settings[key]);engine=CasaAccessibleGestures.create(settings);}
+    function allowedDevice(d,target){return d.adapter!=='pending'&&(target?.type==='curtain'?d.kind==='cover':target?.type==='projector'?['remote','tv'].includes(d.kind):['switch','light','remote','tv'].includes(d.kind));}
+    function selectOptions(select,values,selectedValue){select.replaceChildren();for(const [value,label]of values){const option=document.createElement('option');option.value=value;option.textContent=label;select.append(option);}select.value=selectedValue||'';}
+    function showBinding(){
       const target=chosen();
-      $('target-name').value=target?.name||'';$('target-kind').value=target?.type||'switch';
-      $('curtain-start').value=target?.position===null?'':target?.position??'';
-      $('curtain-start-row').hidden=target?.type!=='curtain';
-      $('target-calibration').textContent=!target?'Adicione um aparelho para calibrar.':target.anchor&&target.direction?'Posição marcada e direção aprendida.':'Marque a posição na imagem e ensine a direção de apontar.';
-      for(const id of ['mark-target','learn-direction','remove-target','target-name','target-kind'])$(id).disabled=!target;
-      $('learn-direction').disabled=!target||!ready||!target.anchor;
-      $('mark-target').disabled=!target||video.readyState<2;
-      draw();
+      selectOptions($('target-device'),[['','Selecione o aparelho'],...devices.filter(d=>allowedDevice(d,target)).map(d=>[d.id,d.name])],target?.binding?.deviceId);
+      const device=devices.find(d=>d.id===target?.binding?.deviceId),channels=device?.actions.filter(a=>/^on_\d+$/.test(a)).map(a=>Number(a.slice(3)))||[];
+      $('target-channel-row').hidden=!channels.length;
+      selectOptions($('target-channel'),[['','Escolha o canal'],...channels.map(ch=>[String(ch),'Canal '+ch])],String(target?.binding?.channel||''));
+      $('projector-bindings').replaceChildren();
+      if(target&&device&&['remote','tv'].includes(device.kind))for(const key of target.type==='projector'?Object.keys(keyNames):['power']){
+        const label=document.createElement('label'),select=document.createElement('select');label.textContent=keyNames[key]+' · botão aprendido';select.setAttribute('aria-label',keyNames[key]+' · botão aprendido');
+        selectOptions(select,[['','Configure o botão'],...device.actions.map(a=>[a,a])],target.binding?.keys?.[key]);
+        select.addEventListener('change',()=>{disable();target.binding.keys[key]=select.value;dirty();});label.append(select);$('projector-bindings').append(label);
+      }
     }
-    function setCamera(id) {
-      if(cameraId!==id) {stop();cameraId=id;}
-      const mismatch=cameraId&&config.cameraId&&config.cameraId!==cameraId;
-      $('camera-calibration-note').textContent=mismatch?'Esta calibração pertence a outra câmera. Use “Recalibrar nesta câmera” antes de continuar.':'Mantenha a Echo fixa. Se mudar a câmera ou sua posição na sala, refaça a calibração.';
-      $('use-camera').hidden=!mismatch;
-    }
-    function stop() {
-      generation++;active=false;ready=false;clearInterval(timer);timer=null;
-      if(frameCallback!==null)video.cancelVideoFrameCallback?.(frameCallback);frameCallback=null;
-      worker?.terminate();worker=null;frameBusy=false;lastHand=null;lastResult=-Infinity;capture=null;marking=false;
-      canvas.dataset.marking='false';disarm();draw();$('hand-pose').textContent='Reconhecimento parado';$('hand-latency').textContent='Modelo local';$('hand-diagnostic').textContent='';inferenceMs=null;
-      $('hand-start').disabled=false;$('hand-stop').disabled=true;$('learn-direction').disabled=true;
-      say('Reconhecimento desativado.');report('stopped');
-    }
-    function report(phase) {
-      const fresh=performance.now()-lastResult<500;
-      post('/api/gestures/report',{mode:'preview',phase,handPresent:Boolean(fresh&&lastHand?.present),targetId:fresh?selected:null,inferenceMs,detectedHands:fresh?lastHand?.detectedHands:0,reason:fresh?lastHand?.reason:null}).catch(()=>{});
-    }
-    async function start() {
-      if(video.readyState<2||!video.srcObject?.getVideoTracks().some(t=>t.readyState==='live')) {say('Abra o vídeo da Echo antes de iniciar o reconhecimento.');return;}
-      if(config.cameraId&&config.cameraId!==cameraId){say('Recalibre os alvos para esta câmera antes de iniciar.');return;}
-      stop();const current=generation;active=true;$('hand-start').disabled=true;$('hand-stop').disabled=false;say('Carregando o modelo local de mãos…');report('loading');
-      const model = worker = new Worker('/hand-worker.js');
-      model.onerror=()=>{if(current===generation){stop();say('Falha ao carregar o reconhecimento local. Confira o diagnóstico do navegador.');}};
+    function bindDevice(target,id){const device=devices.find(d=>d.id===id);target.binding=device?{deviceId:id,channel:null,keys:{}}:null;if(device){for(const key of Object.keys(keyNames)){const action=key==='ok'?(device.actions.includes('enter')?'enter':'ok'):key;if(device.actions.includes(action))target.binding.keys[key]=action;}}}
+    async function connect(){try{$('central-status').textContent='Buscando a central…';const result=await post('/api/gestures/central',{address:$('central-address').value.trim()||null});devices=result.devices;$('central-address').value=result.address;$('central-status').textContent=`Central conectada · ${devices.length} aparelhos. Escolha o aparelho de cada alvo.`;sessionId=null;mode();showBinding();}catch(error){$('central-status').textContent=error.message;}}
+    function renderTargets(){const old=$('gesture-target').value;selectOptions($('gesture-target'),config.targets.map(t=>[t.id,t.name+(t.anchor&&t.direction?' · calibrado':' · a calibrar')]),old||config.targets[0]?.id);showTarget();}
+    function showTarget(){const target=chosen();$('target-name').value=target?.name||'';$('target-kind').value=target?.type||'switch';$('curtain-start-row').hidden=true;
+      $('target-calibration').textContent=!target?'Adicione um aparelho para calibrar.':target.anchor&&target.direction?'Posição marcada e direção aprendida.':'Marque a posição e ensine sua direção confortável.';
+      for(const id of ['target-name','target-kind','remove-target'])$(id).disabled=!target;
+      $('learn-direction').disabled=!target||!ready||!target.anchor;$('mark-target').disabled=!target||video.readyState<2;showBinding();draw();}
+    function setCamera(id){if(cameraId!==id){stop();cameraId=id;}const mismatch=cameraId&&config.cameraId&&config.cameraId!==cameraId;$('camera-calibration-note').textContent=mismatch?'Esta calibração pertence a outra câmera. Recalibre antes de continuar.':'Mantenha a Echo fixa e use a posição confortável em que calibrou os alvos.';$('use-camera').hidden=!mismatch;}
+    function report(phase){const fresh=performance.now()-lastResult<600;post('/api/gestures/report',{mode:'preview',phase,sessionId,handPresent:Boolean(fresh&&lastHand?.present),targetId:fresh?selected:null,inferenceMs,detectedHands:fresh?lastHand?.detectedHands:0,reason:fresh?lastHand?.reason:null}).catch(()=>{});}
+    function stop(){generation++;active=false;ready=false;clearInterval(timer);timer=null;if(frameCallback!==null)video.cancelVideoFrameCallback?.(frameCallback);frameCallback=null;worker?.terminate();worker=null;frameBusy=false;lastHand=null;lastResult=-Infinity;capture=null;marking=false;canvas.dataset.marking='false';reset();draw();$('hand-start').disabled=false;$('hand-stop').disabled=true;$('learn-direction').disabled=true;$('hand-pose').textContent='Reconhecimento parado';$('hand-latency').textContent='Modelo local';$('hand-diagnostic').textContent='';inferenceMs=null;say('Reconhecimento desativado.');mode();if(!stopping){stopping=true;disable().finally(()=>{stopping=false;});}report('stopped');}
+    async function start(){
+      if(video.readyState<2||!video.srcObject?.getVideoTracks().some(t=>t.readyState==='live')){say('Abra o vídeo da Echo antes de iniciar.');return;}
+      if(config.cameraId&&config.cameraId!==cameraId){say('Recalibre para esta câmera.');return;}
+      stop();const current=generation;active=true;$('hand-start').disabled=true;$('hand-stop').disabled=false;say('Carregando reconhecimento local…');report('loading');
+      const model=worker=new Worker('/hand-worker.js');model.onerror=()=>{if(current===generation){stop();say('Falha no reconhecimento local.');}};
       model.onmessage=({data})=>{
         if(current!==generation||!active)return;
         if(data.type==='error'){stop();say(data.message);return;}
-        if(data.type==='ready') {ready=true;say('Modelo pronto. Mostre uma mão para a Echo.');showTarget();schedule(current);return;}
-        if(data.type!=='result')return;
-        frameBusy=false;const now=performance.now();
-        if(now-data.timestamp>450){lastHand=null;disarm();draw();$('hand-pose').textContent='Frame atrasado';say('Reconhecimento lento. Aguarde ou feche outras tarefas pesadas.');return;}
-        lastResult=data.timestamp;inferenceMs=Math.round(data.elapsedMs);lastHand=CasaHandFeatures.features(data);
-        $('hand-latency').textContent=inferenceMs+' ms · processamento local';
-        $('hand-diagnostic').textContent=`${lastHand.detectedHands} mão(s) encontrada(s) · análise em ${Math.min(1280,video.videoWidth)} px · ${lastHand.present?'pronta para gestos':reasons[lastHand.reason]||'aguardando'}`;
-        process(lastHand,data.timestamp,now);draw();
+        if(data.type==='ready'){ready=true;say(config.settings.tracker==='arm'?'Mostre o punho e o cotovelo em posição confortável.':'Mostre a mão em posição confortável.');showTarget();mode();schedule(current);return;}
+        if(data.type!=='result')return;frameBusy=false;const now=performance.now();
+        if(now-data.timestamp>550){lastHand=null;reset();draw();say('Imagem atrasada. Seleção suspensa.');return;}
+        lastResult=data.timestamp;inferenceMs=Math.round(data.elapsedMs);lastHand=CasaHandFeatures.features(data,config.settings);
+        if(lastHand.present){if(previousPoint&&previousPoint.tracker===lastHand.tracker){lastHand.x=.65*lastHand.x+.35*previousPoint.x;lastHand.y=.65*lastHand.y+.35*previousPoint.y;}previousPoint={x:lastHand.x,y:lastHand.y,tracker:lastHand.tracker};}else previousPoint=null;
+        $('hand-latency').textContent=inferenceMs+' ms · processamento local';$('hand-diagnostic').textContent=lastHand.present?(config.settings.tracker==='arm'?'Punho e antebraço acompanhados · sem exigir os dedos':'Mão acompanhada · confirmação por tempo'):(reasons[lastHand.reason]||'Aguardando');process(lastHand,data.timestamp,now);draw();
       };
-      model.postMessage({type:'init'});
-      timer=setInterval(()=>{
-        const now=performance.now();dispatch(engine.tick(now));
-        if(capture&&now-capture.started>=5500)finishCapture();
-        if(now-lastResult>500){lastHand=null;if(selected)disarm();$('hand-pose').textContent=ready?'Aguardando imagem recente':'Carregando modelo';draw();}
-        if(video.readyState<2||!video.srcObject?.getVideoTracks().some(t=>t.readyState==='live')){stop();return;}
-        if(now-lastReport>=1000){lastReport=now;report(ready?'tracking':'loading');}
-      },100);
+      model.postMessage({type:'init',settings:config.settings});
+      timer=setInterval(()=>{const now=performance.now();engine.tick(now);if(capture&&now-capture.started>=15000)finishCapture();if(now-lastResult>600){lastHand=null;selected=null;$('selected-target').textContent='Aguardando mão ou punho';$('dwell-progress').value=0;draw();}if(video.readyState<2||!video.srcObject?.getVideoTracks().some(t=>t.readyState==='live')){stop();return;}if(now-lastReport>=1000){lastReport=now;report(ready?'tracking':'loading');}},100);
     }
-    function schedule(current) {
-      frameCallback=video.requestVideoFrameCallback(async now=>{
-        if(current!==generation||!active||!ready)return;
-        if(!frameBusy&&now-lastCapture>=100&&video.readyState>=2){
-          frameBusy=true;lastCapture=now;
-          try {
-            const width=Math.min(1280,video.videoWidth);
-            const bitmap=await createImageBitmap(video,{resizeWidth:width,resizeHeight:Math.round(width*video.videoHeight/video.videoWidth),resizeQuality:'high'});
-            if(current!==generation||!active){bitmap.close();return;}
-            worker.postMessage({type:'frame',bitmap,timestamp:now},[bitmap]);
-          } catch {frameBusy=false;stop();say('Não foi possível ler os frames do vídeo para reconhecer a mão.');return;}
-        }
-        if(current===generation&&active)schedule(current);
-      });
+    function schedule(current){frameCallback=video.requestVideoFrameCallback(async now=>{if(current!==generation||!active||!ready)return;if(!frameBusy&&now-lastCapture>=100&&video.readyState>=2){frameBusy=true;lastCapture=now;try{const width=Math.min(1280,video.videoWidth),bitmap=await createImageBitmap(video,{resizeWidth:width,resizeHeight:Math.round(width*video.videoHeight/video.videoWidth),resizeQuality:'high'});if(current!==generation||!active){bitmap.close();return;}worker.postMessage({type:'frame',bitmap,timestamp:now},[bitmap]);}catch{frameBusy=false;stop();say('Não foi possível ler a imagem.');return;}}if(current===generation&&active)schedule(current);});}
+    function finishCapture(){const job=capture;if(!job)return;capture=null;const target=config.targets.find(t=>t.id===job.id);try{const learned=CasaHandFeatures.comfortableCalibration(job.samples);if(target){target.direction=learned.direction;target.tolerance=learned.tolerance;target.tracker=config.settings.tracker;dirty();renderTargets();say(`Direção de ${target.name} aprendida. Salve a calibração.`);$('capture-progress').textContent=`Direção de ${target.name} aprendida com ${job.samples.length} amostras. Salve a calibração.`;}}catch(error){say(error.message);$('capture-progress').textContent=error.message+' Você pode usar “Escolher na tela”, sem calibrar a direção.';}}
+    function process(hand,timestamp,now){
+      $('hand-pose').textContent=hand.present?(config.settings.tracker==='arm'?'Punho visível':'Mão confortável visível'):'Aguardando mão / punho';
+      if(capture){const elapsed=now-capture.started;say(!hand.present?reasons[hand.reason]:elapsed<3000?`Posicione-se para ${capture.name}. Começando em ${Math.ceil((3000-elapsed)/1000)}…`:'Mantenha sua direção confortável…');if(elapsed>=3000&&hand.present)capture.samples.push(hand.direction);$('capture-progress').textContent=`Captura: ${capture.samples.length}/16 amostras · ${hand.present?'punho acompanhado':'ajuste o punho no enquadramento'}`;if(capture.samples.length>=16||elapsed>=15000)finishCapture();return;}
+      const match=hand.present?CasaHandFeatures.match(hand.direction,config.targets.filter(t=>t.anchor&&t.tracker===config.settings.tracker),24,7):null,target=config.settings.selection==='manual'?chosen():config.targets.find(t=>t.id===match?.id);
+      const intents=engine.sample(hand,target,now),state=engine.report();selected=state.targetId;$('selected-target').textContent=config.targets.find(t=>t.id===selected)?.name||'Nenhum aparelho selecionado';$('dwell-progress').value=Math.round(state.progress*100);
+      const messages={idle:config.settings.selection==='manual'?'Escolha o aparelho acima e mostre o punho confortavelmente.':'Aponte de seu jeito para um alvo calibrado.',dwelling:`Mantenha confortável e parado · ${Math.round(state.progress*100)}%`,release:'Confirmado uma vez. Retire a mão por 1,2 s ou use Rearmar.',controlling:'Alvo confirmado. Agora mova o punho.',curtain:'Suba para abrir um pouco; desça para fechar um pouco.',projector:'Mova para navegar. Mantenha parado para OK.'};
+      $('dwell-label').textContent=messages[state.phase];say(hand.present?messages[state.phase]:reasons[hand.reason]||'Aguardando');for(const intent of intents)dispatch(intent,timestamp);
     }
-    function finishCapture() {
-      const job=capture;if(!job)return;capture=null;
-      const target=config.targets.find(t=>t.id===job.id);
-      try {const learned=CasaHandFeatures.calibration(job.samples);if(target){target.direction=learned.direction;dirty();renderTargets();say(`Direção de ${target.name} aprendida. Salve e teste apontando e fazendo uma pinça.`);}}
-      catch(error){say(error.message);}
+    function draw(){const width=video.videoWidth||1280,height=video.videoHeight||720;if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}ctx.clearRect(0,0,width,height);if(config.cameraId&&cameraId&&config.cameraId!==cameraId)return;
+      for(const target of config.targets){if(!target.anchor)continue;const x=target.anchor.x*width,y=target.anchor.y*height;ctx.strokeStyle=target.id===selected?'#e1ffac':'#a4b9a0';ctx.fillStyle='#e1ffac';ctx.lineWidth=3;ctx.beginPath();ctx.arc(x,y,target.id===selected?20:11,0,Math.PI*2);ctx.stroke();ctx.font='600 '+Math.max(16,width/65)+'px system-ui';ctx.fillText(target.name,Math.min(x+22,width-180),Math.max(24,y-15));}
+      if(!lastHand||performance.now()-lastResult>600)return;ctx.strokeStyle=lastHand.present?'#d4edab':'#ffc36d';ctx.fillStyle='#f5ffe7';ctx.lineWidth=Math.max(2,width/350);
+      for(const points of lastHand.visibleHands||[]){for(const [a,b]of connections){ctx.beginPath();ctx.moveTo(points[a].x*width,points[a].y*height);ctx.lineTo(points[b].x*width,points[b].y*height);ctx.stroke();}for(const p of points){ctx.beginPath();ctx.arc(p.x*width,p.y*height,Math.max(3,width/260),0,Math.PI*2);ctx.fill();}}
+      if(lastHand.arm){ctx.beginPath();ctx.moveTo(lastHand.arm[0].x*width,lastHand.arm[0].y*height);ctx.lineTo(lastHand.arm[1].x*width,lastHand.arm[1].y*height);ctx.stroke();}
+      if(lastHand.present){const x=lastHand.x*width,y=lastHand.y*height;ctx.beginPath();ctx.arc(x,y,18,0,Math.PI*2);ctx.stroke();ctx.beginPath();ctx.lineWidth=7;ctx.arc(x,y,25,-Math.PI/2,-Math.PI/2+Math.PI*2*engine.report().progress);ctx.stroke();}
     }
-    function process(hand,timestamp,now) {
-      if(!hand.present){if(selected)dispatch(engine.sample({timestamp,present:false},now));disarm();latched=false;$('hand-pose').textContent=hand.detectedHands?'Mão detectada · ajuste o enquadramento':'Sem mão detectada';if(!capture)say(reasons[hand.reason]||'Mostre uma mão para a Echo.');return;}
-      pinch=hand.pinchRatio<(pinch?0.45:0.28);
-      $('hand-pose').textContent=pinch?'Pinça fechada':hand.pointing?'Indicador estendido':'Mão visível';
-      if(capture){
-        const elapsed=now-capture.started;
-        say(elapsed<3000?`Aponte para ${capture.name}. Começando em ${Math.ceil((3000-elapsed)/1000)}…`:'Segure a direção por dois segundos…');
-        if(elapsed>=3000&&elapsed<5000&&hand.pointing&&!pinch)capture.samples.push(hand.direction);
-        if(elapsed>=5000)finishCapture();
-        return;
-      }
-      if(!selected&&(!hand.pointing||pinch))candidate=null;
-      if(!selected&&!latched&&hand.pointing&&!pinch){
-        const match=CasaHandFeatures.match(hand.direction,config.targets.filter(t=>t.anchor));
-        if(!match){candidate=null;say('Direção sem alvo ou ambígua. Calibre os aparelhos e aponte novamente.');return;}
-        if(candidate!==match.id){candidate=match.id;candidateAt=now;}
-        if(now-candidateAt<300){say('Mantenha a direção para selecionar o aparelho…');return;}
-        const target=config.targets.find(t=>t.id===match.id);
-        if(target.type==='curtain'&&target.position===null){say('Informe a abertura inicial da cortina antes de testar o arraste.');return;}
-        dispatch(engine.arm({id:target.id,type:target.type,...(target.type==='curtain'?{position:target.position}:{})},now));
-        selected=target.id;$('selected-target').textContent=target.name;say(`Selecionado: ${target.name}. Faça uma pinça para confirmar; na cortina, segure e mova a mão.`);
-      }
-      if(selected)dispatch(engine.sample({timestamp,present:true,targetId:selected,x:hand.x,y:hand.y,confirm:pinch,drag:pinch},now));
-    }
-    function draw() {
-      const width=video.videoWidth||1280,height=video.videoHeight||720;
-      if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
-      ctx.clearRect(0,0,width,height);
-      if(config.cameraId&&cameraId&&config.cameraId!==cameraId)return;
-      for(const target of config.targets){if(!target.anchor)continue;const x=target.anchor.x*width,y=target.anchor.y*height;
-        ctx.strokeStyle=target.id===selected?'#e1ffac':'#a4b9a0';ctx.fillStyle=target.id===selected?'#e1ffac':'#d5ddd0';ctx.lineWidth=3;
-        ctx.beginPath();ctx.arc(x,y,target.id===selected?18:11,0,Math.PI*2);ctx.stroke();
-        ctx.font='600 '+Math.max(16,width/65)+'px system-ui';ctx.fillText(target.name,Math.min(x+22,width-180),Math.max(24,y-15));}
-      if(!lastHand||performance.now()-lastResult>500)return;
-      ctx.strokeStyle=!lastHand.present?'#ffc36d':pinch?'#f4d47e':'#d4edab';ctx.fillStyle='#f5ffe7';ctx.lineWidth=Math.max(2,width/450);
-      for(const points of lastHand.visibleHands){
-        for(const [a,b]of connections){ctx.beginPath();ctx.moveTo(points[a].x*width,points[a].y*height);ctx.lineTo(points[b].x*width,points[b].y*height);ctx.stroke();}
-        for(const p of points){ctx.beginPath();ctx.arc(p.x*width,p.y*height,Math.max(3,width/260),0,Math.PI*2);ctx.fill();}
-        ctx.beginPath();ctx.arc(points[8].x*width,points[8].y*height,lastHand.present&&pinch?20:13,0,Math.PI*2);ctx.stroke();
-      }
-    }
-    canvas.addEventListener('pointerdown',event=>{
-      if(!marking)return;const target=chosen();if(!target)return;
-      const box=canvas.getBoundingClientRect(),width=video.videoWidth,height=video.videoHeight,scale=Math.min(box.width/width,box.height/height);
-      const x=(event.clientX-box.left-(box.width-width*scale)/2)/(width*scale),y=(event.clientY-box.top-(box.height-height*scale)/2)/(height*scale);
-      if(x<0||x>1||y<0||y>1)return;
-      target.anchor={x,y};marking=false;canvas.dataset.marking='false';dirty();renderTargets();say(`Posição de ${target.name} marcada. Agora ensine a direção de apontar.`);
-    });
-    $('hand-start').addEventListener('click',start);$('hand-stop').addEventListener('click',()=>stop());
-    $('gesture-rearm').addEventListener('click',()=>{disarm();latched=false;say('Pronto para selecionar um aparelho novamente.');});
-    $('gesture-target').addEventListener('change',()=>{disarm();marking=false;capture=null;canvas.dataset.marking='false';showTarget();});
-    $('add-target').addEventListener('click',()=>{if(config.targets.length>=12){say('Use até 12 alvos por câmera.');return;}const [name,type]=presets[Number($('new-target').value)];const id=crypto.randomUUID();config.targets.push({id,name,type,anchor:null,direction:null,position:null});config.cameraId=cameraId;dirty();renderTargets();$('gesture-target').value=id;showTarget();});
-    $('remove-target').addEventListener('click',()=>{const target=chosen();if(!target)return;disarm();config.targets=config.targets.filter(t=>t.id!==target.id);dirty();renderTargets();});
-    $('target-name').addEventListener('change',()=>{const target=chosen();if(!target)return;target.name=$('target-name').value.trim().slice(0,60)||target.name;dirty();renderTargets();});
-    $('target-kind').addEventListener('change',()=>{const target=chosen();if(!target)return;disarm();target.type=$('target-kind').value;dirty();showTarget();});
-    $('curtain-start').addEventListener('change',()=>{const target=chosen();if(!target)return;const value=$('curtain-start').value;target.position=value===''?null:Math.max(0,Math.min(100,Number(value)));disarm();dirty();});
-    $('mark-target').addEventListener('click',()=>{marking=true;canvas.dataset.marking='true';say('Clique na imagem sobre o aparelho selecionado.');});
-    $('learn-direction').addEventListener('click',()=>{const target=chosen();if(!ready||!target?.anchor)return;disarm();capture={id:target.id,name:target.name,started:performance.now(),samples:[]};say(`Aponte para ${target.name}. A captura começa em três segundos.`);});
-    $('save-calibration').addEventListener('click',async()=>{try{if(cameraId)config.cameraId=cameraId;config=await post('/api/gestures/config',config);$('calibration-state').textContent='Calibração salva neste Mac.';}catch(error){$('calibration-state').textContent=error.message;}});
-    $('use-camera').addEventListener('click',()=>{stop();config.cameraId=cameraId;for(const target of config.targets){target.anchor=null;target.direction=null;}dirty();setCamera(cameraId);renderTargets();});
-    document.addEventListener('visibilitychange',()=>{if(document.hidden&&active)stop();});
-    addEventListener('pagehide',()=>{if(active)stop();});
-    video.addEventListener('loadeddata',showTarget);
-    video.addEventListener('emptied',()=>{if(active)stop();});
-    fetch('/api/gestures/config').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(value=>{config=value;renderTargets();setCamera(cameraId);$('calibration-state').textContent=config.targets.length?'Calibração carregada deste Mac.':'Adicione os aparelhos que aparecem na imagem.';}).catch(()=>say('Não foi possível carregar a calibração local.'));
-    renderTargets();
-    return {stop,setCamera};
+    canvas.addEventListener('pointerdown',event=>{if(!marking)return;const target=chosen();if(!target)return;const box=canvas.getBoundingClientRect(),width=video.videoWidth,height=video.videoHeight,scale=Math.min(box.width/width,box.height/height),x=(event.clientX-box.left-(box.width-width*scale)/2)/(width*scale),y=(event.clientY-box.top-(box.height-height*scale)/2)/(height*scale);if(x<0||x>1||y<0||y>1)return;target.anchor={x,y};marking=false;canvas.dataset.marking='false';dirty();renderTargets();say('Posição marcada. Agora ensine sua direção confortável.');});
+    $('hand-start').addEventListener('click',start);$('hand-stop').addEventListener('click',stop);
+    $('gesture-rearm').addEventListener('click',()=>{reset();say('Pronto para selecionar novamente.');});
+    $('gesture-target').addEventListener('change',()=>{disable();reset();capture=null;marking=false;canvas.dataset.marking='false';showTarget();});
+    $('add-target').addEventListener('click',()=>{if(config.targets.length>=12){say('Use até 12 alvos.');return;}disable();reset();const [name,type,deviceId]=presets[Number($('new-target').value)],target={id:crypto.randomUUID(),name,type,anchor:null,direction:null,position:null,tracker:config.settings.tracker,binding:null};config.targets.push(target);if(deviceId)bindDevice(target,deviceId);config.cameraId=cameraId;dirty();renderTargets();$('gesture-target').value=target.id;showTarget();});
+    $('remove-target').addEventListener('click',()=>{const target=chosen();if(!target)return;disable();reset();config.targets=config.targets.filter(t=>t.id!==target.id);dirty();renderTargets();});
+    $('target-name').addEventListener('change',()=>{const t=chosen();if(!t)return;t.name=$('target-name').value.trim().slice(0,60)||t.name;dirty();renderTargets();});
+    $('target-kind').addEventListener('change',()=>{const t=chosen();if(!t)return;disable();reset();t.type=$('target-kind').value;t.binding=null;dirty();showTarget();});
+    $('target-device').addEventListener('change',()=>{const t=chosen();if(!t)return;disable();reset();bindDevice(t,$('target-device').value);dirty();showBinding();});
+    $('target-channel').addEventListener('change',()=>{const t=chosen();if(!t?.binding)return;disable();reset();t.binding.channel=Number($('target-channel').value)||null;dirty();});
+    $('central-connect').addEventListener('click',connect);
+    $('mark-target').addEventListener('click',()=>{disable();reset();marking=true;canvas.dataset.marking='true';say('Clique na imagem sobre o aparelho.');});
+    $('learn-direction').addEventListener('click',()=>{const target=chosen();if(!ready||!target?.anchor)return;disable();reset();capture={id:target.id,name:target.name,started:performance.now(),samples:[]};say('Posicione-se confortavelmente. A captura começa em 3 segundos.');});
+    $('save-calibration').addEventListener('click',async()=>{try{await disable();if(cameraId)config.cameraId=cameraId;config=await post('/api/gestures/config',config);dirtyConfig=false;$('calibration-state').textContent='Calibração, ajustes e vínculos salvos neste Mac.';}catch(error){$('calibration-state').textContent=error.message;}});
+    $('use-camera').addEventListener('click',()=>{stop();config.cameraId=cameraId;for(const t of config.targets){t.anchor=null;t.direction=null;}dirty();setCamera(cameraId);renderTargets();});
+    for(const [id,key]of [['selection-method','selection'],['tracking-source','tracker'],['tracking-side','side'],['dwell-time','dwellMs'],['stability','stability'],['movement','movement'],['confidence','confidence']])$(id).addEventListener('change',()=>{const before=config.settings[key];config.settings[key]=['tracker','side','selection'].includes(key)?$(id).value:Number($(id).value);stop();engine=CasaAccessibleGestures.create(config.settings);if(['tracker','side'].includes(key)&&config.settings[key]!==before)for(const t of config.targets){t.direction=null;t.tracker=config.settings.tracker;}dirty();showTarget();say('Ajustes aplicados. Inicie o reconhecimento novamente.');});
+    $('enable-control').addEventListener('click',async()=>{if(!ready||!cameraId){$('command-status').textContent='Inicie a câmera e o reconhecimento primeiro.';return;}if(dirtyConfig){$('command-status').textContent='Salve a calibração e os vínculos antes de ativar.';return;}try{const result=await post('/api/gestures/arm',{cameraId,manualTargetId:config.settings.selection==='manual'?chosen()?.id:null});sessionId=result.sessionId;sequence=0;reset();mode();$('command-status').textContent='Comandos reais ativos. Mantenha parado até completar o círculo para confirmar.';report('tracking');}catch(error){$('command-status').textContent=error.message;}});
+    $('disable-control').addEventListener('click',()=>{reset();disable();});
+    document.addEventListener('visibilitychange',()=>{if(document.hidden&&active)stop();});addEventListener('pagehide',()=>{if(active)stop();});video.addEventListener('loadeddata',showTarget);video.addEventListener('emptied',()=>{if(active)stop();});
+    fetch('/api/gestures/config').then(r=>{if(!r.ok)throw new Error();return r.json();}).then(value=>{config={...value,settings:{...defaults,...value.settings}};showSettings();renderTargets();setCamera(cameraId);$('calibration-state').textContent=config.targets.length?'Calibração carregada deste Mac.':'Adicione os aparelhos da imagem.';return connect();}).catch(()=>say('Não foi possível carregar a configuração local.'));
+    showSettings();renderTargets();mode();return {stop,setCamera};
   }
   window.CasaGesturePreview={create};
 })();

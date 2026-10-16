@@ -32,7 +32,7 @@ test('telemetry expires and never exposes arbitrary landmarks or enables command
   const stale=store.status(store.report.receivedAt+2001);assert.equal(stale.handPresent,false);assert.equal(stale.phase,'stopped');assert.equal(stale.targetId,null);assert.equal(stale.reason,null);
   assert.throws(()=>store.update({mode:'control',phase:'tracking',handPresent:true}));
 });
-test('gesture HTTP API stores calibration with origin checks and has no actuator route',async()=>{
+test('gesture HTTP API stores calibration with origin checks and rejects commands without an active session',async()=>{
   const directory=await mkdtemp(join(tmpdir(),'casa-gesture-http-'));
   const gestures=new GestureStore({directory}),login={status:()=>({authenticated:false}),close(){}},cloud={status:()=>({}),stop(){}};
   const bridge=createAlexaBridge({port:0,login,cloud,gestures,restore:false}),url=await bridge.start();
@@ -42,7 +42,7 @@ test('gesture HTTP API stores calibration with origin checks and has no actuator
     assert.equal((await post('api/gestures/config',config())).status,200);
     const invalid=config();invalid.targets[0].position=-1;
     const rejected=await post('api/gestures/config',invalid);assert.equal(rejected.status,400);assert.match((await rejected.json()).error,/Abertura/);
-    assert.equal((await post('api/gestures/execute',{targetId:'curtain'})).status,404);
+    assert.equal((await post('api/gestures/execute',{targetId:'curtain'})).status,400);
     const status=await(await fetch(url+'api/gestures/status')).json();assert.equal(status.commandsEnabled,false);assert.equal(status.calibratedTargets,1);
     const worker=await fetch(url+'hand-worker.js');assert.equal(worker.status,200);assert.match(worker.headers.get('content-security-policy'),/worker-src 'self'/);
     assert.equal((await fetch(url+'vision/registration.json')).status,404);

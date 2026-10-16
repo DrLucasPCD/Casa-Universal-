@@ -1,28 +1,39 @@
 import {mkdir, readFile, writeFile, rename, chmod} from 'node:fs/promises';
 import {resolve, join} from 'node:path';
 const TYPES = new Set(['switch','projector','curtain']);
-const REASONS=new Set(['tracked','no-hand','multiple-hands','incomplete-hand','too-small','no-direction']);
+const REASONS=new Set(['tracked','no-hand','multiple-hands','incomplete-hand','too-small','no-direction','no-arm','multiple-people']);
 const ID = /^[a-zA-Z0-9_-]{1,100}$/;
 const coordinate = x => Number.isFinite(x) && x >= 0 && x <= 1;
 function point(value) {
   if (!value || !coordinate(value.x) || !coordinate(value.y)) throw new Error('Posição de calibração inválida.');
   return {x:value.x,y:value.y};
 }
+export function accessibility(value={}) {
+  const settings={tracker:'arm',selection:'manual',side:'right',dwellMs:600,stability:.065,movement:.07,confidence:.4,...value};
+  if(!['manual','direction'].includes(settings.selection)||!['arm','palm','finger'].includes(settings.tracker)||!['left','right'].includes(settings.side)||!Number.isFinite(settings.dwellMs)||settings.dwellMs<400||settings.dwellMs>6000||!Number.isFinite(settings.stability)||settings.stability<.02||settings.stability>.15||!Number.isFinite(settings.movement)||settings.movement<.03||settings.movement>.25||!Number.isFinite(settings.confidence)||settings.confidence<.3||settings.confidence>.8)throw new Error('Gestos: ajustes de reconhecimento inválidos.');
+  return Object.fromEntries(['tracker','selection','side','dwellMs','stability','movement','confidence'].map(k=>[k,settings[k]]));
+}
+function binding(value) {
+  if(value==null)return null;
+  if(typeof value.deviceId!=='string'||!ID.test(value.deviceId)||(value.channel!=null&&(!Number.isInteger(value.channel)||value.channel<1||value.channel>16)))throw new Error('Gestos: vínculo de aparelho inválido.');
+  const keys={};for(const key of ['power','up','down','left','right','ok'])if(value.keys?.[key]){if(typeof value.keys[key]!=='string'||!ID.test(value.keys[key])||['unlock','lock'].includes(value.keys[key]))throw new Error('Gestos: botão inválido.');keys[key]=value.keys[key];}
+  return {deviceId:value.deviceId,channel:value.channel??null,keys};
+}
 export function validateCalibration(value) {
   if (!value || value.version!==1 || !Array.isArray(value.targets) || value.targets.length>12 || (value.cameraId!==null && (typeof value.cameraId!=='string'||!ID.test(value.cameraId)))) throw new Error('Calibração inválida.');
   const ids=new Set();
   const targets=value.targets.map(target=>{
     if (!target || typeof target.id!=='string' || !ID.test(target.id) || ids.has(target.id) || !TYPES.has(target.type) || typeof target.name!=='string' || !target.name.trim() || target.name.trim().length>60) throw new Error('Alvo de calibração inválido.');
-    ids.add(target.id);
+    ids.add(target.id);if(target.tracker!=null&&!['arm','palm','finger'].includes(target.tracker))throw new Error('Gestos: fonte de calibração inválida.');
     let direction=null;
     if(target.direction!==null) {
       if (!target.direction || !['x','y','z'].every(k=>Number.isFinite(target.direction[k])) || Math.abs(Math.hypot(target.direction.x,target.direction.y,target.direction.z)-1)>0.01) throw new Error('Direção de calibração inválida.');
       direction={x:target.direction.x,y:target.direction.y,z:target.direction.z};
     }
     if(target.position!==null&&(!Number.isFinite(target.position)||target.position<0||target.position>100))throw new Error('Abertura inicial inválida.');
-    return {id:target.id,name:target.name.trim(),type:target.type,anchor:target.anchor===null?null:point(target.anchor),direction,position:target.position===null?null:target.position};
+    return {id:target.id,name:target.name.trim(),type:target.type,anchor:target.anchor===null?null:point(target.anchor),direction,position:target.position===null?null:target.position,binding:binding(target.binding),tracker:target.tracker??null,tolerance:Number.isFinite(target.tolerance)?Math.min(36,Math.max(12,target.tolerance)):24};
   });
-  return {version:1,cameraId:value.cameraId,targets};
+  return {version:1,cameraId:value.cameraId,targets,settings:accessibility(value.settings)};
 }
 export class GestureStore {
   constructor({directory=resolve('data/gestures')}={}) {

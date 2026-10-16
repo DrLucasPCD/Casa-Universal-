@@ -2,7 +2,7 @@
 
 ## Situação em 16/10/2026
 
-O acesso à câmera da Echo Show foi confirmado pela [ponte local Alexa](ponte-alexa.md): vídeo WebRTC real até 1280 × 720, sem alterar o sistema da Echo. A prévia local reconhece mãos e desenha os 21 pontos sobre o vídeo. O usuário confirmou os pontos na imagem real da Echo após o ajuste do reconhecimento. A calibração de alvos e as intenções de gestos estão implementadas para teste; nenhum comando de gesto foi enviado aos aparelhos.
+O acesso à câmera da Echo Show foi confirmado pela [ponte local Alexa](ponte-alexa.md): vídeo WebRTC real até 1280 × 720, sem alterar o sistema da Echo. A prévia local reconhece mãos e desenha os 21 pontos sobre o vídeo. O usuário confirmou os pontos na imagem real da Echo após o ajuste do reconhecimento. O reconhecimento do punho e antebraço também foi confirmado pelo usuário como mais confortável. A ponte implementa confirmação por permanência e envio de comandos reais à central ESP32, com ativação explícita na tela. A configuração inicial permanece em prévia.
 
 **Atualização:** o usuário forneceu o XAPK Alexa 2.2.720364.0 e confirmou que vê a câmera no app. A [análise do aplicativo fornecido](alexa-oficial.md) rastreou LiveView/RTCSC e identificou implementação WebRTC. Isso amplia o estudo inicial do cliente de terceiros descrito abaixo, e a investigação posterior demonstrou uma sessão independente com imagem real no navegador.
 
@@ -38,45 +38,57 @@ O botão **Parar**, sair da página ou ocultar a aba encerra as trilhas. Uma aut
 
 `NotAllowedError` pode significar recusa de permissão ou restrição do sistema. `NoCameraAPI` significa que o navegador não expõe a API naquele contexto. Nenhum desses resultados deve ser anunciado como prova de que o hardware não tem câmera. Consulte a documentação de [getUserMedia](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia).
 
-## Usar a prévia de mãos e gestos
+## Usar gestos acessíveis e comandos reais
 
-1. No Mac, execute `npm ci` e `npm run alexa`. A preparação baixa o modelo oficial de mãos se necessário, verifica seu SHA-256 e prepara o pacote local. Abra **http://127.0.0.1:8877/**.
-2. Faça login manualmente se a sessão não estiver disponível. Clique em **Abrir câmera da Echo** e aguarde a mensagem de imagem recebida.
-3. Clique em **Iniciar teste de gestos**. Mostre uma mão inteira, iluminada, perto da câmera no primeiro teste. Os pontos acompanham a mão. Pontos âmbar indicam detecção que ainda não permite selecionar um alvo, por exemplo, mão pequena ou parcialmente fora da imagem. O diagnóstico mostra quantidade de mãos e tempo de processamento.
-4. Adicione um aparelho e use **1. Marcar na imagem** para clicar na localização dele no vídeo. Depois clique em **2. Aprender direção**: são 3 segundos para se posicionar e 2 segundos para apontar, mantendo a mão inteira visível. A direção só é aceita com amostras suficientes e estáveis.
-5. Clique em **Salvar calibração**. A configuração fica em `data/gestures/calibration.json`, com acesso somente pelo usuário do Mac. Ela é vinculada à câmera e carregada nas próximas aberturas. Esta calibração ainda não é sincronizada com o Firestore.
-6. Aponte para selecionar e espere o nome aparecer em **Alvo selecionado**. Faça uma pinça para confirmar. Na cortina, informe a abertura inicial, segure a pinça e suba/desça a mão; no projetor, deslize em quatro direções ou faça a pinça para OK. As intenções aparecem no painel, sem acionar os aparelhos. **Rearmar seleção** permite repetir o teste de energia.
+1. No Mac, execute `npm ci` e `npm run alexa`. A preparação baixa e verifica os dois modelos oficiais. Abra **http://127.0.0.1:8877/** e clique em **Abrir câmera da Echo**.
+2. Em **Do seu jeito**, escolha **Punho e antebraço** e o lado direito/esquerdo mais confortável. Esse modo acompanha cotovelo e punho, sem exigir dedos estendidos, mão aberta ou pinça. Há também acompanhamento da palma e o modo anterior pelo indicador.
+3. Clique em **Iniciar reconhecimento**. O círculo acompanha o punho; a linha representa o antebraço. Ajuste a sensibilidade, a tolerância a pequenos movimentos e a amplitude da navegação conforme seu conforto. O tempo padrão é **0,6 segundo**; existem opções de 0,4 a 6 segundos.
+4. Use **Escolher na tela** para selecionar o alvo sem calibrar uma direção. Vincule **Aparelho real deste alvo** a um aparelho da central. Para interruptores com vários canais, selecione o canal. Para um controle IR/RF, associe os botões disponíveis aos comandos do gesto. Clique em **Salvar calibração**.
+5. Teste primeiro a prévia. O círculo preenche enquanto você mantém o punho confortável e parado. Para enviar comandos, clique em **Ativar comandos reais**. O nome do alvo fica visível antes do envio.
+6. **Energia:** confirme por permanência para alternar uma vez. O app consulta o estado real antes de escolher ligar/desligar. Retire o punho por 1,2 s ou clique em **Rearmar seleção** antes de repetir. Se o estado for desconhecido, a alternância fica bloqueada.
+7. **Cortina:** confirme o alvo e suba/desça o punho para enviar abrir/fechar por um intervalo curto; a ponte sempre tenta enviar Parar após o envio, inclusive se a resposta do movimento falhar. Cada pulso aguarda o comando anterior. O percentual exibido vem do motor, quando disponível; o movimento não representa um ajuste percentual exato.
+8. **Projetor:** depois de confirmar, mova nos quatro sentidos para navegar; mantenha parado para OK. É necessário cadastrar/aprender os códigos IR/RF reais primeiro. O envio de IR/RF não confirma a reação física.
+9. **Parar comandos / cortina** cancela a sessão e solicita a parada de um movimento em curso. Encerrar a câmera ou ocultar/sair da aba também desativa os comandos. Uma falha de comunicação durante a parada é mostrada na tela; use o controle físico se não houver confirmação.
 
-Mantenha a câmera fixa e use a mesma posição na sala durante a calibração e o teste. Esta versão compara a direção estimada do dedo com as direções aprendidas; ela não reconhece objetos nem calcula a posição absoluta da pessoa na sala. Alvos com direções muito próximas são recusados como ambíguos. A calibração com a mão perto da câmera não substitui calibrar a posição de uso pretendida.
+A central é localizada pelo endereço salvo da configuração USB ou por `casa-universal.local`; pode-se informar outro IPv4 privado no painel. A ponte só encaminha operações predefinidas, sem seguir redirecionamentos ou encaminhar credenciais Amazon. Os dispositivos são listados sem as chaves locais.
 
-O reconhecimento usa [MediaPipe Hand Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker/web_js), pacote `@mediapipe/tasks-vision` fixado em `0.10.32`, em um Worker com CPU. Os scripts, WASM e modelo são servidos pela ponte local. Os frames são analisados neste navegador; não são gravados nem enviados ao Firestore ou a um serviço de IA. O vídeo continua usando a conexão Amazon autorizada.
+A configuração fica em `data/gestures/calibration.json`, com acesso somente pelo usuário do Mac. Ela contém câmera, alvos, ajustes e vínculos, sem frames. Os comandos reais nunca são reativados pelo arquivo salvo. Esta configuração ainda não é sincronizada com o Firestore.
 
-Modelo: [hand_landmarker.task, float16/1](https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task), SHA-256 `fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1`. Pacote e modelo conservam suas licenças de origem; não são artefatos obtidos do APK Alexa.
+### Apontar na sala (opcional)
 
-A análise usa a resolução recebida, até 1280 px de largura, com no máximo um frame em processamento e captura até 10 vezes por segundo. Não há solicitação da câmera ou do microfone do Mac. Mãos incompletas, múltiplas mãos, perda de imagem e resultados atrasados impedem a seleção. Ocultar/sair da aba, parar o teste ou encerrar o vídeo termina o reconhecimento e limpa as marcações.
+No modo **Apontar na sala**, marque cada aparelho na imagem e use **Aprender direção**. Após 3 segundos de preparação, a captura acumula até 16 amostras ao longo de até 12 segundos, com progresso visível. O ajuste descarta amostras isoladas e aceita uma variação limitada, sem exigir esticar os dedos. A direção deve ser reaprendida ao trocar modo de rastreamento ou lado do corpo.
 
-`GET /api/gestures/status` e a seção `gestures` de `/api/status` mostram apenas estado recente da prévia, quantidade de mãos, motivo padronizado, alvo selecionado e tempo de inferência. O estado expira em 2 segundos; não contém imagem nem coordenadas da mão. `commandsEnabled` é sempre `false`. Ainda não há ferramenta MCP de gestos publicada.
+Mantenha a câmera e a posição de uso constantes. Esta versão compara direções aprendidas; não reconhece objetos nem calcula a posição absoluta da pessoa na sala. Alvos de direção ambígua são recusados. A seleção na tela dispensa essa calibração e mantém o controle no aparelho escolhido.
 
-## Integração com os aparelhos: pendente
+### Processamento e limites
 
-O caminho é **vídeo → reconhecimento local das mãos → seleção de alvo calibrado → comandos existentes da central ESP32**. As três primeiras etapas têm implementação de prévia. A última depende da calibração real e do mapeamento de cada alvo para um controle existente. Não é necessário passar cada frame pelo ChatGPT/MCP.
+O reconhecimento usa [Hand Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker/web_js) e [Pose Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/pose_landmarker/web_js), do pacote `@mediapipe/tasks-vision` fixado em `0.10.32`, em um Worker com CPU. No modo punho, usa-se Pose; no modo palma/indicador, Hand. O modelo depende de visibilidade e iluminação e ainda pode perder o acompanhamento. Não é um modelo treinado com exemplos pessoais do usuário.
 
-O processamento desta versão ocorre no navegador do Mac e a ponte Amazon precisa permanecer ligada. O Mac do usuário está disponível apenas durante testes. Ainda não validamos outro processador permanente, processamento na própria Echo ou no ESP32-S3.
+Scripts, WASM e modelos são servidos localmente. Frames e coordenadas não são gravados nem enviados ao Firestore ou a serviços de IA. O vídeo continua usando a conexão Amazon autorizada. Não há acesso ao microfone ou à câmera do Mac.
 
-| Alvo | Intenção | Condição antes de habilitar |
+| Modelo oficial | Versão | SHA-256 |
 | --- | --- | --- |
-| Cortina | Selecionar e subir/descer a mão para ajustar abertura | Validar DP gravável de posição. O driver atual envia abrir/fechar/parar; leitura percentual não significa ajuste percentual implementado. |
-| Ventilador, luminária e luz do quarto | Apontar e confirmar para alternar energia | Calibrar os alvos, mapear aparelhos reais, aplicar permanência, rearme e intervalo entre comandos para evitar alternância a cada frame. |
-| Projetor | Selecionar projeção, deslizar nas quatro direções e confirmar OK | Cadastrar/testar os botões IR do projetor e calibrar gesto de confirmação. Um movimento em profundidade é ambíguo numa câmera 2D. |
-| Energia do projetor | Ligar/desligar | Verificar códigos e comportamento do modelo, inclusive eventual segunda confirmação para desligar. IR enviado não confirma estado físico. |
+| [Hand Landmarker](https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task) | float16/1 | `fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1` |
+| [Pose Landmarker Lite](https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task) | float16/1 | `59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a` |
 
-Apontar para um objeto exige calibrar a câmera e os alvos na sala; a posição de um dedo na imagem, isoladamente, não identifica o objeto no espaço. O desenho da interação deve mostrar o alvo selecionado antes de executar ações.
+A análise recebe até 1280 px de largura, um frame por vez, até 10 capturas/s. Frames atrasados, perda de acompanhamento e múltiplas pessoas no modo punho suspendem a seleção. O acompanhamento do punho não exige detectar os dedos.
 
-O controle de cortina precisará limitar/coalescer comandos e encerrar movimento ao perder a mão. Não enviaremos comandos por frame. O MCP poderá consultar/configurar o módulo por uma integração futura, usando as mesmas ações validadas da central. A prévia local não publica sua configuração nem uma ferramenta de visão no MCP remoto.
+O processamento e a ponte Amazon dependem do Mac ligado. O ESP32 executa os comandos dos aparelhos; ele não processa o vídeo. Ainda não há processamento permanente validado na Echo ou no ESP32.
 
-## Verificação da página
+### API e comandos
 
-`node --test tests/camera-probe.test.mjs` cobre início explícito sem áudio, recusa de permissão, autorização tardia depois de cancelar, ausência de frames, chegada de imagem, cancelamento durante espera, contexto sem API/sem HTTPS e encerramento pelo sistema. Esses testes validam o código; não substituem o teste físico na Echo.
+- `GET /api/gestures/status`: reconhecimento recente, alvo, resultado do último comando e `commandsEnabled`. Não retorna imagens, coordenadas ou ID da sessão de controle.
+- `POST /api/gestures/config`: valida e salva ajustes/vínculos; desativa os comandos.
+- `POST /api/gestures/central`: encontra a central e lista aparelhos sem credenciais.
+- `POST /api/gestures/arm`: ativação explícita; no modo manual, vincula a sessão a um único alvo escolhido.
+- `POST /api/gestures/report`: telemetria limitada e renovação da sessão ativa. Expiração após 5 segundos sem renovação.
+- `POST /api/gestures/execute`: comando com sessão válida, sequência crescente, observação recente, alvo salvo e ação permitida. Não há fila de comandos atrasados nem repetição automática após falha.
+- `POST /api/gestures/stop`: cancela a sessão e tenta parar a cortina em movimento.
 
+As rotas aceitam mudanças somente pela origem local da ponte. Repetições, resultados atrasados, alvo diferente da sessão manual, comandos não cadastrados e destrancamento são recusados. A confirmação de um interruptor exige uma leitura posterior com o estado esperado, além da confirmação do envio.
 
-`npm test` cobre a extração de características, desenho de mãos pequenas/parciais, rejeição de múltiplas mãos para seleção, direções ambíguas, calibração estável, validação/persistência privada e expiração do estado. Os testes HTTP usam uma ponte simulada e não enviam comandos aos aparelhos. O motor de intenções tem testes de permanência, pinça, navegação, arraste de cortina, perda da mão e frames atrasados. A confirmação dos pontos pelo usuário é a validação física feita nesta etapa; seleção de alvo e execução de gestos ainda precisam de validação na sala.
+O MCP existente continua controlando os aparelhos por suas ferramentas. Esta tela de gestos usa as mesmas ações da central; ainda não publica ferramentas de configuração/visão no MCP remoto nem transmite frames ao ChatGPT.
+
+## Validação
+
+`npm test` inclui testes de permanência sem pinça, movimentos pequenos, rearme após ausência, navegação e pulsos de cortina; reconhecimento sem dedos estendidos; seleção manual sem direção fictícia; calibração tolerante; expiração de sessão; comandos repetidos/atrasados; cancelamento; parada mesmo após falha de envio; e distinção entre envio e estado físico. Esses testes usam dispositivos simulados. O usuário confirmou a melhora do acompanhamento real do punho na Echo. A execução física de cada vínculo deve ser verificada no painel, sem tratar um teste unitário como confirmação do motor ou do aparelho.

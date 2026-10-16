@@ -5,11 +5,11 @@
 <title>Casa · Visão e gestos</title>
 <link rel="stylesheet" href="/alexa-setup.css"><link rel="stylesheet" href="/gesture-preview.css">
 <script src="/hand-features.js" defer></script><script src="/gesture-engine.js" defer></script>
-<script src="/gesture-preview.js" defer></script><script src="/alexa-webrtc.js" defer></script><script src="/alexa-setup.js" defer></script>
+<script src="/accessible-gestures.js" defer></script><script src="/gesture-preview.js" defer></script><script src="/alexa-webrtc.js" defer></script><script src="/alexa-setup.js" defer></script>
 </head>
 <body><main>
 <header><span class="brand">casa.</span><span class="tag">VISÃO LOCAL · ECHO SHOW</span></header>
-<section class="intro"><p class="eyebrow">SUA CASA, NO SEU MOVIMENTO</p><h1>Um gesto.<br>Uma intenção.</h1><p class="lead">Veja a imagem da Echo, ensine para onde está apontando e acompanhe a intenção de cada gesto.</p><p class="preview-badge">PRÉVIA VISUAL · NENHUM APARELHO SERÁ ACIONADO</p></section>
+<section class="intro"><p class="eyebrow">SUA CASA, NO SEU MOVIMENTO</p><h1>Um gesto.<br>Uma intenção.</h1><p class="lead">Veja a imagem da Echo, ensine para onde está apontando e acompanhe a intenção de cada gesto.</p><p class="preview-badge" id="control-mode">MODO PRÉVIA · COMANDOS REAIS DESATIVADOS</p></section>
 <details id="login-panel" class="panel login-details" open><summary>Conexão com a Amazon</summary>
 <h2>Login manual</h2><p>Entre na página da Amazon apresentada pelo intermediário local no Mac. A senha segue por HTTPS para a Amazon e não é gravada pelo Casa Universal.</p>
 <label><input id="remember" type="checkbox"> Manter a conexão neste Mac, salvando os tokens localmente.</label>
@@ -26,17 +26,32 @@
 <details class="camera-options"><summary>Fonte de vídeo e diagnóstico</summary><div class="actions"><button id="discover" disabled>Buscar câmeras da conta</button><select id="gateway" aria-label="Canal Amazon"><option value="modern">Canal atual · América</option><option value="legacy">Canal anterior · América</option><option value="push">Notificações · diagnóstico</option></select><button id="channel" disabled>Testar canal de vídeo</button></div><p id="channel-status"></p><div id="devices"></div><pre id="diagnostic"></pre></details>
 </section>
 <section class="panel gesture-panel"><p class="eyebrow">02 · ENSINE O SEU GESTO</p><h2>Da mão à intenção.</h2>
-<p class="small">O reconhecimento acontece neste navegador. Não identifica objetos sozinho: ele compara sua direção de apontar com as direções que você ensinar.</p>
-<div class="actions"><button id="hand-start">Iniciar teste de gestos</button><button id="hand-stop" class="secondary" disabled>Parar teste</button></div>
+<p class="small">O reconhecimento acontece neste navegador. Não identifica objetos sozinho: ele compara sua direção confortável com as direções que você ensinar. Não é preciso esticar os dedos ou fazer pinça.</p>
+<div class="accessibility-settings"><h3>Do seu jeito</h3>
+<label>Selecionar aparelho<select id="selection-method"><option value="manual">Escolher na tela · dispensa calibrar a direção</option><option value="direction">Apontar na sala · usa direções aprendidas</option></select></label>
+<label>Acompanhar<select id="tracking-source"><option value="arm">Punho e antebraço · sem depender dos dedos</option><option value="palm">Mão em posição confortável</option><option value="finger">Indicador · modo anterior</option></select></label>
+<label>Lado do corpo<select id="tracking-side"><option value="right">Direito</option><option value="left">Esquerdo</option></select></label>
+<div class="target-fields"><label>Tempo para confirmar<select id="dwell-time"><option value="400">0,4 segundo</option><option value="600" selected>0,6 segundo</option><option value="800">0,8 segundo</option><option value="1200">1,2 segundo</option><option value="1500">1,5 segundo</option><option value="2500">2,5 segundos</option><option value="4000">4 segundos</option><option value="6000">6 segundos</option></select></label>
+<label>Tolerância a movimentos pequenos<select id="stability"><option value="0.035">Menor</option><option value="0.065" selected>Confortável</option><option value="0.11">Maior</option></select></label></div>
+<div class="target-fields"><label>Amplitude para navegar<select id="movement"><option value="0.04">Movimentos curtos</option><option value="0.07" selected>Média</option><option value="0.12">Maior</option></select></label>
+<label>Sensibilidade do reconhecimento<select id="confidence"><option value="0.3">Mais sensível</option><option value="0.4" selected>Equilibrada</option><option value="0.6">Mais seletiva</option></select></label></div>
+<p class="small">Mantenha o braço na posição mais confortável. No modo punho, deixe punho e cotovelo visíveis. Ao mudar modo ou lado, reaprenda as direções dos alvos.</p></div>
+<div class="actions"><button id="hand-start">Iniciar reconhecimento</button><button id="hand-stop" class="secondary" disabled>Parar reconhecimento</button></div>
 <p id="hand-status" role="status" aria-live="polite">Reconhecimento desativado.</p><div class="hand-indicators"><span id="hand-pose">Sem mão detectada</span><span id="hand-latency">Modelo local</span>
           <p id="hand-diagnostic" class="muted" aria-live="polite"></p></div>
 <p id="camera-calibration-note" class="small">Mantenha a Echo fixa. Se mudar a câmera ou sua posição na sala, refaça a calibração.</p><button id="use-camera" class="secondary" hidden>Recalibrar nesta câmera</button>
 <div class="calibration-block"><h3>Seus aparelhos na imagem</h3><div class="target-add"><select id="new-target" aria-label="Tipo de aparelho a adicionar"><option value="0">Cortina</option><option value="1">Ventilador</option><option value="2">Projetor</option><option value="3">Luminária</option><option value="4">Luz do quarto</option></select><button id="add-target" class="secondary">Adicionar</button></div>
 <label>Aparelho a calibrar<select id="gesture-target"></select></label><div class="target-fields"><label>Nome<input id="target-name" maxlength="60" autocomplete="off"></label><label>Controle<select id="target-kind"><option value="switch">Ligar / desligar</option><option value="curtain">Cortina</option><option value="projector">Projetor</option></select></label></div>
 <label id="curtain-start-row" hidden>Abertura inicial informada por você (%)<input id="curtain-start" type="number" min="0" max="100" placeholder="0 fechada · 100 aberta"></label>
+<div class="central-settings"><label>Endereço da central<input id="central-address" placeholder="Automático · casa-universal.local"></label><button id="central-connect" class="secondary">Buscar central</button><p id="central-status" role="status">Buscando a central…</p>
+<label>Aparelho real deste alvo<select id="target-device"><option value="">Selecione o aparelho</option></select></label><label id="target-channel-row" hidden>Canal<select id="target-channel"></select></label><div id="projector-bindings" class="target-fields"></div></div>
 <p id="target-calibration" class="small">Adicione um aparelho para calibrar.</p><div class="actions"><button id="mark-target" class="secondary" disabled>1. Marcar na imagem</button><button id="learn-direction" class="secondary" disabled>2. Aprender direção</button></div>
-<p class="small">Ao aprender, você terá 3 segundos para apontar e 2 segundos para manter a direção. Deixe uma mão inteira visível e bem iluminada.</p>
+<p id="capture-progress" class="small" role="status"></p><p class="small">Ao aprender, você terá 3 segundos para se posicionar e até 12 segundos para capturar sua direção confortável. Não é necessário abrir os dedos.</p>
 <div class="actions"><button id="save-calibration">Salvar calibração</button><button id="remove-target" class="text-button" disabled>Remover alvo</button></div><p id="calibration-state" class="small" role="status">Carregando calibração local…</p></div>
-<div class="intent-preview"><span class="eyebrow">03 · CONFIRA A PRÉVIA</span><p id="gesture-intention">Aponte para selecionar. Faça uma pinça para confirmar.</p><p class="small">Cortina: segure a pinça e suba/desça a mão. Projetor: deslize nos quatro sentidos; uma pinça representa OK. Para ligar/desligar: aponte e faça uma pinça.</p><div class="preview-progress"><span>Abertura proposta</span><output id="preview-position">—</output><progress id="preview-meter" max="100" value="0"></progress></div><button id="gesture-rearm" class="secondary">Rearmar seleção</button><ol id="gesture-events" aria-label="Intenções de gestos, sem comandos reais"></ol></div>
+<div class="intent-preview"><span class="eyebrow">03 · SELECIONE E CONFIRME</span><p id="gesture-intention">Escolha um aparelho acima e mantenha o punho confortável e parado para confirmar. Você também pode escolher o modo de apontar na sala.</p>
+<label>Confirmação por permanência<progress id="dwell-progress" max="100" value="0"></progress></label><p id="dwell-label" role="status">Aguardando um alvo calibrado.</p>
+<p class="small">Energia: manter parado alterna uma vez; retire a mão por 1,2 s antes de repetir. Cortina: após selecionar, suba/desça o punho para movimentos curtos com parada. Projetor: mova nos quatro sentidos; manter parado confirma OK. Nenhuma pinça necessária.</p>
+<div class="actions"><button id="enable-control">Ativar comandos reais</button><button id="disable-control" class="secondary">Parar comandos / cortina</button></div><p id="command-status" role="status">Prévia ativa. Nenhum comando será enviado.</p>
+<div class="preview-progress"><span>Posição informada pelo motor</span><output id="preview-position">—</output><progress id="preview-meter" max="100" value="0"></progress></div><button id="gesture-rearm" class="secondary">Rearmar seleção</button><ol id="gesture-events" aria-label="Gestos e resultados dos comandos"></ol></div>
 </section></div>
 </main></body></html>

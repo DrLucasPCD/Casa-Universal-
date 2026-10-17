@@ -30,7 +30,7 @@ test('curtain requires dwell before motion and creates bounded-rate directional 
   assert.equal(engine.sample(hand({y:.2}),t,1700).length,0);
   for(let now=1800;now<=2400;now+=100)engine.sample(hand({y:.4}),t,now);
   assert.equal(engine.sample(hand({y:.6}),t,2500)[0].direction,'close');
-  engine.sample({present:false},null,2600);assert.equal(engine.report().targetId,null);
+  engine.sample({present:false},null,2600);assert.equal(engine.report().phase,'paused');engine.sample({present:false},null,3600);assert.equal(engine.report().targetId,null);
 });
 test('projector navigation and OK use movement and dwell, not pinch',()=>{
   const engine=create(),t=target('projector');dwell(engine,t);
@@ -50,4 +50,11 @@ test('default fast confirmation completes in 600 ms and still fires once',()=>{
   for(let now=0;now<=600;now+=100)events.push(...engine.sample(hand(),target(),now));
   assert.equal(events.length,1);assert.equal(events[0].type,'activate');
   for(let now=700;now<2000;now+=100)assert.equal(engine.sample(hand(),target(),now).length,0);
+});
+
+test('brief occlusion pauses a confirmed target and reanchors without sending a jump',()=>{
+  const engine=create(),t=target('curtain');dwell(engine,t);
+  engine.sample({present:false},null,1600);assert.equal(engine.report().phase,'paused');
+  assert.equal(engine.sample(hand({y:.3}),t,1700).length,0);
+  assert.equal(engine.sample(hand({y:.2}),t,1800)[0].direction,'open');
 });

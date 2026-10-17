@@ -37,10 +37,11 @@
       if(poses.length!==1)return {present:false,reason:poses.length>1?'multiple-people':'no-arm',visibleHands:[],detectedHands:0};
       const [elbow,wrist]=settings.side==='left'?[13,15]:[14,16],points=poses[0],world=result.poseWorldLandmarks?.[0];
       const visible=p=>finite(p)&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1&&p.visibility>=.35;
-      if(!visible(points?.[elbow])||!visible(points?.[wrist])||!finite(world?.[elbow])||!finite(world?.[wrist]))return {present:false,reason:'no-arm',visibleHands:[],detectedHands:0};
-      const direction=normalize(subtract(world[wrist],world[elbow]));
-      if(!direction)return {present:false,reason:'no-direction',visibleHands:[],detectedHands:0};
-      return {present:true,reason:'tracked',tracker:'arm',x:points[wrist].x,y:points[wrist].y,direction,pointing:true,pinchRatio:Infinity,visibleHands:[],detectedHands:1,arm:[points[elbow],points[wrist]]};
+      const manual=settings.selection==='manual';
+      if(!visible(points?.[wrist])||(!manual&&!visible(points?.[elbow])))return {present:false,reason:'no-arm',visibleHands:[],detectedHands:0};
+      const direction=finite(world?.[elbow])&&finite(world?.[wrist])?normalize(subtract(world[wrist],world[elbow])):null;
+      if(!direction&&!manual)return {present:false,reason:'no-direction',visibleHands:[],detectedHands:0};
+      return {present:true,reason:'tracked',tracker:'arm',x:points[wrist].x,y:points[wrist].y,direction,pointing:true,pinchRatio:Infinity,visibleHands:[],detectedHands:1,arm:visible(points?.[elbow])?[points[elbow],points[wrist]]:null};
     }
     const view=observation(result),points=view.visibleHands[0],world=result.worldLandmarks?.[0];
     if(view.detectedHands!==1)return {...view,present:false,reason:view.detectedHands>1?'multiple-hands':'no-hand'};

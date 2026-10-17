@@ -1,15 +1,18 @@
 (function(root){
   'use strict';
-  function create({dwellMs=600,stability=.065,movement=.07}={}) {
-    let target=null,anchor=null,since=null,confirmed=false,latched=false,lastFrame=-Infinity,lastTime=-Infinity,lastAction=-Infinity,releaseAt=null,okLatched=false;
+  function create({dwellMs=600,stability=.065,movement=.035}={}) {
+    let target=null,anchor=null,since=null,confirmed=false,latched=false,lastFrame=-Infinity,lastTime=-Infinity,lastAction=-Infinity,releaseAt=null,okLatched=false,missingAt=null;
     const state={progress:0,phase:'idle',targetId:null};
-    function reset(){target=null;anchor=null;since=null;confirmed=false;latched=false;releaseAt=null;okLatched=false;Object.assign(state,{progress:0,phase:'idle',targetId:null});}
-    function lose(now){target=null;anchor=null;since=null;confirmed=false;state.progress=0;state.targetId=null;state.phase=latched?'release':'idle';if(releaseAt===null)releaseAt=now;if(now-releaseAt>=1200){latched=false;state.phase='idle';}}
+    function reset(){missingAt=null;target=null;anchor=null;since=null;confirmed=false;latched=false;releaseAt=null;okLatched=false;Object.assign(state,{progress:0,phase:'idle',targetId:null});}
+    function lose(now){if(missingAt===null)missingAt=now;if(latched){if(releaseAt===null)releaseAt=now;if(now-releaseAt>=1200){latched=false;confirmed=false;target=null;state.targetId=null;state.phase='idle';}else state.phase='release';state.progress=0;return;}if(confirmed&&now-missingAt<900){state.phase='paused';state.progress=0;return;}target=null;anchor=null;since=null;confirmed=false;state.progress=0;state.targetId=null;state.phase=latched?'release':'idle';if(releaseAt===null)releaseAt=now;if(now-releaseAt>=1200){latched=false;state.phase='idle';}}
     function tick(now){if(now-lastFrame>600)lose(now);return {...state};}
     function sample(hand,selection,now){
       if(!Number.isFinite(now)||now<=lastTime)return [];lastTime=now;
       if(!hand?.present||!Number.isFinite(hand.x)||!Number.isFinite(hand.y)||hand.x<0||hand.x>1||hand.y<0||hand.y>1){lose(now);return [];}
-      if(now-lastFrame>600){target=null;anchor=null;since=null;confirmed=false;state.progress=0;}
+      const gap=now-lastFrame;
+      if(confirmed&&gap<900&&missingAt!==null){anchor={x:hand.x,y:hand.y};since=now;}
+      missingAt=null;
+      if(gap>900){target=null;anchor=null;since=null;confirmed=false;state.progress=0;}
       lastFrame=now;
       if(latched){state.phase='release';releaseAt=null;return [];}
       releaseAt=null;

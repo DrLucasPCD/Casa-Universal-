@@ -9,7 +9,7 @@ function point(value) {
   return {x:value.x,y:value.y};
 }
 export function accessibility(value={}) {
-  const settings={tracker:'arm',selection:'manual',side:'right',dwellMs:600,stability:.065,movement:.07,confidence:.4,...value};
+  const settings={tracker:'arm',selection:'manual',side:'right',dwellMs:600,stability:.065,movement:.035,confidence:.4,...value};
   if(!['manual','direction'].includes(settings.selection)||!['arm','palm','finger'].includes(settings.tracker)||!['left','right'].includes(settings.side)||!Number.isFinite(settings.dwellMs)||settings.dwellMs<400||settings.dwellMs>6000||!Number.isFinite(settings.stability)||settings.stability<.02||settings.stability>.15||!Number.isFinite(settings.movement)||settings.movement<.03||settings.movement>.25||!Number.isFinite(settings.confidence)||settings.confidence<.3||settings.confidence>.8)throw new Error('Gestos: ajustes de reconhecimento inválidos.');
   return Object.fromEntries(['tracker','selection','side','dwellMs','stability','movement','confidence'].map(k=>[k,settings[k]]));
 }

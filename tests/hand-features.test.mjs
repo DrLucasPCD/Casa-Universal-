@@ -71,3 +71,9 @@ test('comfortable calibration tolerates limited variation and discards isolated 
   const result=context.CasaHandFeatures.comfortableCalibration(samples);assert.ok(result.direction.y>.98);assert.ok(result.tolerance>=24);
   assert.throws(()=>context.CasaHandFeatures.comfortableCalibration(samples.slice(0,5)));
 });
+
+test('manual selection tracks a visible wrist even when the elbow is occluded',()=>{
+  const data=pose();data.poseLandmarks[0][14].visibility=.1;
+  const result=features(data,{tracker:'arm',side:'right',selection:'manual'});assert.equal(result.present,true);assert.equal(result.arm,null);
+  assert.equal(features(data,{tracker:'arm',side:'right',selection:'direction'}).present,false);
+});

@@ -102,3 +102,11 @@ test('manual selection tracks a visible wrist even when the elbow is occluded',(
   assert.equal(match(first.direction,targets).id,'front');assert.equal(match(second.direction,targets).id,'back');
   assert.equal(context.CasaHandFeatures.selectDirection(first.direction,[targets[0],{id:'same',direction:first.direction}]).reason,'ambiguous');
 });
+
+ test('close calibrated 3D directions allow comfortable variation but still reject the midpoint',()=>{
+  const vector=degrees=>({x:Math.sin(degrees*Math.PI/180),y:Math.cos(degrees*Math.PI/180),z:0});
+  const targets=[{id:'cover',direction:vector(0)},{id:'lamp',direction:vector(13)}];
+  assert.equal(context.CasaHandFeatures.selectDirection(vector(5),targets,24,7).reason,'ambiguous');
+  assert.equal(context.CasaHandFeatures.selectDirection(vector(5),targets,24,'adaptive').match.id,'cover');
+  assert.equal(context.CasaHandFeatures.selectDirection(vector(6.5),targets,24,'adaptive').reason,'ambiguous');
+});

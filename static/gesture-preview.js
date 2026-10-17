@@ -90,7 +90,7 @@
       if(marking||setup){say(setup?`Configuração ${setup.index+1}/${setup.ids.length}: clique na imagem onde fica ${chosen()?.name}.`:'Clique na imagem sobre o aparelho.');return;}
       if(capture){const elapsed=now-capture.started;say(!hand.present?reasons[hand.reason]:elapsed<3000?`Posicione-se para ${capture.name}. Começando em ${Math.ceil((3000-elapsed)/1000)}…`:'Mantenha sua direção confortável…');if(elapsed>=3000&&hand.present&&hand.direction)capture.samples.push(hand.direction);$('capture-progress').textContent=`Captura: ${capture.samples.length}/16 amostras · ${hand.present?'punho acompanhado':'ajuste o punho no enquadramento'}`;if(capture.samples.length>=16||elapsed>=15000)finishCapture();return;}
       const pointing=hand.present&&config.settings.selection==='point'?CasaPointingSelector.select(hand.ray,config.targets,video.videoWidth/video.videoHeight):null;
-      const spatial=hand.present&&config.settings.selection==='direction'?CasaHandFeatures.selectDirection(hand.direction,config.targets.filter(t=>t.binding&&t.direction&&t.tracker===config.settings.tracker),24,7):null;
+      const spatial=hand.present&&config.settings.selection==='direction'?CasaHandFeatures.selectDirection(hand.direction,config.targets.filter(t=>t.binding&&t.direction&&t.tracker===config.settings.tracker),24,'adaptive'):null;
       pointingReason=(config.settings.selection==='direction'?spatial?.reason:pointing?.reason)||null;
       hand.pointingAmbiguous=pointingReason==='ambiguous';
       hand.pointingUnavailable=config.settings.selection==='direction'?!hand.direction:config.settings.selection==='point'&&['no-ray','short-ray'].includes(pointingReason);

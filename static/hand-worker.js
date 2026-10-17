@@ -9,8 +9,10 @@ self.onmessage = async ({data}) => {
       const files = await FilesetResolver.forVisionTasks('/vision/wasm');
       tracker=['arm','palm','finger'].includes(data.settings?.tracker)?data.settings.tracker:'arm';
       const confidence=Math.min(.8,Math.max(.3,Number(data.settings?.confidence)||.4));
+      // MediaPipe enables stream landmark smoothing only with one pose.
+      // Requesting two for a single user also reruns body detection each frame.
       detector=tracker==='arm'?await PoseLandmarker.createFromOptions(files,{
-        baseOptions:{modelAssetPath:'/vision/pose_landmarker_full.task',delegate:'CPU'},runningMode:'VIDEO',numPoses:2,outputSegmentationMasks:false,
+        baseOptions:{modelAssetPath:'/vision/pose_landmarker_full.task',delegate:'CPU'},runningMode:'VIDEO',numPoses:1,outputSegmentationMasks:false,
         minPoseDetectionConfidence:confidence,minPosePresenceConfidence:confidence,minTrackingConfidence:confidence,
       }):await HandLandmarker.createFromOptions(files,{
         baseOptions:{modelAssetPath:'/vision/hand_landmarker.task',delegate:'CPU'},runningMode:'VIDEO',numHands:2,

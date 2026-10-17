@@ -61,7 +61,9 @@
     if(!unit(direction)||!Array.isArray(targets))return {match:null,reason:'no-direction'};
     const ranked=targets.filter(t=>unit(t.direction)).map(t=>({id:t.id,angle:angle(direction,t.direction),tolerance:Number.isFinite(t.tolerance)?t.tolerance:tolerance})).sort((a,b)=>a.angle-b.angle);
     if(!ranked.length||ranked[0].angle>ranked[0].tolerance)return {match:null,reason:'no-target'};
-    if(ranked[1]&&ranked[1].angle-ranked[0].angle<margin)return {match:null,reason:'ambiguous'};
+    const separation=ranked[1]?angle(targets.find(t=>t.id===ranked[0].id).direction,targets.find(t=>t.id===ranked[1].id).direction):180;
+    const requiredMargin=margin==='adaptive'?Math.max(1.5,Math.min(4,separation*.15)):margin;
+    if(ranked[1]&&ranked[1].angle-ranked[0].angle<requiredMargin)return {match:null,reason:'ambiguous'};
     return {match:ranked[0],reason:'matched'};
   }
   function match(direction,targets,tolerance=18,margin=6){return selectDirection(direction,targets,tolerance,margin).match;}

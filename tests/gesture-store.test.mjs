@@ -43,8 +43,14 @@ test('gesture HTTP API stores calibration with origin checks and rejects command
     const invalid=config();invalid.targets[0].position=-1;
     const rejected=await post('api/gestures/config',invalid);assert.equal(rejected.status,400);assert.match((await rejected.json()).error,/Abertura/);
     assert.equal((await post('api/gestures/execute',{targetId:'curtain'})).status,400);
-    const status=await(await fetch(url+'api/gestures/status')).json();assert.equal(status.commandsEnabled,false);assert.equal(status.calibratedTargets,1);
+    const status=await(await fetch(url+'api/gestures/status')).json();assert.equal(status.commandsEnabled,false);assert.equal(status.calibratedTargets,0);
     const worker=await fetch(url+'hand-worker.js');assert.equal(worker.status,200);assert.match(worker.headers.get('content-security-policy'),/worker-src 'self'/);
     assert.equal((await fetch(url+'vision/registration.json')).status,404);
   } finally {await bridge.close();await rm(directory,{recursive:true,force:true});}
+});
+
+ test('pointing marks and wrist continuity are reported without raw images or coordinates',()=>{
+  const store=new GestureStore();store.config=validateCalibration(config());store.config.settings={selection:'point'};store.config.targets[0].direction=null;store.config.targets[0].binding={deviceId:'cover'};
+  store.update({mode:'preview',phase:'tracking',handPresent:true,reason:'image-flow'});
+  assert.equal(store.status().calibratedTargets,1);assert.equal(store.status().reason,'image-flow');
 });

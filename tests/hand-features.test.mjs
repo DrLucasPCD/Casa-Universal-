@@ -77,3 +77,17 @@ test('manual selection tracks a visible wrist even when the elbow is occluded',(
   const result=features(data,{tracker:'arm',side:'right',selection:'manual'});assert.equal(result.present,true);assert.equal(result.arm,null);
   assert.equal(features(data,{tracker:'arm',side:'right',selection:'direction'}).present,false);
 });
+
+ test('automatic pointing retains the wrist when only the elbow is hidden',()=>{
+  const data=pose();data.poseLandmarks[0][14].visibility=.1;
+  const result=features(data,{tracker:'arm',side:'right',selection:'point'});
+  assert.equal(result.present,true);assert.equal(result.reason,'wrist-only');assert.equal(result.ray,null);assert.equal(result.direction,null);assert.equal(result.y,.4);
+  data.poseLandmarks[0][16].visibility=.1;assert.equal(features(data,{tracker:'arm',selection:'point'}).present,false);
+});
+
+ test('measured wrist continuity works without a visible body but cannot override multiple people',()=>{
+  const trackedWrist={x:.4,y:.6,z:0,source:'image-flow',points:8,ageMs:300};
+  assert.equal(features({poseLandmarks:[],trackedWrist},{tracker:'arm',selection:'point'}).reason,'image-flow');
+  assert.equal(features({poseLandmarks:[],trackedWrist:{...trackedWrist,ageMs:1801}},{tracker:'arm',selection:'point'}).present,false);
+  assert.equal(features({poseLandmarks:[[],[]],trackedWrist},{tracker:'arm',selection:'point'}).present,false);
+});

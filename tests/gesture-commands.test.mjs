@@ -72,3 +72,26 @@ test('pointing session controls different marked devices without manual rearming
   h.setNow(1600);h.store.config.targets[1].anchor=null;
   await assert.rejects(h.send({targetId:'second',sequence:3}));await h.commands.stop();
 });
+
+ test('automatic central discovery resolves mDNS once and uses the private IP for all commands',async()=>{
+  let lookups=0;const calls=[];
+  const commands=new GestureCommands({store:{config:{}},lookupImpl:async(host,options)=>{lookups++;assert.equal(host,'casa-universal.local');assert.equal(options.family,4);return {address:'192.168.68.115'};},fetchImpl:async(url,options)=>{calls.push({url,origin:options.headers?.Origin});return new Response(JSON.stringify({devices:[]}));}});
+  assert.equal((await commands.connect('http://casa-universal.local')).address,'http://192.168.68.115');
+  await commands.request('/api/status',{id:'cover'});await commands.request('/api/action',{id:'cover',action:'stop'});
+  assert.equal(lookups,1);assert.ok(calls.every(c=>c.url.startsWith('http://192.168.68.115/')));assert.equal(calls.at(-1).origin,'http://192.168.68.115');
+});
+ test('mDNS resolving outside the private network cannot become an actuator destination',async()=>{
+  const calls=[];const commands=new GestureCommands({store:{config:{}},lookupImpl:async()=>({address:'8.8.8.8'}),fetchImpl:async url=>{calls.push(url);throw new Error();}});
+  await assert.rejects(commands.connect('http://casa-universal.local'));assert.ok(!calls.includes('http://8.8.8.8/api/devices'));
+});
+
+ test('connection repairs Sonoff DHCP changes by exact saved identity and preserves device secrets',async()=>{
+  const calls=[],device={id:'lamp',adapter:'sonoff_lan',config:{device_id:'owner-device',ip:'192.168.1.20',port:8081}};
+  const commands=new GestureCommands({store:{config:{}},fetchImpl:async(url,options)=>{
+    const body=options.body?JSON.parse(options.body):null;calls.push({url,body});
+    return new Response(JSON.stringify(url.endsWith('/api/devices')?{devices:[device]}:url.endsWith('/api/discover/sonoff')?{devices:[{device_id:'other-device',ip:'192.168.1.25',port:8081},{device_id:'owner-device',ip:'192.168.1.30',port:8081}]}:{}));
+  }});
+  await commands.connect('http://192.168.1.10');
+  const saves=calls.filter(c=>c.url.endsWith('/api/configure'));
+  assert.equal(saves.length,1);assert.deepEqual(saves[0].body,{id:'lamp',config:{ip:'192.168.1.30',port:8081}});
+});

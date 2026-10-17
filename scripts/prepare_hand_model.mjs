@@ -16,11 +16,11 @@ if (!model || digest(model) !== expected) {
   await writeFile(resolve(directory, 'hand_landmarker.task.tmp'), model, {mode: 0o600});
   await rename(resolve(directory, 'hand_landmarker.task.tmp'), resolve(directory, 'hand_landmarker.task'));
 }
-const poseURL='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task';
-const poseDigest='59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a';
-const posePath=resolve(directory,'pose_landmarker_lite.task');
-let pose;try{pose=await readFile(posePath);}catch{}
-if(!pose||digest(pose)!==poseDigest){const response=await fetch(poseURL,{signal:AbortSignal.timeout(90000)});if(!response.ok)throw new Error('Modelo de punho indisponível.');pose=Buffer.from(await response.arrayBuffer());if(digest(pose)!==poseDigest)throw new Error('Modelo de punho não corresponde à versão fixada.');await writeFile(posePath+'.tmp',pose,{mode:0o600});await rename(posePath+'.tmp',posePath);}
+const fullPoseURL='https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task';
+const fullPoseDigest='5134a3aad27a58b93da0088d431f366da362b44e3ccfbe3462b3827a839011b1';
+const fullPosePath=resolve(directory,'pose_landmarker_full.task');
+let fullPose;try{fullPose=await readFile(fullPosePath);}catch{}
+if(!fullPose||digest(fullPose)!==fullPoseDigest){const response=await fetch(fullPoseURL,{signal:AbortSignal.timeout(90000)});if(!response.ok)throw new Error('Modelo de punho indisponível.');fullPose=Buffer.from(await response.arrayBuffer());if(digest(fullPose)!==fullPoseDigest)throw new Error('Modelo de punho não corresponde à versão fixada.');await writeFile(fullPosePath+'.tmp',fullPose,{mode:0o600});await rename(fullPosePath+'.tmp',fullPosePath);}
 // The pinned package's CommonJS build has no require imports. Wrap its exports
 // in a local object so it can load in a classic Worker without eval or a CDN.
 const pkg = JSON.parse(await readFile(resolve('node_modules/@mediapipe/tasks-vision/package.json'), 'utf8'));
@@ -28,3 +28,8 @@ if (pkg.version !== '0.10.32') throw new Error('Versão inesperada do MediaPipe.
 const source = await readFile(resolve('node_modules/@mediapipe/tasks-vision/vision_bundle.cjs'), 'utf8');
 await writeFile(resolve(directory, 'vision_bundle.js'), '(function(exports){\n' + source.replace(/\/\/# sourceMappingURL=.*$/, '') + '\n})(self.CasaMediaPipe = {});\n', {mode: 0o600});
 console.log('Modelo de mãos preparado para processamento local.');
+
+const flowPackage=JSON.parse(await readFile(resolve('node_modules/jsfeat/package.json'),'utf8'));
+if(flowPackage.version!=='0.0.8')throw new Error('Versão inesperada do rastreador visual.');
+const flowSource=await readFile(resolve('node_modules/jsfeat/build/jsfeat.js'),'utf8');
+await writeFile(resolve(directory,'jsfeat.js'),flowSource.replace('window.jsfeat = lib','self.jsfeat = lib'),{mode:0o600});

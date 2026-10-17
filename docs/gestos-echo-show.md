@@ -77,16 +77,16 @@ A central é localizada pelo endereço salvo da configuração USB ou por `casa-
 
 ### Processamento e limites
 
-O reconhecimento usa [Hand Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker/web_js) e [Pose Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/pose_landmarker/web_js), do pacote `@mediapipe/tasks-vision` fixado em `0.10.32`, em um Worker com CPU. No modo punho, usa-se Pose; no modo palma/indicador, Hand. O modelo depende de visibilidade e iluminação e ainda pode perder o acompanhamento. Não é um modelo treinado com exemplos pessoais do usuário.
+O reconhecimento usa [Hand Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/hand_landmarker/web_js) e [Pose Landmarker](https://developers.google.com/edge/mediapipe/solutions/vision/pose_landmarker/web_js), do pacote `@mediapipe/tasks-vision` fixado em `0.10.32`, em um Worker com CPU. No modo punho, usa-se Pose Full; no modo palma/indicador, Hand. O modelo depende de visibilidade e iluminação e ainda pode perder o acompanhamento. Não é um modelo treinado com exemplos pessoais do usuário.
 
 Scripts, WASM e modelos são servidos localmente. Frames e coordenadas não são gravados nem enviados ao Firestore ou a serviços de IA. O vídeo continua usando a conexão Amazon autorizada. Não há acesso ao microfone ou à câmera do Mac.
 
 | Modelo oficial | Versão | SHA-256 |
 | --- | --- | --- |
 | [Hand Landmarker](https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task) | float16/1 | `fbc2a30080c3c557093b5ddfc334698132eb341044ccee322ccf8bcf3607cde1` |
-| [Pose Landmarker Lite](https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task) | float16/1 | `59929e1d1ee95287735ddd833b19cf4ac46d29bc7afddbbf6753c459690d574a` |
+| [Pose Landmarker Full](https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task) | float16/1 | `5134a3aad27a58b93da0088d431f366da362b44e3ccfbe3462b3827a839011b1` |
 
-A análise recebe até 1280 px de largura, um frame por vez, até 10 capturas/s. Frames atrasados, perda de acompanhamento e múltiplas pessoas no modo punho suspendem a geração de comandos. Um alvo confirmado tolera até 900 ms de perda breve; ao reencontrar o punho, o ponto de referência é atualizado sem transformar o salto em movimento. O acompanhamento do punho não exige detectar os dedos.
+A análise recebe até 1280 px de largura, um frame por vez, até 10 capturas/s. Frames atrasados, perda de acompanhamento e múltiplas pessoas no modo punho suspendem a geração de comandos. Um alvo confirmado tolera até 900 ms de perda breve; ao reencontrar o punho, o ponto de referência é atualizado sem transformar o salto em movimento. O acompanhamento do punho não exige detectar os dedos. No modo de apontar, perder o cotovelo não descarta o punho: a cortina já confirmada pode continuar seguindo os movimentos observados. A seleção de outro aparelho exige reencontrar o antebraço. Falta de direção ou perda de detecção não rearma uma luz no modo automático: é preciso apontar para fora dos locais com o braço visível, ou trocar de aparelho. Uma confirmação parcial tolera até 450 ms de perda, descontando esse intervalo do tempo de permanência; não se geram comandos a partir de posições extrapoladas. Frames atrasados pausam o controle sem apagar a trava que impede alternâncias repetidas.
 
 O processamento e a ponte Amazon dependem do Mac ligado. O ESP32 executa os comandos dos aparelhos; ele não processa o vídeo. Ainda não há processamento permanente validado na Echo ou no ESP32.
 
@@ -107,3 +107,12 @@ O MCP existente continua controlando os aparelhos por suas ferramentas. Esta tel
 ## Validação
 
 `npm test` inclui testes de permanência sem pinça, movimentos pequenos, rearme após ausência, navegação e pulsos de cortina; reconhecimento sem dedos estendidos; seleção manual sem direção fictícia; calibração tolerante; expiração de sessão; comandos repetidos/atrasados; cancelamento; parada mesmo após falha de envio; e distinção entre envio e estado físico. Esses testes usam dispositivos simulados. O usuário confirmou a melhora do acompanhamento real do punho na Echo. A cortina foi validada fisicamente pelo usuário tanto pelo botão de abertura curta quanto pelo gesto de subir o punho no modo manual anterior. A nova seleção automática por linha do antebraço tem testes de geometria, troca de alvo e rejeição de ambiguidades; seus locais na sala devem ser marcados e validados na imagem real. Ventilador, luminária e luz do quarto foram vinculados aos respectivos cadastros; seus testes físicos de gesto ainda não foram executados. A execução de outros vínculos deve ser verificada no painel, sem tratar um teste unitário como confirmação do aparelho.
+
+
+### Continuidade do punho e comunicação local
+
+A versão de rastreio de outubro de 2026 usa Pose Full e [jsfeat 0.0.8](https://github.com/inspirit/jsfeat) (MIT) no mesmo Worker. Quando a postura é detectada, pequenos detalhes de imagem ao redor do punho são registrados apenas em memória. Em uma falha breve, Lucas–Kanade piramidal mede o deslocamento desses detalhes, valida o percurso de ida/volta, o erro de imagem e o consenso de pelo menos cinco pontos. Essa continuidade dura no máximo 1,8 segundo sem uma nova detecção de postura; não extrapola a posição nem cria uma direção para selecionar outro aparelho. Imagem plana, mudança de cena, intervalo maior que 350 ms ou mais de uma pessoa interrompem esse recurso. Os quadros não são gravados nem enviados para outro serviço de reconhecimento.
+
+O nome `casa-universal.local` é resolvido uma vez ao conectar; os comandos seguintes usam o IP privado encontrado, evitando repetir a resolução mDNS antes de cada envio e da parada da cortina. A conexão também busca anúncios Sonoff e atualiza IP/porta apenas quando o ID coincide com um aparelho já cadastrado, preservando a chave existente. Isso cobre mudanças de endereço por DHCP sem pedir novos cadastros ao usuário.
+
+Ao confirmar a cortina, a seleção fica retida enquanto o punho sobe/desce, mesmo quando o raio passa por uma luminária. Para sair, abaixe o punho abaixo do cotovelo por 350 ms, ou retire-o do enquadramento. Durante uma requisição à central, novas imagens continuam atualizando o acompanhamento, com a emissão de ações suspensa: a espera de rede não se transforma em perda do punho nem cria uma fila de comandos.

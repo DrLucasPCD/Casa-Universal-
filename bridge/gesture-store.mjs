@@ -1,7 +1,7 @@
 import {mkdir, readFile, writeFile, rename, chmod} from 'node:fs/promises';
 import {resolve, join} from 'node:path';
 const TYPES = new Set(['switch','projector','curtain']);
-const REASONS=new Set(['tracked','no-hand','multiple-hands','incomplete-hand','too-small','no-direction','no-arm','multiple-people']);
+const REASONS=new Set(['tracked','no-hand','multiple-hands','incomplete-hand','too-small','no-direction','no-arm','no-wrist','wrist-only','image-flow','multiple-people']);
 const ID = /^[a-zA-Z0-9_-]{1,100}$/;
 const coordinate = x => Number.isFinite(x) && x >= 0 && x <= 1;
 function point(value) {
@@ -66,7 +66,7 @@ export class GestureStore {
     return {mode:'preview',phase:fresh?this.report.phase:'stopped',handPresent:Boolean(fresh&&this.report.handPresent),
       targetId:fresh?this.report.targetId:null,inferenceMs:fresh?this.report.inferenceMs:null,
       detectedHands:fresh?this.report.detectedHands:0,reason:fresh?this.report.reason:null,
-      calibratedTargets:this.config.targets.filter(t=>t.anchor&&t.direction).length,
+      calibratedTargets:this.config.targets.filter(t=>t.anchor&&(this.config.settings?.selection==='point'?t.binding:t.direction)).length,
       lastReportAt:this.report?new Date(this.report.receivedAt).toISOString():null,commandsEnabled:false};
   }
 }

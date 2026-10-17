@@ -61,3 +61,26 @@ test('an appliance outside the camera remains unmarked when explicitly skipped',
   await h.click('setup-locations');await h.click('skip-location');await flush();
   const saved=h.requests.filter(r=>r.path==='/api/gestures/config'&&r.body).at(-1).body;assert.equal(saved.targets[0].anchor,null);assert.match(h.nodes.get('setup-status').textContent,/falta marcar/);
 });
+function armFrame(timestamp,{elbow=true,y=.4}={}){
+  const points=Array.from({length:33},()=>({x:.5,y:.5,z:0,visibility:.95}));
+  points[14]={x:.5,y:.65,z:0,visibility:elbow?.95:.1};points[16]={x:.5,y,z:0,visibility:.95};
+  return {type:'result',timestamp,elapsedMs:50,poseLandmarks:[points],poseWorldLandmarks:[structuredClone(points)]};
+}
+function pointedTarget(type='curtain'){return{id:'appliance',name:'Aparelho',type,anchor:{x:.5,y:.1},binding:{deviceId:'appliance'}};}
+test('preview continues wrist curtain control when the elbow disappears',async()=>{
+  const h=harness({targets:[pointedTarget()],settings:{tracker:'arm',selection:'point'}});await flush();await h.click('hand-start');h.result({type:'ready'});
+  for(let now=1000;now<=1600;now+=100){h.setNow(now);h.result(armFrame(now));}
+  h.setNow(1700);h.result(armFrame(1700,{elbow:false,y:.3}));
+  assert.match(h.nodes.get('hand-diagnostic').textContent,/Punho acompanhado/);
+  assert.equal(h.nodes.get('selected-target').textContent,'Aparelho');
+  assert.match(h.nodes.get('gesture-events').children[0].textContent,/abrir um pouco/);
+  assert.ok(!h.requests.some(r=>r.path==='/api/gestures/execute'));h.client.stop();
+});
+test('a delayed model frame never clears the one-shot switch latch',async()=>{
+  const h=harness({targets:[pointedTarget('switch')],settings:{tracker:'arm',selection:'point'}});await flush();await h.click('hand-start');h.result({type:'ready'});
+  for(let now=1000;now<=1600;now+=100){h.setNow(now);h.result(armFrame(now));}
+  assert.equal(h.nodes.get('gesture-events').children.length,1);
+  h.setNow(2300);h.result(armFrame(1700));
+  for(let now=2400;now<=4000;now+=100){h.setNow(now);h.result(armFrame(now));}
+  assert.equal(h.nodes.get('gesture-events').children.length,1);h.client.stop();
+});

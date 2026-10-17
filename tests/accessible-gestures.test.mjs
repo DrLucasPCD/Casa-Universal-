@@ -80,11 +80,17 @@ test('point away to rearm the same light while keeping the hand visible',()=>{
   for(let now=700;now<=1500;now+=100)engine.sample(hand(),null,now);
   let out=[];for(let now=1600;now<=2200;now+=100)out.push(...engine.sample(hand(),t,now));assert.equal(out.length,1);
 });
-test('switching away from a curtain suppresses motion and confirms the new target',()=>{
+test('raising the arm keeps the curtain selected even when the ray crosses a light',()=>{
   const engine=context.CasaAccessibleGestures.create({automatic:true}),cover={id:'cover',type:'curtain'},lamp={id:'lamp',type:'switch'};
   for(let now=0;now<=600;now+=100)engine.sample(hand(),cover,now);
-  let out=[];for(let now=700;now<=1400;now+=100)out.push(...engine.sample(hand({y:.2}),lamp,now));
-  assert.equal(out.length,1);assert.equal(out[0].targetId,'lamp');assert.equal(out[0].type,'activate');
+  const out=engine.sample(hand({y:.2}),lamp,700);
+  assert.equal(out[0].type,'curtain-motion');assert.equal(out[0].direction,'open');
+  for(let now=800;now<=1400;now+=100)assert.ok(engine.sample(hand({y:.2}),lamp,now).every(x=>x.type!=='activate'));
+  assert.equal(engine.report().targetId,'cover');
+  for(let now=1500;now<=1900;now+=100)assert.equal(engine.sample(hand({armLowered:true,y:.8}),lamp,now).length,0);
+  assert.equal(engine.report().targetId,null);
+  let events=[];for(let now=2000;now<=2700;now+=100)events.push(...engine.sample(hand(),lamp,now));
+  assert.equal(events[0].type,'activate');assert.equal(events[0].targetId,'lamp');
 });
 
 test('a camera freeze cannot re-toggle a light still being pointed at',()=>{
@@ -92,4 +98,56 @@ test('a camera freeze cannot re-toggle a light still being pointed at',()=>{
   for(let now=0;now<=600;now+=100)engine.sample(hand(),t,now);
   engine.tick(5000);
   for(let now=5100;now<=7000;now+=100)assert.equal(engine.sample(hand(),t,now).length,0);
+});
+
+ test('elbow loss cannot rearm a light while the wrist remains visible',()=>{
+  const engine=context.CasaAccessibleGestures.create({automatic:true}),t={id:'lamp',type:'switch'};
+  for(let now=0;now<=600;now+=100)engine.sample(hand(),t,now);
+  for(let now=700;now<=3000;now+=100)assert.equal(engine.sample(hand({pointingUnavailable:true}),null,now).length,0);
+  for(let now=3100;now<=4000;now+=100)assert.equal(engine.sample(hand(),t,now).length,0);
+});
+ test('a confirmed curtain follows the visible wrist without needing the elbow',()=>{
+  const engine=context.CasaAccessibleGestures.create({automatic:true}),t={id:'cover',type:'curtain'};
+  for(let now=0;now<=600;now+=100)engine.sample(hand(),t,now);
+  assert.equal(engine.sample(hand({pointingUnavailable:true,y:.4}),null,700)[0].direction,'open');
+});
+ test('brief missing detections preserve partial dwell but never advance it',()=>{
+  const engine=context.CasaAccessibleGestures.create({automatic:true}),t={id:'lamp',type:'switch'};
+  for(let now=0;now<=300;now+=100)engine.sample(hand(),t,now);
+  engine.sample({present:false},null,400);assert.equal(engine.report().targetId,'lamp');assert.equal(engine.report().progress,.5);
+  engine.sample({present:false},null,500);assert.equal(engine.report().progress,.5);
+  assert.equal(engine.sample(hand(),t,600).length,0);
+  assert.equal(engine.sample(hand(),t,700).length,0);
+  assert.equal(engine.sample(hand(),t,800)[0].type,'activate');
+});
+ test('uncertain pointing cannot complete or rearm a dwell',()=>{
+  const engine=context.CasaAccessibleGestures.create({automatic:true}),t={id:'lamp',type:'switch'};
+  for(let now=0;now<=400;now+=100)engine.sample(hand(),t,now);
+  for(let now=500;now<=1200;now+=100)assert.equal(engine.sample(hand({pointingUnavailable:true}),null,now).length,0);
+  assert.equal(engine.report().targetId,null);
+  assert.equal(engine.sample(hand(),t,1300).length,0);assert.equal(engine.report().progress,0);
+});
+
+ test('a single long occlusion resets partial confirmation even without intermediate detections',()=>{
+  const engine=context.CasaAccessibleGestures.create({automatic:true}),t={id:'lamp',type:'switch'};
+  for(let now=0;now<=400;now+=100)engine.sample(hand(),t,now);
+  engine.sample({present:false},null,500);
+  assert.equal(engine.sample(hand(),t,1000).length,0);assert.equal(engine.report().progress,0);
+});
+
+ test('automatic light activation survives prolonged model loss without a second toggle',()=>{
+  const engine=context.CasaAccessibleGestures.create({automatic:true}),t={id:'lamp',type:'switch'};
+  for(let now=0;now<=600;now+=100)engine.sample(hand(),t,now);
+  for(let now=700;now<=4000;now+=100)engine.sample({present:false},null,now);
+  for(let now=4100;now<=6000;now+=100)assert.equal(engine.sample(hand(),t,now).length,0);
+});
+
+ test('waiting for the central preserves the curtain lock and tracks fresh motion without queued actions',()=>{
+  const engine=context.CasaAccessibleGestures.create({automatic:true}),cover={id:'cover',type:'curtain'},lamp={id:'lamp',type:'switch'};
+  for(let now=0;now<=600;now+=100)engine.sample(hand(),cover,now);
+  assert.equal(engine.sample(hand({y:.4}),cover,700)[0].direction,'open');
+  for(let now=800;now<=3000;now+=100)assert.equal(engine.sample(hand({y:.3}),lamp,now,{actionsEnabled:false}).length,0);
+  assert.equal(engine.report().targetId,'cover');
+  const events=engine.sample(hand({y:.3}),lamp,3100);assert.equal(events[0].type,'curtain-motion');assert.equal(events[0].direction,'open');
+  assert.equal(engine.sample(hand({y:.3}),lamp,3200).length,0);
 });

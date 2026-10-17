@@ -15,6 +15,7 @@ export function createAlexaBridge({port = 8877, login = new AlexaLogin(), cloud 
     '/alexa-setup.js': ['alexa-setup.js', 'text/javascript; charset=utf-8'],
     '/alexa-webrtc.js': ['alexa-webrtc.js', 'text/javascript; charset=utf-8'],
     '/hand-worker.js': ['hand-worker.js', 'text/javascript; charset=utf-8'],
+    '/wrist-flow.js': ['wrist-flow.js','text/javascript; charset=utf-8'],
     '/hand-features.js': ['hand-features.js', 'text/javascript; charset=utf-8'],
     '/pointing-selector.js': ['pointing-selector.js','text/javascript; charset=utf-8'],
     '/accessible-gestures.js': ['accessible-gestures.js', 'text/javascript; charset=utf-8'],
@@ -22,7 +23,8 @@ export function createAlexaBridge({port = 8877, login = new AlexaLogin(), cloud 
     '/gesture-preview.js': ['gesture-preview.js', 'text/javascript; charset=utf-8'],
     '/gesture-preview.css': ['gesture-preview.css', 'text/css; charset=utf-8'],
     '/alexa-setup.css': ['echo-camera.css', 'text/css; charset=utf-8']};
-  const visionAssets = {'/vision/vision_bundle.js': [resolve(ROOT, 'data/vision/vision_bundle.js'), 'text/javascript; charset=utf-8'],
+  const visionAssets = {'/vision/jsfeat.js': [resolve(ROOT,'data/vision/jsfeat.js'),'text/javascript; charset=utf-8'],'/vision/vision_bundle.js': [resolve(ROOT, 'data/vision/vision_bundle.js'), 'text/javascript; charset=utf-8'],
+    '/vision/pose_landmarker_full.task': [resolve(ROOT,'data/vision/pose_landmarker_full.task'),'application/octet-stream'],
     '/vision/pose_landmarker_lite.task': [resolve(ROOT,'data/vision/pose_landmarker_lite.task'),'application/octet-stream'],
     '/vision/hand_landmarker.task': [resolve(ROOT, 'data/vision/hand_landmarker.task'), 'application/octet-stream']};
   for (const file of ['vision_wasm_internal.js','vision_wasm_internal.wasm','vision_wasm_nosimd_internal.js','vision_wasm_nosimd_internal.wasm']) visionAssets['/vision/wasm/'+file]=[resolve(ROOT,'node_modules/@mediapipe/tasks-vision/wasm',file),file.endsWith('.wasm')?'application/wasm':'text/javascript; charset=utf-8'];

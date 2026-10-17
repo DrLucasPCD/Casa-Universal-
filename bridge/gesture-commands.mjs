@@ -1,6 +1,7 @@
 import {randomUUID} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 import {isIP} from 'node:net';
+import {lookup} from 'node:dns/promises';
 const KEYS=['up','down','left','right','ok','power'];
 const privateIP=host=>isIP(host)===4&&(/^(10\.|192\.168\.)/.test(host)||(/^172\.(1[6-9]|2\d|3[01])\./.test(host)));
 export function centralURL(value) {
@@ -9,8 +10,8 @@ export function centralURL(value) {
   return url.origin;
 }
 export class GestureCommands {
-  constructor({store,fetchImpl=fetch,now=()=>Date.now(),sleep=ms=>new Promise(r=>setTimeout(r,ms)),address=null}={}) {
-    this.store=store;this.fetch=fetchImpl;this.now=now;this.sleep=sleep;this.address=address;this.session=null;this.busy=false;this.lastCommandAt=-Infinity;this.lastResult=null;this.activeCover=null;this.timer=null;
+  constructor({store,fetchImpl=fetch,now=()=>Date.now(),sleep=ms=>new Promise(r=>setTimeout(r,ms)),address=null,lookupImpl=lookup}={}) {
+    this.store=store;this.fetch=fetchImpl;this.lookup=lookupImpl;this.now=now;this.sleep=sleep;this.address=address;this.session=null;this.busy=false;this.lastCommandAt=-Infinity;this.lastResult=null;this.activeCover=null;this.timer=null;
   }
   async request(path,body) {
     if(!this.address)throw new Error('Central: conecte a central antes de ativar os comandos.');
@@ -30,9 +31,26 @@ export class GestureCommands {
     }
     for(const address of [...new Set(candidates)]) {
       this.address=address;
-      try{const data=await this.request('/api/devices');if(!Array.isArray(data.devices))throw new Error();return {address,devices:data.devices.map(d=>this.public(d))};}catch{}
+      try{
+        // Resolve once at connection time: repeated macOS mDNS lookups can cost
+        // five seconds per request, including the curtain's critical Stop.
+        if(new URL(address).hostname==='casa-universal.local'){const resolved=await this.lookup('casa-universal.local',{family:4});this.address=centralURL('http://'+resolved.address);}
+        const data=await this.request('/api/devices');if(!Array.isArray(data.devices))throw new Error();await this.refreshSonoffAddresses(data.devices);return {address:this.address,devices:data.devices.map(d=>this.public(d))};}catch{}
     }
     this.address=null;throw new Error('Central: sem resposta. Confira o Wi-Fi ou informe o IP atual.');
+  }
+  async refreshSonoffAddresses(devices) {
+    const configured=devices.filter(d=>['sonoff_lan','sonoff_diy'].includes(d.adapter)&&d.config?.device_id);
+    if(!configured.length)return;
+    // Match the owner's saved device ID, never an IP guessed from a name.
+    let discovered;try{discovered=await this.request('/api/discover/sonoff',{});}catch{return;}
+    for(const d of configured){
+      const matches=(discovered.devices||[]).filter(x=>x.device_id===d.config.device_id);
+      if(matches.length!==1)continue;
+      const found=matches[0];
+      if(!privateIP(found.ip)||!Number.isInteger(found.port)||found.port<1||found.port>65535||found.ip===d.config.ip&&found.port===(d.config.port||8081))continue;
+      try{await this.request('/api/configure',{id:d.id,config:{ip:found.ip,port:found.port}});d.config.ip=found.ip;d.config.port=found.port;}catch{}
+    }
   }
   public(d) {return {id:d.id,name:d.name,kind:d.kind,adapter:d.adapter,actions:Array.isArray(d.actions)?d.actions:[],state:d.state||'unknown',available:d.available===true,channels:d.channels?.map(c=>({channel:c.channel,state:c.state})),position:d.telemetry?.position_percent??null};}
   status() {return {mode:this.session?'control':'preview',commandsEnabled:Boolean(this.session&&this.session.expiresAt>this.now()),address:this.address,busy:this.busy,lastResult:this.lastResult};}

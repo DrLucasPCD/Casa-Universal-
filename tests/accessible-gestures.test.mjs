@@ -151,3 +151,12 @@ test('a camera freeze cannot re-toggle a light still being pointed at',()=>{
   const events=engine.sample(hand({y:.3}),lamp,3100);assert.equal(events[0].type,'curtain-motion');assert.equal(events[0].direction,'open');
   assert.equal(engine.sample(hand({y:.3}),lamp,3200).length,0);
 });
+
+ test('brief pointing misses preserve partial confirmation without counting the missing interval',()=>{
+  const engine=context.CasaAccessibleGestures.create({automatic:true}),t={id:'lamp',type:'switch'};
+  for(let now=0;now<=300;now+=100)engine.sample(hand(),t,now);
+  engine.sample(hand(),null,400);engine.sample(hand(),null,500);
+  assert.equal(engine.report().targetId,'lamp');assert.equal(engine.report().progress,.5);
+  assert.equal(engine.sample(hand(),t,600).length,0);assert.equal(engine.sample(hand(),t,700).length,0);
+  assert.equal(engine.sample(hand(),t,800)[0].type,'activate');
+});

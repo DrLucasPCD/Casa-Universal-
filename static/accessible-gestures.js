@@ -10,6 +10,7 @@
       if(!Number.isFinite(now)||now<=lastTime)return [];lastTime=now;
       if(!hand?.present||!Number.isFinite(hand.x)||!Number.isFinite(hand.y)||hand.x<0||hand.x>1||hand.y<0||hand.y>1){lose(now);return [];}
       const gap=now-lastFrame;
+      if(automatic&&!confirmed&&!latched&&!selection&&!hand.pointingAmbiguous){lastFrame=now;lose(now);return [];}
       if(automatic&&hand.pointingUnavailable&&!selection){
         nextId=null;nextSince=null;releaseAt=null;
         if(latched){lastFrame=now;state.phase='paused';return [];}

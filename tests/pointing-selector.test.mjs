@@ -26,3 +26,10 @@ test('only marked, bound targets in the visible pointing corridor participate',(
   const targets=[{id:'no-binding',anchor:{x:.8,y:.5}},target('far',.8,.95),{id:'no-marker',binding:{deviceId:'x'}}];
   assert.equal(select(ray,targets).target,null);
 });
+
+ test('comfortable pointing accepts a wider corridor while keeping nearby choices distinct',()=>{
+  const lamp=target('lamp',.8,.64),fan=target('fan',.2,.95);
+  assert.equal(select(ray,[lamp,fan]).target.id,'lamp');
+  const radius=context.CasaPointingSelector.radius(lamp,[lamp,fan]);assert.ok(radius>.085);assert.ok(radius<=.18);
+  assert.ok(context.CasaPointingSelector.radius(lamp,[lamp,target('nearby',.85,.66)])<.1);
+});

@@ -47,8 +47,10 @@ São suportados interruptores de 1 a 4 canais e DIY explicitamente confirmado.
 Uma confirmação HTTP de comando significa que o Sonoff aceitou a solicitação;
 o painel só mostra ligado/desligado a partir de estado recebido do aparelho.
 Se `getState` não for suportado, os anúncios mDNS podem fornecer o estado.
-Observações sem atualização expiram após 60 segundos; um envio nunca inventa
-um estado. Nos aparelhos de vários canais, o estado geral só é calculado quando
+Observações sem resposta nova expiram após 60 segundos; um envio nunca inventa
+um estado. Uma resposta criptografada válida recebida em uma consulta mDNS ativa
+renova a observação mesmo quando o conteúdo e o número de sequência não mudam.
+Um interruptor que permanece desligado não perde a leitura só por não mudar de estado. Nos aparelhos de vários canais, o estado geral só é calculado quando
 todos os canais têm uma leitura confirmada: ligado se algum canal está ligado,
 desligado se todos estão desligados. Respostas excessivas, padding inválido, erros e timeouts são rejeitados.
 Comandos não são reenviados automaticamente, pois um timeout pode ocorrer depois

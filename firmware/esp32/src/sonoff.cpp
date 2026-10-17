@@ -9,7 +9,7 @@
 #include <time.h>
 
 namespace {
-struct Seen { String ip, raw, params; uint16_t port=8081; uint32_t observed=0; };
+struct Seen { String ip, params; uint16_t port=8081; uint32_t observed=0; };
 std::map<String,Seen> seen;
 uint32_t nextScan=0;
 uint64_t sequence=0;
@@ -39,10 +39,11 @@ bool encrypt(JsonObject params,const String& key,JsonObject payload){
 // HTTPClient decodes chunked bodies. This sink stops before oversized responses.
 struct Bounded : Stream {String text;int available() override{return 0;}int read() override{return -1;}int peek() override{return -1;}void flush() override{}size_t write(uint8_t b) override {if(text.length()>=LIMIT)return 0;text+=(char)b;return 1;}size_t write(const uint8_t* p,size_t n) override {if(n>LIMIT-text.length())return 0;text+=String((const char*)p,n);return n;}};
 
-void observe(JsonObject d,JsonObject params,const String& ip,uint16_t port,const String& raw){
+void observe(JsonObject d,JsonObject params,const String& ip,uint16_t port){
   String id=d["id"]|"";auto& state=seen[id];state.ip=ip;state.port=port;
-  // Repeated advertisements are not new observations; stale state must expire.
-  if(state.raw==raw)return;state.raw=raw;state.params="";serializeJson(params,state.params);state.observed=millis();
+  // Only active mDNS queries and authenticated HTTP responses call this.
+  // An unchanged switch is still a fresh observation from a new response.
+  state.params="";serializeJson(params,state.params);state.observed=millis();
 }
 void scan(JsonArray output,bool force){
   if(WiFi.status()!=WL_CONNECTED||(!force&&(int32_t)(nextScan-millis())>0))return;nextScan=millis()+15000;
@@ -57,7 +58,7 @@ void scan(JsonArray output,bool force){
       if(!raw.length())continue;Doc data(16384);bool ok=false;
       if(encrypted&&d["adapter"]=="sonoff_lan")ok=decrypt(raw,MDNS.txt(i,"iv"),d["config"]["device_key"]|"",data);
       else if(!encrypted&&d["adapter"]=="sonoff_diy")ok=!deserializeJson(data,raw)&&data.is<JsonObject>();
-      if(ok)observe(d,data.as<JsonObject>(),ip,port,MDNS.txt(i,"seq")+"/"+MDNS.txt(i,"iv")+"/"+raw);
+      if(ok)observe(d,data.as<JsonObject>(),ip,port);
     }
   }
 }
@@ -84,7 +85,7 @@ bool request(JsonObject d,const String& operation,JsonObject params,bool reading
   if(response["iv"].is<const char*>()&&!diy)decoded=decrypt(response["data"]|"",response["iv"]|"",cfg["device_key"]|"",data);
   else if(diy&&response["data"].is<JsonObject>()){data.set(response["data"]);decoded=true;}
   if(response.containsKey("iv")&&!decoded){lastError="Não foi possível validar o estado criptografado do Sonoff.";return false;}
-  if(decoded)observe(d,data.as<JsonObject>(),ip,port,sink.text);
+  if(decoded)observe(d,data.as<JsonObject>(),ip,port);
   else if(!reading){auto it=seen.find(id);if(it!=seen.end()){it->second.params="";it->second.observed=0;}}
   return true;
 }
@@ -109,7 +110,7 @@ void sonoffStatus(JsonObject d,JsonObject out){
   int count=d["config"]["channels"]|1;JsonArray channels;if(count>1){channels=out.createNestedArray("channels");for(int i=1;i<=count;i++){auto c=channels.createNestedObject();c["channel"]=i;c["state"]="unknown";}}
   auto it=seen.find(String(d["id"]|""));bool fresh=it!=seen.end()&&it->second.observed&&millis()-it->second.observed<60000;
   if(fresh){Doc data(16384);deserializeJson(data,it->second.params);String state=data["switch"]|"";if(count==1&&(state=="on"||state=="off"))out["state"]=state;
-    for(auto s:data["switches"].as<JsonArray>())if(s["outlet"].is<int>()&&(s["switch"]=="on"||s["switch"]=="off")){int n=s["outlet"].as<int>();if(n>=0&&n<count&&!channels.isNull())channels[n]["state"]=s["switch"];}
+    for(auto s:data["switches"].as<JsonArray>())if(s["outlet"].is<int>()&&(s["switch"]=="on"||s["switch"]=="off")){int n=s["outlet"].as<int>();if(count==1&&n==0)out["state"]=s["switch"];else if(n>=0&&n<count&&!channels.isNull())channels[n]["state"]=s["switch"];}
     if(count>1){bool complete=true,anyOn=false;for(auto channel:channels){String value=channel["state"]|"unknown";complete&=value=="on"||value=="off";anyOn|=value=="on";}if(complete)out["state"]=anyOn?"on":"off";}
     out["observation_age_seconds"]=(millis()-it->second.observed)/1000;
   }

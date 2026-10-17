@@ -63,3 +63,12 @@ test('failed physical readback never confirms a switch merely because the send s
   const h=harness();h.arm();h.commands.state=async()=>({id:'device',kind:'switch',adapter:'tuya',state:'off',available:true,actions:['on','off']});
   const result=await h.send();assert.equal(result.confirmed,false);assert.equal(result.state,'off');await h.commands.stop();
 });
+
+test('pointing session controls different marked devices without manual rearming',async()=>{
+  const h=harness();h.store.config.settings.selection='point';h.target.direction=null;
+  h.commands.arm('camera');const result=await h.send();assert.equal(result.action,'on');
+  h.setNow(800);h.store.config.targets.push({...h.target,id:'second'});
+  assert.equal((await h.send({targetId:'second',sequence:2})).action,'off');
+  h.setNow(1600);h.store.config.targets[1].anchor=null;
+  await assert.rejects(h.send({targetId:'second',sequence:3}));await h.commands.stop();
+});

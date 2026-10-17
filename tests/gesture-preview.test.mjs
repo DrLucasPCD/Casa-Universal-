@@ -4,19 +4,19 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const source=name=>readFileSync(new URL('../static/'+name,import.meta.url),'utf8');
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
-function harness() {
+function harness({targets=[],settings={tracker:'palm'}}={}) {
   const nodes=new Map(),requests=[],workers=[],frames=new Map(),events={};let now=1000,id=0,tick,arcs=0;
   function element() {return {textContent:'',value:'',setAttribute(){},dataset:{},children:[],addEventListener(name,fn){this[name]=fn;},replaceChildren(){this.children=[];},append(e){this.children.push(e);},prepend(e){this.children.unshift(e);}};}
   const document={hidden:false,getElementById(id){if(!nodes.has(id))nodes.set(id,element());return nodes.get(id);},createElement:element,addEventListener(name,fn){events[name]=fn;}};
   const video={readyState:4,videoWidth:1280,videoHeight:720,srcObject:{getVideoTracks:()=>[{readyState:'live'}]},addEventListener(){},requestVideoFrameCallback(fn){frames.set(++id,fn);return id;},cancelVideoFrameCallback(id){frames.delete(id);}};
   const ctx=new Proxy({arc(){arcs++;}},{get:(o,k)=>o[k]??(()=>{})});
-  const canvas={...element(),getContext:()=>ctx};
+  const canvas={...element(),getContext:()=>ctx,getBoundingClientRect:()=>({left:0,top:0,width:1280,height:720})};
   const context={window:{},document,performance:{now:()=>now},crypto:{randomUUID:()=>'target'},addEventListener(){},setInterval(fn){tick=fn;return 1;},clearInterval(){tick=null;},
     createImageBitmap:async()=>({close(){}}),Worker:class {constructor(){workers.push(this);}postMessage(){}terminate(){this.terminated=true;}},
-    fetch:async(path,options)=>{requests.push({path,body:options?.body?JSON.parse(options.body):null});return{ok:true,json:async()=>path==='/api/gestures/config'?{version:1,cameraId:null,targets:[],settings:{tracker:'palm'}}:path==='/api/gestures/central'?{address:'http://192.168.68.117',devices:[]}:{}};}};
-  vm.createContext(context);for(const file of ['accessible-gestures.js','hand-features.js','gesture-preview.js'])vm.runInContext(source(file),context);
+    fetch:async(path,options)=>{requests.push({path,body:options?.body?JSON.parse(options.body):null});return{ok:true,json:async()=>path==='/api/gestures/config'?(options?.body?JSON.parse(options.body):{version:1,cameraId:null,targets,settings}):path==='/api/gestures/central'?{address:'http://192.168.68.117',devices:[]}:{}};}};
+  vm.createContext(context);for(const file of ['pointing-selector.js','accessible-gestures.js','hand-features.js','gesture-preview.js'])vm.runInContext(source(file),context);
   const client=context.window.CasaGesturePreview.create({video,canvas});
-  return {client,document,video,requests,workers,nodes,events,frames,get arcs(){return arcs;},setNow(value){now=value;},tick:()=>tick?.(),click:id=>nodes.get(id).click(),result(data){workers.at(-1).onmessage({data});}};
+  return {client,document,video,canvas,requests,workers,nodes,events,frames,get arcs(){return arcs;},setNow(value){now=value;},tick:()=>tick?.(),click:id=>nodes.get(id).click(),result(data){workers.at(-1).onmessage({data});}};
 }
 test('preview needs a live decoded video and starts the model only explicitly',async()=>{
   const h=harness();await flush();assert.equal(h.workers.length,0);
@@ -44,4 +44,20 @@ test('late model messages after stop cannot resurrect hand tracking',async()=>{
 test('hiding the page stops the worker and cancels queued frame callbacks',async()=>{
   const h=harness();await flush();await h.click('hand-start');h.result({type:'ready'});assert.equal(h.frames.size,1);
   h.document.hidden=true;h.events.visibilitychange();assert.equal(h.frames.size,0);assert.equal(h.workers[0].terminated,true);
+});
+
+test('one-time location setup persists all marks without sending device commands',async()=>{
+  const targets=['curtain','lamp'].map((id,i)=>({id,name:id,type:i?'switch':'curtain',anchor:null,direction:null,position:null,tracker:'arm',binding:{deviceId:id}}));
+  const h=harness({targets,settings:{tracker:'arm',selection:'point'}});await flush();
+  assert.equal(h.nodes.get('manual-target-row').hidden,true);
+  await h.click('setup-locations');h.canvas.pointerdown({clientX:900,clientY:200});h.canvas.pointerdown({clientX:200,clientY:400});await flush();
+  const saved=h.requests.filter(r=>r.path==='/api/gestures/config'&&r.body).at(-1).body;
+  assert.equal(saved.targets[0].anchor.x,900/1280);assert.equal(saved.targets[1].anchor.y,400/720);
+  assert.equal(saved.settings.selection,'point');assert.ok(!h.requests.some(r=>r.path==='/api/gestures/execute'));
+  assert.match(h.nodes.get('setup-status').textContent,/2 aparelhos/);
+});
+test('an appliance outside the camera remains unmarked when explicitly skipped',async()=>{
+  const h=harness({targets:[{id:'lamp',name:'Lamp',type:'switch',anchor:null,binding:{deviceId:'lamp'}}],settings:{tracker:'arm',selection:'point'}});await flush();
+  await h.click('setup-locations');await h.click('skip-location');await flush();
+  const saved=h.requests.filter(r=>r.path==='/api/gestures/config'&&r.body).at(-1).body;assert.equal(saved.targets[0].anchor,null);assert.match(h.nodes.get('setup-status').textContent,/falta marcar/);
 });

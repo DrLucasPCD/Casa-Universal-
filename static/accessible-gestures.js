@@ -1,19 +1,32 @@
 (function(root){
   'use strict';
-  function create({dwellMs=600,stability=.065,movement=.035}={}) {
-    let target=null,anchor=null,since=null,confirmed=false,latched=false,lastFrame=-Infinity,lastTime=-Infinity,lastAction=-Infinity,releaseAt=null,okLatched=false,missingAt=null;
+  function create({dwellMs=600,stability=.065,movement=.035,automatic=false}={}) {
+    let target=null,anchor=null,since=null,confirmed=false,latched=false,lastFrame=-Infinity,lastTime=-Infinity,lastAction=-Infinity,releaseAt=null,okLatched=false,missingAt=null,nextId=null,nextSince=null;
     const state={progress:0,phase:'idle',targetId:null};
-    function reset(){missingAt=null;target=null;anchor=null;since=null;confirmed=false;latched=false;releaseAt=null;okLatched=false;Object.assign(state,{progress:0,phase:'idle',targetId:null});}
-    function lose(now){if(missingAt===null)missingAt=now;if(latched){if(releaseAt===null)releaseAt=now;if(now-releaseAt>=1200){latched=false;confirmed=false;target=null;state.targetId=null;state.phase='idle';}else state.phase='release';state.progress=0;return;}if(confirmed&&now-missingAt<900){state.phase='paused';state.progress=0;return;}target=null;anchor=null;since=null;confirmed=false;state.progress=0;state.targetId=null;state.phase=latched?'release':'idle';if(releaseAt===null)releaseAt=now;if(now-releaseAt>=1200){latched=false;state.phase='idle';}}
-    function tick(now){if(now-lastFrame>600)lose(now);return {...state};}
+    function reset(){nextId=null;nextSince=null;missingAt=null;target=null;anchor=null;since=null;confirmed=false;latched=false;releaseAt=null;okLatched=false;Object.assign(state,{progress:0,phase:'idle',targetId:null});}
+    function lose(now){nextId=null;nextSince=null;if(missingAt===null)missingAt=now;if(latched){if(releaseAt===null)releaseAt=now;if(now-releaseAt>=1200){latched=false;confirmed=false;target=null;state.targetId=null;state.phase='idle';}else state.phase='release';state.progress=0;return;}if(confirmed&&now-missingAt<900){state.phase='paused';state.progress=0;return;}target=null;anchor=null;since=null;confirmed=false;state.progress=0;state.targetId=null;state.phase=latched?'release':'idle';if(releaseAt===null)releaseAt=now;if(now-releaseAt>=1200){latched=false;state.phase='idle';}}
+    function tick(now){if(now-lastFrame>600){if(latched){state.phase='paused';state.progress=0;}else lose(now);}return {...state};}
     function sample(hand,selection,now){
       if(!Number.isFinite(now)||now<=lastTime)return [];lastTime=now;
       if(!hand?.present||!Number.isFinite(hand.x)||!Number.isFinite(hand.y)||hand.x<0||hand.x>1||hand.y<0||hand.y>1){lose(now);return [];}
       const gap=now-lastFrame;
       if(confirmed&&gap<900&&missingAt!==null){anchor={x:hand.x,y:hand.y};since=now;}
       missingAt=null;
-      if(gap>900){target=null;anchor=null;since=null;confirmed=false;state.progress=0;}
+      if(gap>900){if(!latched)target=null;anchor=null;since=null;confirmed=false;state.progress=0;}
       lastFrame=now;
+      if(automatic&&hand.pointingAmbiguous){nextId=null;nextSince=null;releaseAt=null;state.phase='ambiguous';state.progress=0;return [];}
+      if(automatic&&(confirmed||latched)&&selection&&selection.id!==target?.id){
+        if(nextId!==selection.id){nextId=selection.id;nextSince=now;}
+        state.phase='switching';state.targetId=selection.id;state.progress=Math.min(1,(now-nextSince)/dwellMs);
+        if(now-nextSince<Math.min(300,dwellMs))return [];
+        target=selection;anchor={x:hand.x,y:hand.y};since=nextSince;confirmed=false;latched=false;okLatched=false;nextId=null;nextSince=null;releaseAt=null;
+      }else {nextId=null;nextSince=null;if(target)state.targetId=target.id;}
+      if(automatic&&latched&&!selection){
+        if(releaseAt===null)releaseAt=now;
+        state.phase='release';state.progress=0;
+        if(now-releaseAt>=700){target=null;anchor=null;since=null;confirmed=false;latched=false;state.targetId=null;state.phase='idle';}
+        return [];
+      }
       if(latched){state.phase='release';releaseAt=null;return [];}
       releaseAt=null;
       if(!confirmed){

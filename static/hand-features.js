@@ -29,7 +29,7 @@
     if (!direction||!lower||!upper) return {present:false,reason:'no-direction'};
     const pointing=angle(lower,upper)>150 && distance(world[8],world[0])>distance(world[6],world[0])*1.08;
     return {present:true,reason:'tracked',x:points[8].x,y:points[8].y,direction,pointing,
-      pinchRatio:distance(world[4],world[8])/palm,landmarks:points};
+      pinchRatio:distance(world[4],world[8])/palm,ray:{origin:{x:points[5].x,y:points[5].y},tip:{x:points[8].x,y:points[8].y}},landmarks:points};
   }
   function accessible(result,settings) {
     if(settings.tracker==='arm') {
@@ -39,9 +39,10 @@
       const visible=p=>finite(p)&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1&&p.visibility>=.35;
       const manual=settings.selection==='manual';
       if(!visible(points?.[wrist])||(!manual&&!visible(points?.[elbow])))return {present:false,reason:'no-arm',visibleHands:[],detectedHands:0};
+      const ray=visible(points?.[elbow])?{origin:{x:points[elbow].x,y:points[elbow].y},tip:{x:points[wrist].x,y:points[wrist].y}}:null;
       const direction=finite(world?.[elbow])&&finite(world?.[wrist])?normalize(subtract(world[wrist],world[elbow])):null;
-      if(!direction&&!manual)return {present:false,reason:'no-direction',visibleHands:[],detectedHands:0};
-      return {present:true,reason:'tracked',tracker:'arm',x:points[wrist].x,y:points[wrist].y,direction,pointing:true,pinchRatio:Infinity,visibleHands:[],detectedHands:1,arm:visible(points?.[elbow])?[points[elbow],points[wrist]]:null};
+      if(!direction&&!manual&&settings.selection!=='point')return {present:false,reason:'no-direction',visibleHands:[],detectedHands:0};
+      return {present:true,reason:'tracked',tracker:'arm',ray,x:points[wrist].x,y:points[wrist].y,direction,pointing:true,pinchRatio:Infinity,visibleHands:[],detectedHands:1,arm:visible(points?.[elbow])?[points[elbow],points[wrist]]:null};
     }
     const view=observation(result),points=view.visibleHands[0],world=result.worldLandmarks?.[0];
     if(view.detectedHands!==1)return {...view,present:false,reason:view.detectedHands>1?'multiple-hands':'no-hand'};
@@ -51,7 +52,7 @@
     const center={x:(world[5].x+world[9].x+world[17].x)/3,y:(world[5].y+world[9].y+world[17].y)/3,z:(world[5].z+world[9].z+world[17].z)/3};
     const direction=normalize(subtract(center,world[0]));
     if(!direction)return {...view,present:false,reason:'no-direction'};
-    return {...view,present:true,reason:'tracked',tracker:'palm',x:palm.reduce((v,i)=>v+points[i].x,0)/4,y:palm.reduce((v,i)=>v+points[i].y,0)/4,direction,pointing:true,pinchRatio:Infinity};
+    return {...view,present:true,reason:'tracked',tracker:'palm',ray:{origin:{x:points[0].x,y:points[0].y},tip:{x:points[9].x,y:points[9].y}},x:palm.reduce((v,i)=>v+points[i].x,0)/4,y:palm.reduce((v,i)=>v+points[i].y,0)/4,direction,pointing:true,pinchRatio:Infinity};
   }
   function features(result,settings={tracker:'finger'}) {
     return settings.tracker==='finger'?{...observation(result),...eligible(result),tracker:'finger'}:accessible(result,settings);

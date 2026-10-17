@@ -38,27 +38,42 @@ O botão **Parar**, sair da página ou ocultar a aba encerra as trilhas. Uma aut
 
 `NotAllowedError` pode significar recusa de permissão ou restrição do sistema. `NoCameraAPI` significa que o navegador não expõe a API naquele contexto. Nenhum desses resultados deve ser anunciado como prova de que o hardware não tem câmera. Consulte a documentação de [getUserMedia](https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia).
 
-## Usar gestos acessíveis e comandos reais
+## Apontar para o aparelho e controlar
 
-1. No Mac, execute `npm ci` e `npm run alexa`. A preparação baixa e verifica os dois modelos oficiais. Abra **http://127.0.0.1:8877/** e clique em **Abrir câmera da Echo**.
-2. Em **Do seu jeito**, escolha **Punho e antebraço** e o lado direito/esquerdo mais confortável. Na seleção manual, basta manter o punho visível; o cotovelo é necessário para aprender direções. Não é preciso estender os dedos, abrir a mão ou fazer pinça. Há também acompanhamento da palma e o modo anterior pelo indicador.
-3. Clique em **Iniciar reconhecimento**. O círculo acompanha o punho; a linha representa o antebraço. Ajuste a sensibilidade, a tolerância a pequenos movimentos e a amplitude da navegação conforme seu conforto. O tempo padrão é **0,6 segundo**; existem opções de 0,4 a 6 segundos.
-4. Use **Escolher na tela** para selecionar o alvo sem calibrar uma direção. Vincule **Aparelho real deste alvo** a um aparelho da central. Para interruptores com vários canais, selecione o canal. Para um controle IR/RF, associe os botões disponíveis aos comandos do gesto. Clique em **Salvar calibração**.
-5. Teste primeiro a prévia. O círculo preenche enquanto você mantém o punho confortável e parado. Para enviar comandos, clique em **Ativar comandos reais**. O nome do alvo fica visível antes do envio.
-6. **Energia:** confirme por permanência para alternar uma vez. O app consulta o estado real antes de escolher ligar/desligar. Retire o punho por 1,2 s ou clique em **Rearmar seleção** antes de repetir. Se o estado for desconhecido, a alternância fica bloqueada.
-7. **Cortina:** confirme o alvo e suba/desça o punho para enviar abrir/fechar por um intervalo curto; a ponte sempre tenta enviar Parar após o envio, inclusive se a resposta do movimento falhar. Cada pulso aguarda o comando anterior. Os botões **Abrir um pouco** e **Fechar um pouco** usam o mesmo envio para permitir teste e uso sem gesto. O percentual exibido vem do motor, quando disponível; o movimento não representa um ajuste percentual exato.
-8. **Projetor:** depois de confirmar, mova nos quatro sentidos para navegar; mantenha parado para OK. É necessário cadastrar/aprender os códigos IR/RF reais primeiro. O envio de IR/RF não confirma a reação física.
-9. **Parar comandos / cortina** cancela a sessão e solicita a parada de um movimento em curso. Encerrar a câmera ou ocultar/sair da aba também desativa os comandos. Uma falha de comunicação durante a parada é mostrada na tela; use o controle físico se não houver confirmação.
+O modo padrão é **apontar com troca automática**, sem escolher o aparelho no menu durante o uso. A Echo precisa enquadrar o usuário e os aparelhos; uma configuração inicial associa os locais na imagem aos cadastros reais da central.
 
-A central é localizada pelo endereço salvo da configuração USB ou por `casa-universal.local`; pode-se informar outro IPv4 privado no painel. A ponte só encaminha operações predefinidas, sem seguir redirecionamentos ou encaminhar credenciais Amazon. Os dispositivos são listados sem as chaves locais.
+### Configuração única
 
-A configuração fica em `data/gestures/calibration.json`, com acesso somente pelo usuário do Mac. Ela contém câmera, alvos, ajustes e vínculos, sem frames. Os comandos reais nunca são reativados pelo arquivo salvo. Esta configuração ainda não é sincronizada com o Firestore.
+1. No Mac, execute `npm ci` e `npm run alexa`. Abra **http://127.0.0.1:8877/**, entre na Amazon se necessário e clique em **Abrir câmera da Echo**.
+2. Clique em **Marcar locais dos aparelhos (uma vez)**. O assistente pede Cortina, Ventilador, Luminária e Luz do quarto, conforme os alvos vinculados. Clique na imagem sobre cada aparelho. Os comandos ficam desativados durante a configuração.
+3. Se um aparelho não aparecer na câmera, use **Este aparelho não aparece na câmera**. Ele ficará sem alvo de apontar até ser marcado, sem inventar uma posição.
+4. Os locais são salvos automaticamente neste Mac ao terminar. Não é necessário repetir a configuração ao abrir o painel, desde que a câmera permaneça no mesmo lugar.
 
-### Apontar na sala (opcional)
+Os vínculos com os aparelhos reais ficam em **Configurar aparelhos e direções**, usados somente na configuração. Eles não precisam ser selecionados durante o controle por apontar.
 
-No modo **Apontar na sala**, marque cada aparelho na imagem e use **Aprender direção**. Após 3 segundos de preparação, a captura acumula até 16 amostras ao longo de até 12 segundos, com progresso visível. O ajuste descarta amostras isoladas e aceita uma variação limitada, sem exigir esticar os dedos. A direção deve ser reaprendida ao trocar modo de rastreamento ou lado do corpo.
+### Uso normal
 
-Mantenha a câmera e a posição de uso constantes. Esta versão compara direções aprendidas; não reconhece objetos nem calcula a posição absoluta da pessoa na sala. Alvos de direção ambígua são recusados. A seleção na tela dispensa essa calibração e mantém o controle no aparelho escolhido.
+1. Clique em **Iniciar reconhecimento** e **Ativar gestos da casa** uma vez por sessão.
+2. Aponte o antebraço para o aparelho. Uma linha tracejada mostra a direção estimada, o local é destacado e o nome aparece em **Aparelho apontado**.
+3. Mantenha a direção confortável por **0,6 segundo** para confirmar. Não há exigência de pinça, mão aberta ou indicador estendido.
+4. **Luz e ventilador:** uma confirmação alterna a energia uma vez. Aponte para outro aparelho para controlá-lo. Para repetir no mesmo, aponte para fora dos locais marcados por aproximadamente 0,7 s e volte a apontar. Estado desconhecido bloqueia a alternância desse aparelho.
+5. **Cortina:** depois do destaque, suba/desça o punho para abrir/fechar em pulsos curtos, sempre seguidos de uma tentativa de Parar. Aponte para outro aparelho para trocar automaticamente. O percentual mostrado vem do motor, quando disponível; um pulso não representa uma posição percentual exata.
+6. **Projetor:** depois de confirmar, mova nos quatro sentidos para navegar e mantenha parado para OK. É necessário aprender os códigos IR/RF reais e marcar a projeção. O envio IR/RF não confirma a reação física.
+7. **Parar comandos / cortina**, encerrar a câmera ou sair/ocultar a aba desativa o controle. Se uma parada não for confirmada, a tela informa a falha e o controle físico deve ser usado.
+
+### Como o alvo é escolhido
+
+O seletor projeta na imagem uma linha do cotovelo até o punho, estendida para a frente, e compara essa linha com os locais marcados. No modo palma/indicador, usa os pontos correspondentes da mão. A geometria leva em conta a proporção da imagem e rejeita pontos atrás do braço, linhas muito curtas e locais fora do corredor de apontar.
+
+Esta é uma aproximação pela imagem da câmera, não reconhecimento de objetos nem medição da posição 3D da sala. Alvos alinhados na mesma direção são considerados ambíguos e não acionam aparelhos. Ajustar o braço ou a posição da câmera pode separá-los. Aparelhos fora da imagem não podem ser marcados por este método. A confirmação física de cada alvo continua necessária.
+
+Não é mais necessário aprender e repetir uma direção pessoal por aparelho no modo padrão. **Direções aprendidas** e **Escolher na tela** continuam disponíveis como alternativas dentro dos ajustes avançados.
+
+### Ajustes e persistência
+
+Em **Do seu jeito**, escolha o lado mais confortável e ajuste o tempo de confirmação (0,4 a 6 segundos), a tolerância e a amplitude dos movimentos. No modo de apontar com o punho, cotovelo e punho precisam estar visíveis. Uma perda breve suspende comandos e preserva o alvo; o reencontro redefine a referência sem gerar um salto de movimento.
+
+A central é localizada pelo endereço salvo da configuração USB ou por `casa-universal.local`; pode-se informar outro IPv4 privado. Os vínculos e locais ficam em `data/gestures/calibration.json`, acessível somente pelo usuário do Mac, sem frames. A configuração não é sincronizada com o Firestore. Comandos reais nunca são reativados pelo arquivo salvo.
 
 ### Processamento e limites
 
@@ -80,7 +95,7 @@ O processamento e a ponte Amazon dependem do Mac ligado. O ESP32 executa os coma
 - `GET /api/gestures/status`: reconhecimento recente, alvo, resultado do último comando e `commandsEnabled`. Não retorna imagens, coordenadas ou ID da sessão de controle.
 - `POST /api/gestures/config`: valida e salva ajustes/vínculos; desativa os comandos.
 - `POST /api/gestures/central`: encontra a central e lista aparelhos sem credenciais.
-- `POST /api/gestures/arm`: ativação explícita; no modo manual, vincula a sessão a um único alvo escolhido.
+- `POST /api/gestures/arm`: ativação explícita; no modo de apontar, habilita os alvos vinculados com local marcado; no modo manual alternativo, limita a um único alvo escolhido.
 - `POST /api/gestures/report`: telemetria limitada e renovação da sessão ativa. Expiração após 5 segundos sem renovação.
 - `POST /api/gestures/execute`: comando com sessão válida, sequência crescente, observação recente, alvo salvo e ação permitida. Não há fila de comandos atrasados nem repetição automática após falha.
 - `POST /api/gestures/stop`: cancela a sessão e tenta parar a cortina em movimento.
@@ -91,4 +106,4 @@ O MCP existente continua controlando os aparelhos por suas ferramentas. Esta tel
 
 ## Validação
 
-`npm test` inclui testes de permanência sem pinça, movimentos pequenos, rearme após ausência, navegação e pulsos de cortina; reconhecimento sem dedos estendidos; seleção manual sem direção fictícia; calibração tolerante; expiração de sessão; comandos repetidos/atrasados; cancelamento; parada mesmo após falha de envio; e distinção entre envio e estado físico. Esses testes usam dispositivos simulados. O usuário confirmou a melhora do acompanhamento real do punho na Echo. A cortina foi validada fisicamente pelo usuário tanto pelo botão de abertura curta quanto pelo gesto de subir o punho. Ventilador, luminária e luz do quarto foram vinculados aos respectivos cadastros; seus testes físicos de gesto ainda não foram executados. A execução de outros vínculos deve ser verificada no painel, sem tratar um teste unitário como confirmação do aparelho.
+`npm test` inclui testes de permanência sem pinça, movimentos pequenos, rearme após ausência, navegação e pulsos de cortina; reconhecimento sem dedos estendidos; seleção manual sem direção fictícia; calibração tolerante; expiração de sessão; comandos repetidos/atrasados; cancelamento; parada mesmo após falha de envio; e distinção entre envio e estado físico. Esses testes usam dispositivos simulados. O usuário confirmou a melhora do acompanhamento real do punho na Echo. A cortina foi validada fisicamente pelo usuário tanto pelo botão de abertura curta quanto pelo gesto de subir o punho no modo manual anterior. A nova seleção automática por linha do antebraço tem testes de geometria, troca de alvo e rejeição de ambiguidades; seus locais na sala devem ser marcados e validados na imagem real. Ventilador, luminária e luz do quarto foram vinculados aos respectivos cadastros; seus testes físicos de gesto ainda não foram executados. A execução de outros vínculos deve ser verificada no painel, sem tratar um teste unitário como confirmação do aparelho.

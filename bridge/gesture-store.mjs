@@ -9,8 +9,8 @@ function point(value) {
   return {x:value.x,y:value.y};
 }
 export function accessibility(value={}) {
-  const settings={tracker:'arm',selection:'manual',side:'right',dwellMs:600,stability:.065,movement:.035,confidence:.4,...value};
-  if(!['manual','direction'].includes(settings.selection)||!['arm','palm','finger'].includes(settings.tracker)||!['left','right'].includes(settings.side)||!Number.isFinite(settings.dwellMs)||settings.dwellMs<400||settings.dwellMs>6000||!Number.isFinite(settings.stability)||settings.stability<.02||settings.stability>.15||!Number.isFinite(settings.movement)||settings.movement<.03||settings.movement>.25||!Number.isFinite(settings.confidence)||settings.confidence<.3||settings.confidence>.8)throw new Error('Gestos: ajustes de reconhecimento inválidos.');
+  const settings={tracker:'arm',selection:'point',side:'right',dwellMs:600,stability:.065,movement:.035,confidence:.4,...value};
+  if(!['point','manual','direction'].includes(settings.selection)||!['arm','palm','finger'].includes(settings.tracker)||!['left','right'].includes(settings.side)||!Number.isFinite(settings.dwellMs)||settings.dwellMs<400||settings.dwellMs>6000||!Number.isFinite(settings.stability)||settings.stability<.02||settings.stability>.15||!Number.isFinite(settings.movement)||settings.movement<.03||settings.movement>.25||!Number.isFinite(settings.confidence)||settings.confidence<.3||settings.confidence>.8)throw new Error('Gestos: ajustes de reconhecimento inválidos.');
   return Object.fromEntries(['tracker','selection','side','dwellMs','stability','movement','confidence'].map(k=>[k,settings[k]]));
 }
 function binding(value) {
@@ -31,7 +31,7 @@ export function validateCalibration(value) {
       direction={x:target.direction.x,y:target.direction.y,z:target.direction.z};
     }
     if(target.position!==null&&(!Number.isFinite(target.position)||target.position<0||target.position>100))throw new Error('Abertura inicial inválida.');
-    return {id:target.id,name:target.name.trim(),type:target.type,anchor:target.anchor===null?null:point(target.anchor),direction,position:target.position===null?null:target.position,binding:binding(target.binding),tracker:target.tracker??null,tolerance:Number.isFinite(target.tolerance)?Math.min(36,Math.max(12,target.tolerance)):24};
+    return {id:target.id,name:target.name.trim(),type:target.type,anchor:target.anchor===null?null:point(target.anchor),direction,position:target.position===null?null:target.position,binding:binding(target.binding),tracker:target.tracker??null,radius:Number.isFinite(target.radius)?Math.min(.16,Math.max(.025,target.radius)):.085,tolerance:Number.isFinite(target.tolerance)?Math.min(36,Math.max(12,target.tolerance)):24};
   });
   return {version:1,cameraId:value.cameraId,targets,settings:accessibility(value.settings)};
 }

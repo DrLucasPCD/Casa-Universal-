@@ -16,6 +16,7 @@ export function createAlexaBridge({port = 8877, login = new AlexaLogin(), cloud 
     '/alexa-webrtc.js': ['alexa-webrtc.js', 'text/javascript; charset=utf-8'],
     '/hand-worker.js': ['hand-worker.js', 'text/javascript; charset=utf-8'],
     '/hand-features.js': ['hand-features.js', 'text/javascript; charset=utf-8'],
+    '/pointing-selector.js': ['pointing-selector.js','text/javascript; charset=utf-8'],
     '/accessible-gestures.js': ['accessible-gestures.js', 'text/javascript; charset=utf-8'],
     '/gesture-engine.js': ['gesture-engine.js', 'text/javascript; charset=utf-8'],
     '/gesture-preview.js': ['gesture-preview.js', 'text/javascript; charset=utf-8'],
@@ -81,7 +82,7 @@ export function createAlexaBridge({port = 8877, login = new AlexaLogin(), cloud 
       return send(404, {error: 'Operação não encontrada.'});
     } catch (error) {
       const safe = typeof error?.message === 'string' && /^(A Amazon |Faça login |Escolha uma câmera |Encerre a solicitação |Conecte o canal |O canal |Canal inválido|Conexão cancelada|Falha na conexão segura|Resposta de diretivas|Falha ao interpretar|O fluxo de diretivas|O envio do evento|Resposta do evento|Não foi possível enviar|Resposta Amazon muito grande|A Amazon devolveu|Região Amazon|Sessão RTC |Oferta RTC |Relato de imagem|Posição de calibração|Calibração inválida|Alvo de calibração|Direção de calibração|Abertura inicial inválida|Estado de gestos inválido|Gestos:|Central:)/.test(error.message);
-      return send(400, {error: safe ? error.message : 'Não foi possível concluir a operação. Confira a conexão da ponte com a Amazon.'});
+      return send(400, {...(path==='/api/gestures/execute'?{controlActive:commands.status().commandsEnabled}:{}),error: safe ? error.message : 'Não foi possível concluir a operação. Confira a conexão da ponte com a Amazon.'});
     }
   });
   return {server, login, cloud, async start() {

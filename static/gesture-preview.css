@@ -4,3 +4,5 @@
 #dwell-progress{display:block;width:100%;height:22px;accent-color:#d4edab;margin:10px 0}
 #dwell-label{min-height:48px;font-weight:650}#command-status{padding:14px;border:1px solid #697454;border-radius:14px;overflow-wrap:anywhere}
 #disable-control{border-color:#c4a77a}#central-address{width:100%;box-sizing:border-box}#projector-bindings:empty{display:none}
+.pointing-setup{padding:14px 0}.pointing-setup p{font-size:.9rem;line-height:1.5}.intent-preview .selection-readout{margin-bottom:18px}
+#auto-target{font-size:1.5rem}#manual-target-row[hidden]{display:none}

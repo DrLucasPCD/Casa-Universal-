@@ -58,3 +58,38 @@ test('brief occlusion pauses a confirmed target and reanchors without sending a 
   assert.equal(engine.sample(hand({y:.3}),t,1700).length,0);
   assert.equal(engine.sample(hand({y:.2}),t,1800)[0].direction,'open');
 });
+
+test('pointing switches between appliances without a menu or removing the hand',()=>{
+  const engine=context.CasaAccessibleGestures.create({automatic:true}),a={id:'lamp',type:'switch'},b={id:'fan',type:'switch'};
+  let events=[];for(let now=0;now<=600;now+=100)events.push(...engine.sample(hand(),a,now));
+  assert.equal(events[0].targetId,'lamp');
+  events=[];for(let now=700;now<=1400;now+=100)events.push(...engine.sample(hand(),b,now));
+  assert.equal(events.length,1);assert.equal(events[0].targetId,'fan');
+  for(let now=1500;now<=2000;now+=100)assert.equal(engine.sample(hand(),b,now).length,0);
+});
+test('transient target jitter and ambiguous pointing do not toggle another appliance',()=>{
+  const engine=context.CasaAccessibleGestures.create({automatic:true}),a={id:'lamp',type:'switch'},b={id:'fan',type:'switch'};
+  for(let now=0;now<=600;now+=100)engine.sample(hand(),a,now);
+  assert.equal(engine.sample(hand(),b,700).length,0);assert.equal(engine.sample(hand(),a,800).length,0);
+  for(let now=900;now<=1800;now+=100)assert.equal(engine.sample(hand({pointingAmbiguous:true}),null,now).length,0);
+  assert.equal(engine.report().phase,'ambiguous');assert.equal(engine.sample(hand(),a,1900).length,0);
+});
+test('point away to rearm the same light while keeping the hand visible',()=>{
+  const engine=context.CasaAccessibleGestures.create({automatic:true}),t={id:'lamp',type:'switch'};
+  for(let now=0;now<=600;now+=100)engine.sample(hand(),t,now);
+  for(let now=700;now<=1500;now+=100)engine.sample(hand(),null,now);
+  let out=[];for(let now=1600;now<=2200;now+=100)out.push(...engine.sample(hand(),t,now));assert.equal(out.length,1);
+});
+test('switching away from a curtain suppresses motion and confirms the new target',()=>{
+  const engine=context.CasaAccessibleGestures.create({automatic:true}),cover={id:'cover',type:'curtain'},lamp={id:'lamp',type:'switch'};
+  for(let now=0;now<=600;now+=100)engine.sample(hand(),cover,now);
+  let out=[];for(let now=700;now<=1400;now+=100)out.push(...engine.sample(hand({y:.2}),lamp,now));
+  assert.equal(out.length,1);assert.equal(out[0].targetId,'lamp');assert.equal(out[0].type,'activate');
+});
+
+test('a camera freeze cannot re-toggle a light still being pointed at',()=>{
+  const engine=context.CasaAccessibleGestures.create({automatic:true}),t={id:'lamp',type:'switch'};
+  for(let now=0;now<=600;now+=100)engine.sample(hand(),t,now);
+  engine.tick(5000);
+  for(let now=5100;now<=7000;now+=100)assert.equal(engine.sample(hand(),t,now).length,0);
+});

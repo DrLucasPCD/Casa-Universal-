@@ -6,7 +6,7 @@ const source=name=>readFileSync(new URL('../static/'+name,import.meta.url),'utf8
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 function harness({targets=[],settings={tracker:'palm'}}={}) {
   const nodes=new Map(),requests=[],workers=[],frames=new Map(),events={};let now=1000,id=0,tick,arcs=0;
-  function element() {return {textContent:'',value:'',setAttribute(){},dataset:{},children:[],addEventListener(name,fn){this[name]=fn;},replaceChildren(){this.children=[];},append(e){this.children.push(e);},prepend(e){this.children.unshift(e);}};}
+  function element() {return {getContext:()=>ctx,textContent:'',value:'',setAttribute(){},dataset:{},children:[],addEventListener(name,fn){this[name]=fn;},replaceChildren(){this.children=[];},append(e){this.children.push(e);},prepend(e){this.children.unshift(e);}};}
   const document={hidden:false,getElementById(id){if(!nodes.has(id))nodes.set(id,element());return nodes.get(id);},createElement:element,addEventListener(name,fn){events[name]=fn;}};
   const video={readyState:4,videoWidth:1280,videoHeight:720,srcObject:{getVideoTracks:()=>[{readyState:'live'}]},addEventListener(){},requestVideoFrameCallback(fn){frames.set(++id,fn);return id;},cancelVideoFrameCallback(id){frames.delete(id);}};
   const ctx=new Proxy({arc(){arcs++;}},{get:(o,k)=>o[k]??(()=>{})});
@@ -83,4 +83,25 @@ test('a delayed model frame never clears the one-shot switch latch',async()=>{
   h.setNow(2300);h.result(armFrame(1700));
   for(let now=2400;now<=4000;now+=100){h.setNow(now);h.result(armFrame(now));}
   assert.equal(h.nodes.get('gesture-events').children.length,1);h.client.stop();
+});
+
+ test('guided 3D calibration saves world direction vectors rather than wrist positions',async()=>{
+  const targets=[{id:'cover',name:'Cortina',type:'curtain',anchor:null,direction:null,position:null,binding:{deviceId:'cover'}},{id:'lamp',name:'Luz',type:'switch',anchor:null,direction:null,position:null,binding:{deviceId:'lamp'}}];
+  const h=harness({targets,settings:{tracker:'arm',selection:'point'}});await flush();await h.click('hand-start');h.result({type:'ready'});await h.click('learn-pointing');
+  for(let now=4000;now<=5500;now+=100){h.setNow(now);h.result(armFrame(now));}
+  for(let now=8500;now<=10000;now+=100){h.setNow(now);const frame=armFrame(now);frame.poseWorldLandmarks[0][16]={x:.8,y:.5,z:.3};h.result(frame);}
+  await flush();
+  const saved=h.requests.filter(r=>r.path==='/api/gestures/config'&&r.body).at(-1)?.body;
+  assert.ok(saved);assert.equal(saved.settings.selection,'direction');assert.ok(saved.targets[1].direction.z>.3);assert.ok(saved.targets[0].direction.y<-.9);
+  assert.equal(saved.targets[0].aim,undefined);assert.ok(!h.requests.some(r=>r.path==='/api/gestures/execute'));h.client.stop();
+});
+
+ test('3D target selection distinguishes depth even when wrist pixels never change',async()=>{
+  const size=Math.hypot(.1,-.2,.3),direction={x:.1/size,y:-.2/size,z:.3/size};
+  const targets=[{id:'front',name:'Frente',type:'switch',direction,tracker:'arm',anchor:null,binding:{deviceId:'front'}},{id:'back',name:'Fundo',type:'switch',direction:{...direction,z:-direction.z},tracker:'arm',anchor:null,binding:{deviceId:'back'}}];
+  const h=harness({targets,settings:{tracker:'arm',selection:'direction'}});await flush();await h.click('hand-start');h.result({type:'ready'});
+  for(let now=1000;now<=1600;now+=100){h.setNow(now);const frame=armFrame(now);frame.poseWorldLandmarks[0][14]={x:0,y:0,z:0};frame.poseWorldLandmarks[0][16]={x:.1,y:-.2,z:.3};h.result(frame);}
+  assert.equal(h.nodes.get('selected-target').textContent,'Frente');assert.match(h.nodes.get('direction-values').textContent,/Z 0.80/);
+  for(let now=1700;now<=3500;now+=100){h.setNow(now);const frame=armFrame(now);frame.poseWorldLandmarks[0][14]={x:0,y:0,z:0};frame.poseWorldLandmarks[0][16]={x:.1,y:-.2,z:-.3};h.result(frame);}
+  assert.equal(h.nodes.get('selected-target').textContent,'Fundo');assert.match(h.nodes.get('direction-values').textContent,/Z -0.80/);h.client.stop();
 });

@@ -39,12 +39,9 @@
       if(poses.length!==1)return {present:false,reason:poses.length>1?'multiple-people':'no-arm',visibleHands:[],detectedHands:0};
       const [elbow,wrist]=settings.side==='left'?[13,15]:[14,16],points=poses[0],world=result.poseWorldLandmarks?.[0];
       const visible=p=>finite(p)&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1&&p.visibility>=.35;
-      const manual=settings.selection==='manual';
       if(!visible(points?.[wrist]))return {present:false,reason:'no-wrist',visibleHands:[],detectedHands:0};
-      if(settings.selection!=='point'&&!manual&&!visible(points?.[elbow]))return {present:false,reason:'no-direction',visibleHands:[],detectedHands:0};
       const ray=visible(points?.[elbow])?{origin:{x:points[elbow].x,y:points[elbow].y},tip:{x:points[wrist].x,y:points[wrist].y}}:null;
       const direction=visible(points?.[elbow])&&finite(world?.[elbow])&&finite(world?.[wrist])?normalize(subtract(world[wrist],world[elbow])):null;
-      if(!direction&&!manual&&settings.selection!=='point')return {present:false,reason:'no-direction',visibleHands:[],detectedHands:0};
       return {present:true,reason:ray?'tracked':'wrist-only',tracker:'arm',armLowered:Boolean(ray&&points[wrist].y>points[elbow].y+.04),ray,x:points[wrist].x,y:points[wrist].y,direction,pointing:true,pinchRatio:Infinity,visibleHands:[],detectedHands:1,arm:visible(points?.[elbow])?[points[elbow],points[wrist]]:null};
     }
     const view=observation(result),points=view.visibleHands[0],world=result.worldLandmarks?.[0];
@@ -60,12 +57,14 @@
   function features(result,settings={tracker:'finger'}) {
     return settings.tracker==='finger'?{...observation(result),...eligible(result),tracker:'finger'}:accessible(result,settings);
   }
-  function match(direction, targets, tolerance=18, margin=6) {
-    if (!unit(direction)||!Array.isArray(targets)) return null;
+  function selectDirection(direction,targets,tolerance=18,margin=6){
+    if(!unit(direction)||!Array.isArray(targets))return {match:null,reason:'no-direction'};
     const ranked=targets.filter(t=>unit(t.direction)).map(t=>({id:t.id,angle:angle(direction,t.direction),tolerance:Number.isFinite(t.tolerance)?t.tolerance:tolerance})).sort((a,b)=>a.angle-b.angle);
-    if (!ranked.length||ranked[0].angle>ranked[0].tolerance||(ranked[1]&&ranked[1].angle-ranked[0].angle<margin)) return null;
-    return ranked[0];
+    if(!ranked.length||ranked[0].angle>ranked[0].tolerance)return {match:null,reason:'no-target'};
+    if(ranked[1]&&ranked[1].angle-ranked[0].angle<margin)return {match:null,reason:'ambiguous'};
+    return {match:ranked[0],reason:'matched'};
   }
+  function match(direction,targets,tolerance=18,margin=6){return selectDirection(direction,targets,tolerance,margin).match;}
   function calibration(samples) {
     if (!Array.isArray(samples)||samples.length<8||samples.some(p=>!finite(p)||Math.abs(length(p)-1)>0.01)) throw new Error('Aponte por mais tempo, com a mão inteira visível.');
     const direction=normalize(samples.reduce((s,p)=>({x:s.x+p.x,y:s.y+p.y,z:s.z+p.z}),{x:0,y:0,z:0}));
@@ -85,5 +84,5 @@
     if(spread>28)throw new Error('A direção ainda variou muito. Use a seleção do aparelho na tela ou tente novamente.');
     return {direction,spread,tolerance:Math.max(24,Math.min(36,spread+8))};
   }
-  root.CasaHandFeatures={features,match,calibration,comfortableCalibration,angle};
+  root.CasaHandFeatures={features,match,selectDirection,calibration,comfortableCalibration,angle};
 })(globalThis);

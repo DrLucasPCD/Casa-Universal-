@@ -66,7 +66,7 @@ export class GestureStore {
     return {mode:'preview',phase:fresh?this.report.phase:'stopped',handPresent:Boolean(fresh&&this.report.handPresent),
       targetId:fresh?this.report.targetId:null,inferenceMs:fresh?this.report.inferenceMs:null,
       detectedHands:fresh?this.report.detectedHands:0,reason:fresh?this.report.reason:null,
-      calibratedTargets:this.config.targets.filter(t=>t.anchor&&(this.config.settings?.selection==='point'?t.binding:t.direction)).length,
+      calibratedTargets:this.config.targets.filter(t=>this.config.settings?.selection==='point'?t.anchor&&t.binding:t.direction&&t.binding).length,
       lastReportAt:this.report?new Date(this.report.receivedAt).toISOString():null,commandsEnabled:false};
   }
 }

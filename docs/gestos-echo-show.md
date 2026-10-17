@@ -118,3 +118,10 @@ O nome `casa-universal.local` é resolvido uma vez ao conectar; os comandos segu
 Ao confirmar a cortina, a seleção fica retida enquanto o punho sobe/desce, mesmo quando o raio passa por uma luminária. Para sair, abaixe o punho abaixo do cotovelo por 350 ms, ou retire-o do enquadramento. Durante uma requisição à central, novas imagens continuam atualizando o acompanhamento, com a emissão de ações suspensa: a espera de rede não se transforma em perda do punho nem cria uma fila de comandos.
 
 A seleção usa uma área adaptada ao espaço entre os locais marcados, até 18% da altura da imagem, e uma direção suavizada separadamente da posição do punho. Pequenos desvios por até 450 ms pausam a confirmação; direções ambíguas continuam sem acionar aparelhos.
+
+
+### Seleção nos três eixos
+
+“Ensinar direções em 3D” conduz uma configuração única dos aparelhos vinculados. Para cada nome, o assistente dá três segundos de preparo e reúne 16 vetores válidos do antebraço, sem exigir dedos esticados. A direção é a diferença entre punho e cotovelo em `poseWorldLandmarks`, normalizada nos eixos X, Y e Z. Uma calibração robusta descarta amostras isoladas e rejeita direções muito semelhantes. O painel mostra o vetor 3D estimado e uma bússola com os três eixos; a seleção compara ângulos em 3D, inclusive diferenças de Z que não aparecem nas coordenadas da imagem.
+
+São estimativas monoculares do Pose Landmarker, não medições de um sensor de profundidade nem coordenadas absolutas da casa. O modelo precisa enxergar o antebraço; continuidade óptica do punho, sozinha, não fornece uma nova direção 3D. Quando essa direção falta, a seleção pausa e o painel indica leitura incerta. O controle de uma cortina já confirmada ainda pode acompanhar o movimento visível do punho. As direções aprendidas ficam no arquivo privado de calibração do Mac; nenhum vídeo é salvo. Não é necessário clicar nos aparelhos durante o uso normal depois de ensinar as direções.

@@ -95,3 +95,8 @@ test('pointing session controls different marked devices without manual rearming
   const saves=calls.filter(c=>c.url.endsWith('/api/configure'));
   assert.equal(saves.length,1);assert.deepEqual(saves[0].body,{id:'lamp',config:{ip:'192.168.1.30',port:8081}});
 });
+
+ test('3D pointing accepts a learned world direction without inventing an image anchor',async()=>{
+  const h=harness();h.store.config.settings.selection='direction';h.target.anchor=null;
+  h.arm();assert.equal((await h.send()).action,'on');await h.commands.stop();
+});

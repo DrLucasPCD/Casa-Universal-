@@ -56,7 +56,7 @@ export class GestureCommands {
   status() {return {mode:this.session?'control':'preview',commandsEnabled:Boolean(this.session&&this.session.expiresAt>this.now()),address:this.address,busy:this.busy,lastResult:this.lastResult};}
   arm(cameraId,manualTargetId=null) {
     const selection=this.store.config.settings?.selection,manual=selection==='manual';
-    const calibrated=t=>t.binding&&(manual?t.id===manualTargetId:selection==='point'?Boolean(t.anchor):t.direction&&t.anchor&&t.tracker===this.store.config.settings?.tracker);
+    const calibrated=t=>t.binding&&(manual?t.id===manualTargetId:selection==='point'?Boolean(t.anchor):t.direction&&t.tracker===this.store.config.settings?.tracker);
     if(!this.address||!cameraId||cameraId!==this.store.config.cameraId||!this.store.config.targets.some(calibrated))throw new Error('Gestos: salve a câmera, a calibração e o vínculo do aparelho antes de ativar.');
     this.session={id:randomUUID(),cameraId,selection,manualTargetId:manual?manualTargetId:null,expiresAt:this.now()+5000,sequence:0};
     clearInterval(this.timer);this.timer=setInterval(()=>{if(this.session&&this.session.expiresAt<=this.now())this.stop().catch(()=>{});},250);this.timer.unref?.();
@@ -77,7 +77,7 @@ export class GestureCommands {
     session.sequence=value.sequence;
     if(!Number.isFinite(value.ageMs)||value.ageMs<0||value.ageMs>700)throw new Error('Gestos: reconhecimento atrasado. Nenhum comando enviado.');
     const target=this.store.config.targets.find(t=>t.id===value.targetId);
-    if(!target?.binding||(session.manualTargetId?target.id!==session.manualTargetId:session.selection==='point'?!target.anchor:!target.direction||!target.anchor||target.tracker!==this.store.config.settings?.tracker)||this.store.config.cameraId!==session.cameraId)throw new Error('Gestos: alvo sem vínculo ou calibração salva.');
+    if(!target?.binding||(session.manualTargetId?target.id!==session.manualTargetId:session.selection==='point'?!target.anchor:!target.direction||target.tracker!==this.store.config.settings?.tracker)||this.store.config.cameraId!==session.cameraId)throw new Error('Gestos: alvo sem vínculo ou calibração salva.');
     if(this.busy||this.now()-this.lastCommandAt<700)throw new Error('Gestos: aguarde o comando anterior.');
     this.busy=true;this.lastCommandAt=this.now();
     try {

@@ -75,7 +75,7 @@ test('comfortable calibration tolerates limited variation and discards isolated 
 test('manual selection tracks a visible wrist even when the elbow is occluded',()=>{
   const data=pose();data.poseLandmarks[0][14].visibility=.1;
   const result=features(data,{tracker:'arm',side:'right',selection:'manual'});assert.equal(result.present,true);assert.equal(result.arm,null);
-  assert.equal(features(data,{tracker:'arm',side:'right',selection:'direction'}).present,false);
+  assert.equal(features(data,{tracker:'arm',side:'right',selection:'direction'}).present,true);assert.equal(features(data,{tracker:'arm',side:'right',selection:'direction'}).direction,null);
 });
 
  test('automatic pointing retains the wrist when only the elbow is hidden',()=>{
@@ -90,4 +90,15 @@ test('manual selection tracks a visible wrist even when the elbow is occluded',(
   assert.equal(features({poseLandmarks:[],trackedWrist},{tracker:'arm',selection:'point'}).reason,'image-flow');
   assert.equal(features({poseLandmarks:[],trackedWrist:{...trackedWrist,ageMs:1801}},{tracker:'arm',selection:'point'}).present,false);
   assert.equal(features({poseLandmarks:[[],[]],trackedWrist},{tracker:'arm',selection:'point'}).present,false);
+});
+
+ test('pointing direction uses all three world axes independently of identical screen coordinates',()=>{
+  const a=pose(),b=pose();
+  a.poseWorldLandmarks[0][14]={x:0,y:0,z:0};b.poseWorldLandmarks[0][14]={x:0,y:0,z:0};
+  a.poseWorldLandmarks[0][16]={x:.1,y:-.2,z:.3};b.poseWorldLandmarks[0][16]={x:.1,y:-.2,z:-.3};
+  const first=features(a,{tracker:'arm',selection:'direction'}),second=features(b,{tracker:'arm',selection:'direction'});
+  assert.equal(first.x,second.x);assert.equal(first.y,second.y);assert.ok(first.direction.z>0);assert.ok(second.direction.z<0);
+  const targets=[{id:'front',direction:first.direction},{id:'back',direction:second.direction}];
+  assert.equal(match(first.direction,targets).id,'front');assert.equal(match(second.direction,targets).id,'back');
+  assert.equal(context.CasaHandFeatures.selectDirection(first.direction,[targets[0],{id:'same',direction:first.direction}]).reason,'ambiguous');
 });

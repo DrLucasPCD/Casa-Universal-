@@ -4,7 +4,7 @@ import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 const source=name=>readFileSync(new URL('../static/'+name,import.meta.url),'utf8');
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
-function harness({targets=[],settings={tracker:'palm'}}={}) {
+function harness({targets=[],settings={tracker:'palm'},reportStatus=null,armSession=null}={}) {
   const nodes=new Map(),requests=[],workers=[],frames=new Map(),events={};let now=1000,id=0,tick,arcs=0;
   function element() {return {getContext:()=>ctx,textContent:'',value:'',setAttribute(){},dataset:{},children:[],addEventListener(name,fn){this[name]=fn;},replaceChildren(){this.children=[];},append(e){this.children.push(e);},prepend(e){this.children.unshift(e);}};}
   const document={hidden:false,getElementById(id){if(!nodes.has(id))nodes.set(id,element());return nodes.get(id);},createElement:element,addEventListener(name,fn){events[name]=fn;}};
@@ -13,8 +13,8 @@ function harness({targets=[],settings={tracker:'palm'}}={}) {
   const canvas={...element(),getContext:()=>ctx,getBoundingClientRect:()=>({left:0,top:0,width:1280,height:720})};
   const context={window:{},document,performance:{now:()=>now},crypto:{randomUUID:()=>'target'},addEventListener(){},setInterval(fn){tick=fn;return 1;},clearInterval(){tick=null;},
     createImageBitmap:async()=>({close(){}}),Worker:class {constructor(){workers.push(this);}postMessage(){}terminate(){this.terminated=true;}},
-    fetch:async(path,options)=>{requests.push({path,body:options?.body?JSON.parse(options.body):null});return{ok:true,json:async()=>path==='/api/gestures/config'?(options?.body?JSON.parse(options.body):{version:1,cameraId:null,targets,settings}):path==='/api/gestures/central'?{address:'http://192.168.68.117',devices:[]}:{}};}};
-  vm.createContext(context);for(const file of ['pointing-selector.js','accessible-gestures.js','hand-features.js','gesture-preview.js'])vm.runInContext(source(file),context);
+    fetch:async(path,options)=>{requests.push({path,body:options?.body?JSON.parse(options.body):null});return{ok:true,json:async()=>path==='/api/gestures/config'?(options?.body?JSON.parse(options.body):{version:1,cameraId:null,targets,settings}):path==='/api/gestures/arm'?{sessionId:armSession}:path==='/api/gestures/report'&&reportStatus?reportStatus:path==='/api/gestures/central'?{address:'http://192.168.68.117',devices:[]}:{}};}};
+  vm.createContext(context);for(const file of ['pointing-selector.js','motion-gestures.js','accessible-gestures.js','hand-features.js','gesture-preview.js'])vm.runInContext(source(file),context);
   const client=context.window.CasaGesturePreview.create({video,canvas});
   return {client,document,video,canvas,requests,workers,nodes,events,frames,get arcs(){return arcs;},setNow(value){now=value;},tick:()=>tick?.(),click:id=>nodes.get(id).click(),result(data){workers.at(-1).onmessage({data});}};
 }
@@ -23,6 +23,13 @@ test('preview needs a live decoded video and starts the model only explicitly',a
   h.video.readyState=0;await h.click('hand-start');assert.equal(h.workers.length,0);
   h.video.readyState=4;await h.click('hand-start');assert.equal(h.workers.length,1);
   h.client.stop();assert.equal(h.workers[0].terminated,true);
+});
+test('a session stopped by the central is visibly disarmed instead of continuing to show active control',async()=>{
+  const h=harness({armSession:'session',reportStatus:{commandsEnabled:false,lastResult:{ok:false,message:'Parada não confirmada.'}}});
+  await flush();h.client.setCamera('camera');await h.click('hand-start');h.result({type:'ready'});
+  await h.click('enable-control');await flush();
+  assert.match(h.nodes.get('control-mode').textContent,/MODO PRÉVIA/);
+  assert.equal(h.nodes.get('command-status').textContent,'Parada não confirmada.');h.client.stop();
 });
 test('ineligible small hands draw points and report diagnostics without landmarks or commands',async()=>{
   const h=harness();await flush();await h.click('hand-start');h.result({type:'ready'});
@@ -48,7 +55,7 @@ test('hiding the page stops the worker and cancels queued frame callbacks',async
 
 test('one-time location setup persists all marks without sending device commands',async()=>{
   const targets=['curtain','lamp'].map((id,i)=>({id,name:id,type:i?'switch':'curtain',anchor:null,direction:null,position:null,tracker:'arm',binding:{deviceId:id}}));
-  const h=harness({targets,settings:{tracker:'arm',selection:'point'}});await flush();
+  const h=harness({targets,settings:{tracker:'arm',selection:'point',motionMode:'continuous'}});await flush();
   assert.equal(h.nodes.get('manual-target-row').hidden,true);
   await h.click('setup-locations');h.canvas.pointerdown({clientX:900,clientY:200});h.canvas.pointerdown({clientX:200,clientY:400});await flush();
   const saved=h.requests.filter(r=>r.path==='/api/gestures/config'&&r.body).at(-1).body;
@@ -57,7 +64,7 @@ test('one-time location setup persists all marks without sending device commands
   assert.match(h.nodes.get('setup-status').textContent,/2 aparelhos/);
 });
 test('an appliance outside the camera remains unmarked when explicitly skipped',async()=>{
-  const h=harness({targets:[{id:'lamp',name:'Lamp',type:'switch',anchor:null,binding:{deviceId:'lamp'}}],settings:{tracker:'arm',selection:'point'}});await flush();
+  const h=harness({targets:[{id:'lamp',name:'Lamp',type:'switch',anchor:null,binding:{deviceId:'lamp'}}],settings:{tracker:'arm',selection:'point',motionMode:'continuous'}});await flush();
   await h.click('setup-locations');await h.click('skip-location');await flush();
   const saved=h.requests.filter(r=>r.path==='/api/gestures/config'&&r.body).at(-1).body;assert.equal(saved.targets[0].anchor,null);assert.match(h.nodes.get('setup-status').textContent,/falta marcar/);
 });
@@ -67,8 +74,18 @@ function armFrame(timestamp,{elbow=true,y=.4}={}){
   return {type:'result',timestamp,elapsedMs:50,poseLandmarks:[points],poseWorldLandmarks:[structuredClone(points)]};
 }
 function pointedTarget(type='curtain'){return{id:'appliance',name:'Aparelho',type,anchor:{x:.5,y:.1},binding:{deviceId:'appliance'}};}
+test('new preview recognizes a projector stroke once, ignores its return, and never sends dwell OK',async()=>{
+  const h=harness({targets:[pointedTarget('projector')],settings:{tracker:'arm',selection:'point'}});
+  await flush();await h.click('hand-start');h.result({type:'ready'});
+  for(let now=1000;now<=1600;now+=100){h.setNow(now);h.result(armFrame(now));}
+  for(let now=1700;now<=2200;now+=100){h.setNow(now);h.result(armFrame(now,{y:.3}));}
+  for(let now=2300;now<=4000;now+=100){h.setNow(now);h.result(armFrame(now));}
+  const notes=h.nodes.get('gesture-events').children.map(e=>e.textContent);
+  assert.equal(notes.length,1);assert.match(notes[0],/Cima.*prévia/);
+  assert.ok(!h.requests.some(r=>r.path==='/api/gestures/execute'));h.client.stop();
+});
 test('preview continues wrist curtain control when the elbow disappears',async()=>{
-  const h=harness({targets:[pointedTarget()],settings:{tracker:'arm',selection:'point'}});await flush();await h.click('hand-start');h.result({type:'ready'});
+  const h=harness({targets:[pointedTarget()],settings:{tracker:'arm',selection:'point',motionMode:'continuous'}});await flush();await h.click('hand-start');h.result({type:'ready'});
   for(let now=1000;now<=1600;now+=100){h.setNow(now);h.result(armFrame(now));}
   h.setNow(1700);h.result(armFrame(1700,{elbow:false,y:.3}));
   assert.match(h.nodes.get('hand-diagnostic').textContent,/Punho acompanhado/);
@@ -77,7 +94,7 @@ test('preview continues wrist curtain control when the elbow disappears',async()
   assert.ok(!h.requests.some(r=>r.path==='/api/gestures/execute'));h.client.stop();
 });
 test('a delayed model frame never clears the one-shot switch latch',async()=>{
-  const h=harness({targets:[pointedTarget('switch')],settings:{tracker:'arm',selection:'point'}});await flush();await h.click('hand-start');h.result({type:'ready'});
+  const h=harness({targets:[pointedTarget('switch')],settings:{tracker:'arm',selection:'point',motionMode:'continuous'}});await flush();await h.click('hand-start');h.result({type:'ready'});
   for(let now=1000;now<=1600;now+=100){h.setNow(now);h.result(armFrame(now));}
   assert.equal(h.nodes.get('gesture-events').children.length,1);
   h.setNow(2300);h.result(armFrame(1700));
@@ -87,7 +104,7 @@ test('a delayed model frame never clears the one-shot switch latch',async()=>{
 
  test('guided 3D calibration saves world direction vectors rather than wrist positions',async()=>{
   const targets=[{id:'cover',name:'Cortina',type:'curtain',anchor:null,direction:null,position:null,binding:{deviceId:'cover'}},{id:'lamp',name:'Luz',type:'switch',anchor:null,direction:null,position:null,binding:{deviceId:'lamp'}}];
-  const h=harness({targets,settings:{tracker:'arm',selection:'point'}});await flush();await h.click('hand-start');h.result({type:'ready'});await h.click('learn-pointing');
+  const h=harness({targets,settings:{tracker:'arm',selection:'point',motionMode:'continuous'}});await flush();await h.click('hand-start');h.result({type:'ready'});await h.click('learn-pointing');
   for(let now=4000;now<=5500;now+=100){h.setNow(now);h.result(armFrame(now));}
   for(let now=8500;now<=10000;now+=100){h.setNow(now);const frame=armFrame(now);frame.poseWorldLandmarks[0][16]={x:.8,y:.5,z:.3};h.result(frame);}
   await flush();

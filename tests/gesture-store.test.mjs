@@ -3,9 +3,18 @@ import assert from 'node:assert/strict';
 import {mkdtemp,stat,rm,readFile} from 'node:fs/promises';
 import {join} from 'node:path';
 import {tmpdir} from 'node:os';
-import {GestureStore,validateCalibration} from '../bridge/gesture-store.mjs';
+import {GestureStore,validateCalibration,accessibility} from '../bridge/gesture-store.mjs';
 import {createAlexaBridge} from '../bridge/alexa-server.mjs';
 const config=()=>({version:1,cameraId:'camera-1',targets:[{id:'curtain',name:' Cortina ',type:'curtain',anchor:{x:.4,y:.5},direction:{x:0,y:1,z:0},position:0}]});
+test('old calibration gains stroke/push defaults without losing learned directions or bindings',()=>{
+  const input=config();input.targets[0].binding={deviceId:'motor',keys:{}};
+  const clean=validateCalibration(input);
+  assert.equal(clean.settings.motionMode,'stroke');assert.equal(clean.settings.projectorConfirm,'push');
+  assert.equal(clean.settings.curtainPulseMs,1000);assert.throws(()=>accessibility({curtainPulseMs:5000}));
+  assert.deepEqual(clean.targets[0].direction,input.targets[0].direction);assert.equal(clean.targets[0].binding.deviceId,'motor');
+  assert.equal(accessibility({motionMode:'continuous',projectorConfirm:'dwell'}).projectorConfirm,'dwell');
+  assert.throws(()=>accessibility({projectorConfirm:'guess'}));assert.throws(()=>accessibility({motionMode:'guess'}));
+});
 test('calibration validates every target and strips unrelated data',()=>{
   const value=config();value.accessToken='must-not-save';value.targets[0].frame='must-not-save';
   const clean=validateCalibration(value);assert.equal(clean.targets[0].name,'Cortina');assert.ok(!JSON.stringify(clean).includes('must-not-save'));
@@ -45,6 +54,7 @@ test('gesture HTTP API stores calibration with origin checks and rejects command
     assert.equal((await post('api/gestures/execute',{targetId:'curtain'})).status,400);
     const status=await(await fetch(url+'api/gestures/status')).json();assert.equal(status.commandsEnabled,false);assert.equal(status.calibratedTargets,0);
     const worker=await fetch(url+'hand-worker.js');assert.equal(worker.status,200);assert.match(worker.headers.get('content-security-policy'),/worker-src 'self'/);
+    assert.equal((await fetch(url+'motion-gestures.js')).status,200);
     assert.equal((await fetch(url+'vision/registration.json')).status,404);
   } finally {await bridge.close();await rm(directory,{recursive:true,force:true});}
 });

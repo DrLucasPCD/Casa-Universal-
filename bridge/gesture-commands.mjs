@@ -11,7 +11,7 @@ export function centralURL(value) {
 }
 export class GestureCommands {
   constructor({store,fetchImpl=fetch,now=()=>Date.now(),sleep=ms=>new Promise(r=>setTimeout(r,ms)),address=null,lookupImpl=lookup}={}) {
-    this.store=store;this.fetch=fetchImpl;this.lookup=lookupImpl;this.now=now;this.sleep=sleep;this.address=address;this.session=null;this.busy=false;this.lastCommandAt=-Infinity;this.lastResult=null;this.activeCover=null;this.timer=null;
+    this.store=store;this.fetch=fetchImpl;this.lookup=lookupImpl;this.now=now;this.sleep=sleep;this.address=address;this.session=null;this.busy=false;this.lastCommandAt=-Infinity;this.lastResult=null;this.activeCover=null;this.timer=null;this.stopPending=null;
   }
   async request(path,body) {
     if(!this.address)throw new Error('Central: conecte a central antes de ativar os comandos.');
@@ -65,9 +65,18 @@ export class GestureCommands {
   heartbeat(id) {if(this.session?.id===id&&this.session.expiresAt>this.now())this.session.expiresAt=this.now()+5000;}
   async stop() {this.session=null;clearInterval(this.timer);this.timer=null;await this.stopCover();return this.status();}
   async stopCover() {
+    if(this.stopPending)return this.stopPending;
     const id=this.activeCover;if(!id)return;
-    try{await this.request('/api/action',{id,action:'stop'});this.activeCover=null;}
-    catch{this.lastResult={ok:false,message:'A parada da cortina não foi confirmada. Use o controle da cortina para pará-la.'};throw new Error('Gestos: parada da cortina não confirmada.');}
+    this.stopPending=(async()=>{
+      // Stop is idempotent. A transient Tuya connection failure may retry Stop,
+      // never Open/Close. Concurrent cancellation shares this same operation.
+      for(let attempt=0;attempt<2;attempt++){
+        try{const result=await this.request('/api/action',{id,action:'stop'});if(result.sent!==true)throw new Error();this.activeCover=null;return;}
+        catch{if(attempt===0)await this.sleep(150);}
+      }
+      this.lastResult={ok:false,message:'A parada da cortina não foi confirmada. Use o controle da cortina para pará-la.'};throw new Error('Gestos: parada da cortina não confirmada.');
+    })();
+    try{await this.stopPending;}finally{this.stopPending=null;}
   }
   async state(id) {const data=await this.request('/api/status',{id});const device=data.devices?.find(d=>d.id===id);if(!device)throw new Error('Gestos: aparelho não encontrado na central.');return this.public(device);}
   async execute(value) {
@@ -98,16 +107,18 @@ export class GestureCommands {
       const cover=target.type==='curtain';
       if(cover)this.activeCover=device.id;
       let result;
+      const pulse=Math.max(350,Math.min(1500,this.store.config.settings?.curtainPulseMs??1000));
       try {
         result=await this.request('/api/action',{id:device.id,action});
-        if(cover)await this.sleep(350);
+        if(result.sent!==true)throw new Error('Central: envio do comando não confirmado.');
+        if(cover)await this.sleep(pulse);
       } finally {if(cover)await this.stopCover();}
       const ir=device.adapter==='broadlink';
       let observed=null;
       if(!ir&&this.session===session)try{observed=await this.state(device.id);}catch{}
       const observedState=target.binding.channel?observed?.channels?.find(c=>c.channel===target.binding.channel)?.state:observed?.state;
       const expected=/^on(?:_|$)/.test(action)?'on':/^off(?:_|$)/.test(action)?'off':null;
-      this.lastResult={ok:true,targetId:target.id,action,sent:result.sent===true,confirmed:Boolean(expected&&observed?.available===true&&observedState===expected),state:observedState||'unknown',position:observed?.position??null,message:ir?'Sinal IR/RF enviado. O estado físico não é confirmado.':cover?'Movimento curto enviado e parada confirmada pela central.':'Comando enviado à central.'};
+      this.lastResult={ok:true,targetId:target.id,action,sent:result.sent===true,confirmed:Boolean(expected&&observed?.available===true&&observedState===expected),state:observedState||'unknown',position:observed?.position??null,message:ir?'Sinal IR/RF enviado. O estado físico não é confirmado.':cover?`Movimento de ${pulse/1000} s enviado; comando Parar confirmado pela central.`:'Comando enviado à central.'};
       return this.lastResult;
     }catch(error){if(this.activeCover){this.session=null;clearInterval(this.timer);this.timer=null;}this.lastResult={ok:false,message:error.message?.startsWith('Gestos:')||error.message?.startsWith('Central:')?error.message:'Central: comunicação interrompida; confira o aparelho antes de repetir.'};throw new Error(this.lastResult.message);}
     finally {this.busy=false;}

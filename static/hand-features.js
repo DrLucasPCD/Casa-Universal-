@@ -35,14 +35,29 @@
     if(settings.tracker==='arm') {
       const poses=result.poseLandmarks||[];
       const tracked=result.trackedWrist;
-      if(poses.length<=1&&tracked?.source==='image-flow'&&finite(tracked)&&tracked.x>=0&&tracked.x<=1&&tracked.y>=0&&tracked.y<=1&&tracked.points>=5&&tracked.ageMs<=1800)return {present:true,reason:'image-flow',tracker:'arm',ray:null,x:tracked.x,y:tracked.y,direction:null,pointing:true,pinchRatio:Infinity,visibleHands:[],detectedHands:1,arm:null};
+      const flowing=poses.length<=1&&tracked?.source==='image-flow'&&finite(tracked)&&tracked.x>=0&&tracked.x<=1&&tracked.y>=0&&tracked.y<=1&&tracked.points>=5&&tracked.ageMs<=1800;
+      if(flowing&&!poses[0]?.length)return {present:true,reason:'image-flow',tracker:'arm',ray:null,x:tracked.x,y:tracked.y,direction:null,pointing:true,pinchRatio:Infinity,visibleHands:[],detectedHands:1,arm:null};
       if(poses.length!==1)return {present:false,reason:poses.length>1?'multiple-people':'no-arm',visibleHands:[],detectedHands:0};
-      const [elbow,wrist]=settings.side==='left'?[13,15]:[14,16],points=poses[0],world=result.poseWorldLandmarks?.[0];
+      const [elbow,wrist]=settings.side==='left'?[13,15]:[14,16],points=poses[0].slice(),world=result.poseWorldLandmarks?.[0];
+      if(flowing)points[wrist]={...tracked,visibility:.8};
       const visible=p=>finite(p)&&p.x>=0&&p.x<=1&&p.y>=0&&p.y<=1&&p.visibility>=.35;
       if(!visible(points?.[wrist]))return {present:false,reason:'no-wrist',visibleHands:[],detectedHands:0};
-      const ray=visible(points?.[elbow])?{origin:{x:points[elbow].x,y:points[elbow].y},tip:{x:points[wrist].x,y:points[wrist].y}}:null;
-      const direction=visible(points?.[elbow])&&finite(world?.[elbow])&&finite(world?.[wrist])?normalize(subtract(world[wrist],world[elbow])):null;
-      return {present:true,reason:ray?'tracked':'wrist-only',tracker:'arm',armLowered:Boolean(ray&&points[wrist].y>points[elbow].y+.04),ray,x:points[wrist].x,y:points[wrist].y,direction,pointing:true,pinchRatio:Infinity,visibleHands:[],detectedHands:1,arm:visible(points?.[elbow])?[points[elbow],points[wrist]]:null};
+      const ray=!flowing&&visible(points?.[elbow])?{origin:{x:points[elbow].x,y:points[elbow].y},tip:{x:points[wrist].x,y:points[wrist].y}}:null;
+      const direction=!flowing&&visible(points?.[elbow])&&finite(world?.[elbow])&&finite(world?.[wrist])?normalize(subtract(world[wrist],world[elbow])):null;
+      // Body-relative motion survives a change of distance and ignores torso translation.
+      // World landmarks are estimates, so a missing joint never supplies a synthetic Z.
+      const shoulder=settings.side==='left'?11:12,other=shoulder===11?12:11;
+      const aspect=Number.isFinite(result.imageAspect)&&result.imageAspect>.1&&result.imageAspect<10?result.imageAspect:1;
+      const scale=finite(points[shoulder])&&finite(points[other])?Math.hypot((points[shoulder].x-points[other].x)*aspect,points[shoulder].y-points[other].y):0;
+      let motion=null;
+      if(scale>.04&&points[shoulder].visibility>=.5&&points[other].visibility>=.5&&points[wrist].visibility>=.5){
+        motion={x:(points[wrist].x-points[shoulder].x)*aspect/scale,y:(points[wrist].y-points[shoulder].y)/scale,reach:null};
+        if(!flowing&&visible(points[elbow])&&[shoulder,elbow,wrist].every(i=>finite(world?.[i]))){
+          const armLength=distance(world[shoulder],world[elbow])+distance(world[elbow],world[wrist]);
+          if(armLength>=.2&&armLength<=1.3){const v=subtract(world[wrist],world[shoulder]);motion.reach={x:v.x/armLength,y:v.y/armLength,z:v.z/armLength};}
+        }
+      }
+      return {present:true,reason:flowing?'image-flow':ray?'tracked':'wrist-only',tracker:'arm',motion,armLowered:Boolean(visible(points[elbow])&&points[wrist].y>points[elbow].y+.04),ray,x:points[wrist].x,y:points[wrist].y,direction,pointing:true,pinchRatio:Infinity,visibleHands:[],detectedHands:1,arm:visible(points?.[elbow])?[points[elbow],points[wrist]]:null};
     }
     const view=observation(result),points=view.visibleHands[0],world=result.worldLandmarks?.[0];
     if(view.detectedHands!==1)return {...view,present:false,reason:view.detectedHands>1?'multiple-hands':'no-hand'};

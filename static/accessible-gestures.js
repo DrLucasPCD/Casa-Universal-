@@ -1,14 +1,16 @@
 (function(root){
   'use strict';
-  function create({dwellMs=600,stability=.065,movement=.035,automatic=false}={}) {
-    let target=null,anchor=null,since=null,confirmed=false,latched=false,lastFrame=-Infinity,lastTime=-Infinity,lastAction=-Infinity,releaseAt=null,okLatched=false,missingAt=null,nextId=null,nextSince=null;
+  function create({dwellMs=600,stability=.065,movement=.035,automatic=false,motionMode='stroke',projectorConfirm='push'}={}) {
+    const motion=root.CasaMotionGestures.create({movement,projectorConfirm});
+    let target=null,anchor=null,since=null,confirmed=false,latched=false,lastFrame=-Infinity,lastTime=-Infinity,lastAction=-Infinity,releaseAt=null,okLatched=false,missingAt=null,nextId=null,nextSince=null,awaitRaised=false;
     const state={progress:0,phase:'idle',targetId:null};
-    function reset(){nextId=null;nextSince=null;missingAt=null;target=null;anchor=null;since=null;confirmed=false;latched=false;releaseAt=null;okLatched=false;Object.assign(state,{progress:0,phase:'idle',targetId:null});}
-    function lose(now){nextId=null;nextSince=null;if(missingAt===null)missingAt=now;if(latched){if(automatic){releaseAt=null;state.phase='paused';state.progress=0;return;}if(releaseAt===null)releaseAt=now;if(now-releaseAt>=1200){latched=false;confirmed=false;target=null;state.targetId=null;state.phase='idle';}else state.phase='release';state.progress=0;return;}if(target&&now-missingAt<(confirmed?900:450)){state.phase='paused';return;}target=null;anchor=null;since=null;confirmed=false;state.progress=0;state.targetId=null;state.phase=latched?'release':'idle';if(releaseAt===null)releaseAt=now;if(now-releaseAt>=1200){latched=false;state.phase='idle';}}
+    function reset(){motion.reset();awaitRaised=false;nextId=null;nextSince=null;missingAt=null;target=null;anchor=null;since=null;confirmed=false;latched=false;releaseAt=null;okLatched=false;Object.assign(state,{progress:0,phase:'idle',targetId:null});}
+    function lose(now){if(confirmed)motion.pause();else motion.reset();nextId=null;nextSince=null;if(missingAt===null)missingAt=now;if(latched){if(automatic){releaseAt=null;state.phase='paused';state.progress=0;return;}if(releaseAt===null)releaseAt=now;if(now-releaseAt>=1200){latched=false;confirmed=false;target=null;state.targetId=null;state.phase='idle';}else state.phase='release';state.progress=0;return;}if(target&&now-missingAt<(confirmed?900:450)){state.phase='paused';return;}target=null;anchor=null;since=null;confirmed=false;state.progress=0;state.targetId=null;state.phase=latched?'release':'idle';if(releaseAt===null)releaseAt=now;if(now-releaseAt>=1200){latched=false;state.phase='idle';}}
     function tick(now){if(now-lastFrame>600){if(latched){state.phase='paused';state.progress=0;}else {if(!confirmed){target=null;anchor=null;since=null;state.targetId=null;}lose(now);}}return {...state};}
     function sample(hand,selection,now,{actionsEnabled=true}={}){
       if(!Number.isFinite(now)||now<=lastTime)return [];lastTime=now;
       if(!hand?.present||!Number.isFinite(hand.x)||!Number.isFinite(hand.y)||hand.x<0||hand.x>1||hand.y<0||hand.y>1){lose(now);return [];}
+      if(awaitRaised){lastFrame=now;if(hand.armLowered){state.phase='releasing';return [];}awaitRaised=false;}
       const gap=now-lastFrame;
       if(automatic&&!confirmed&&!latched&&!selection&&!hand.pointingAmbiguous){lastFrame=now;lose(now);return [];}
       if(automatic&&hand.pointingUnavailable&&!selection){
@@ -23,16 +25,20 @@
       lastFrame=now;
       // Keep the cover selected while the forearm direction changes during a drag.
       // Lowering the arm deliberately releases it without choosing a menu.
-      if(automatic&&confirmed&&target?.type==='curtain'){
+      const strokeTarget=motionMode==='stroke'||target?.type==='projector'&&projectorConfirm==='push';
+      const locked=automatic&&confirmed&&(target?.type==='curtain'||strokeTarget&&target?.type==='projector');
+      if(locked){
         if(hand.armLowered){
           if(releaseAt===null)releaseAt=now;
           state.phase='releasing';state.progress=0;
-          if(now-releaseAt>=350)reset();
-          return [];
+          if(now-releaseAt>=(strokeTarget?750:350)){reset();awaitRaised=strokeTarget;return [];}
+          if(!strokeTarget)return [];
+        }else {
+          releaseAt=null;
         }
-        releaseAt=null;selection=target;
+        selection=target;
       }
-      if(automatic&&hand.pointingAmbiguous&&!(confirmed&&target?.type==='curtain')){nextId=null;nextSince=null;releaseAt=null;state.phase='ambiguous';state.progress=0;return [];}
+      if(automatic&&hand.pointingAmbiguous&&!locked){motion.reset();nextId=null;nextSince=null;releaseAt=null;state.phase='ambiguous';state.progress=0;return [];}
       if(automatic&&(confirmed||latched)&&selection&&selection.id!==target?.id){
         if(nextId!==selection.id){nextId=selection.id;nextSince=now;}
         state.phase='switching';state.targetId=selection.id;state.progress=Math.min(1,(now-nextSince)/dwellMs);
@@ -46,19 +52,31 @@
         return [];
       }
       if(latched){state.phase='release';releaseAt=null;return [];}
-      releaseAt=null;
+      if(!locked)releaseAt=null;
       if(!confirmed){
         if(!selection){target=null;anchor=null;since=null;Object.assign(state,{phase:'idle',progress:0,targetId:null});return [];}
-        if(target?.id!==selection.id){target=selection;anchor={x:hand.x,y:hand.y};since=now;state.progress=0;}
+        if(target?.id!==selection.id){motion.reset();target=selection;anchor={x:hand.x,y:hand.y};since=now;state.progress=0;}
         state.targetId=target.id;state.phase='dwelling';
         if(Math.hypot(hand.x-anchor.x,hand.y-anchor.y)>stability){anchor={x:hand.x,y:hand.y};since=now;}
+        motion.prepare(hand,now);
         state.progress=Math.min(1,(now-since)/dwellMs);
         if(state.progress<1||!actionsEnabled)return [];
-        confirmed=true;anchor={x:hand.x,y:hand.y};since=now;state.phase='controlling';state.progress=1;
+        confirmed=true;anchor={x:hand.x,y:hand.y};motion.anchor(hand,now);since=now;state.phase='controlling';state.progress=1;
         if(target.type==='switch'){latched=true;state.phase='release';return [{type:'activate',targetId:target.id}];}
         return [];
       }
       const dx=hand.x-anchor.x,dy=hand.y-anchor.y;
+      if(strokeTarget&&['curtain','projector'].includes(target.type)){
+        const key=motion.sample(hand,target.type,now,{actionsEnabled});
+        const phase=motion.report().phase;
+        state.phase=['returning','recognizing','uncertain','waiting'].includes(phase)?phase:target.type;state.progress=0;
+        if(key){lastAction=now;since=now;okLatched=false;return [target.type==='curtain'?{type:'curtain-motion',targetId:target.id,direction:key}:{type:'projector-key',targetId:target.id,key}];}
+        if(target.type==='projector'&&projectorConfirm==='dwell'&&phase==='ready'){
+          state.progress=okLatched?0:Math.min(1,(now-since)/dwellMs);
+          if(actionsEnabled&&!okLatched&&state.progress===1&&now-lastAction>=900){okLatched=true;lastAction=now;return [{type:'projector-key',targetId:target.id,key:'ok'}];}
+        }else since=now;
+        return [];
+      }
       if(target.type==='curtain'){
         state.phase='curtain';state.progress=0;
         if(Math.abs(dy)<movement||now-lastAction<900||!actionsEnabled)return [];
@@ -73,7 +91,7 @@
           anchor={x:hand.x,y:hand.y};lastAction=now;return [{type:'projector-key',targetId:target.id,key}];
         }
         state.progress=okLatched?0:Math.min(1,(now-since)/dwellMs);state.phase='projector';
-        if(actionsEnabled&&!okLatched&&state.progress===1&&now-lastAction>=900){okLatched=true;lastAction=now;return [{type:'projector-key',targetId:target.id,key:'ok'}];}
+        if(projectorConfirm==='dwell'&&actionsEnabled&&!okLatched&&state.progress===1&&now-lastAction>=900){okLatched=true;lastAction=now;return [{type:'projector-key',targetId:target.id,key:'ok'}];}
       }
       return [];
     }

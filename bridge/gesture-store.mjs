@@ -9,9 +9,11 @@ function point(value) {
   return {x:value.x,y:value.y};
 }
 export function accessibility(value={}) {
-  const settings={tracker:'arm',selection:'point',side:'right',dwellMs:600,stability:.065,movement:.035,confidence:.4,...value};
+  const settings={tracker:'arm',selection:'point',side:'right',dwellMs:600,stability:.065,movement:.035,confidence:.4,motionMode:'stroke',projectorConfirm:'push',curtainPulseMs:1000,...value};
+  if(!['stroke','continuous'].includes(settings.motionMode)||!['push','dwell'].includes(settings.projectorConfirm))throw new Error('Gestos: modo de movimento inválido.');
+  if(!Number.isInteger(settings.curtainPulseMs)||settings.curtainPulseMs<350||settings.curtainPulseMs>1500)throw new Error('Gestos: use movimento da cortina de 350 a 1500 ms.');
   if(!['point','manual','direction'].includes(settings.selection)||!['arm','palm','finger'].includes(settings.tracker)||!['left','right'].includes(settings.side)||!Number.isFinite(settings.dwellMs)||settings.dwellMs<400||settings.dwellMs>6000||!Number.isFinite(settings.stability)||settings.stability<.02||settings.stability>.15||!Number.isFinite(settings.movement)||settings.movement<.03||settings.movement>.25||!Number.isFinite(settings.confidence)||settings.confidence<.3||settings.confidence>.8)throw new Error('Gestos: ajustes de reconhecimento inválidos.');
-  return Object.fromEntries(['tracker','selection','side','dwellMs','stability','movement','confidence'].map(k=>[k,settings[k]]));
+  return Object.fromEntries(['tracker','selection','side','dwellMs','stability','movement','confidence','motionMode','projectorConfirm','curtainPulseMs'].map(k=>[k,settings[k]]));
 }
 function binding(value) {
   if(value==null)return null;

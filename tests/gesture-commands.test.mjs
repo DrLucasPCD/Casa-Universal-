@@ -41,6 +41,24 @@ test('curtain pulse always sends stop, including an uncertain movement send',asy
     assert.deepEqual(h.calls.filter(c=>c.url.endsWith('/api/action')).map(c=>c.body.action),['open','stop']);await h.commands.stop();
   }
 });
+test('cover uses a visible bounded pulse and retries only idempotent Stop after a transient failure',async()=>{
+  const h=harness({type:'curtain',kind:'cover',state:'partial',actions:['open','close','stop']});
+  const original=h.commands.fetch,sleeps=[];let failed=false;
+  h.commands.sleep=async ms=>{sleeps.push(ms);};
+  h.commands.fetch=async(url,options)=>{const body=JSON.parse(options.body);if(body.action==='stop'&&!failed){failed=true;throw new Error('transient');}return original(url,options);};
+  h.arm();await h.send({type:'curtain-motion',direction:'open'});
+  assert.deepEqual(sleeps,[1000,150]);
+  assert.equal(h.calls.filter(c=>c.body?.action==='open').length,1);
+  assert.equal(h.commands.activeCover,null);await h.commands.stop();
+});
+test('concurrent stop requests share one operation; unconfirmed Stop stays an error',async()=>{
+  const h=harness();h.commands.activeCover='device';let calls=0,release;
+  h.commands.request=async()=>{calls++;await new Promise(r=>{release=r;});return {sent:true};};
+  const a=h.commands.stopCover(),b=h.commands.stopCover();assert.equal(calls,1);release();await Promise.all([a,b]);assert.equal(h.commands.activeCover,null);
+  h.commands.activeCover='device';calls=0;h.commands.request=async()=>{calls++;return {sent:false};};
+  await assert.rejects(h.commands.stopCover(),/parada.*não confirmada/);assert.equal(calls,2);assert.equal(h.commands.activeCover,'device');
+  h.commands.activeCover=null;
+});
 test('old or duplicate observations, and malformed direction, cause no action',async()=>{
   for(const extra of [{ageMs:701},{ageMs:NaN},{sequence:0},{type:'curtain-motion',direction:'unlock'}]){
     const h=harness();h.arm();await assert.rejects(h.send(extra));assert.ok(!h.calls.some(c=>c.url.endsWith('/api/action')));await h.commands.stop();

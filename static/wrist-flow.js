@@ -26,7 +26,6 @@
       let output=null;
       const valid=measurement&&Number.isFinite(measurement.x)&&Number.isFinite(measurement.y)&&measurement.x>=0&&measurement.x<=1&&measurement.y>=0&&measurement.y<=1;
       if(ambiguous){points=[];wrist=null;}
-      else if(valid){wrist={x:measurement.x,y:measurement.y};seen=timestamp;points=seed(image,wrist);}
       else if(previous&&wrist&&points.length>=5&&timestamp-seen<=1800){
         const n=points.length,from=new Float32Array(n*2),to=new Float32Array(n*2),back=new Float32Array(n*2),status=new Uint8Array(n),backStatus=new Uint8Array(n);
         for(let i=0;i<n;i++){from[i*2]=points[i].x;from[i*2+1]=points[i].y;}
@@ -49,6 +48,12 @@
         }
         if(!output){points=[];wrist=null;}
       }else {points=[];wrist=null;}
+      if(!ambiguous&&valid){
+        // Compare a new pose with independently measured image motion first.
+        // Do not reseed the tracker on a single model jump to the elbow/background.
+        const disagreement=output&&Math.hypot((measurement.x-output.x)*w,(measurement.y-output.y)*h)>18;
+        if(!disagreement){wrist={x:measurement.x,y:measurement.y};seen=timestamp;points=seed(image,wrist);output=null;}
+      }
       previous=current;last=timestamp;return output;
     }
     return {update,reset};

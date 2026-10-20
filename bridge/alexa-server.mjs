@@ -19,6 +19,7 @@ export function createAlexaBridge({port = 8877, login = new AlexaLogin(), cloud 
     '/hand-features.js': ['hand-features.js', 'text/javascript; charset=utf-8'],
     '/pointing-selector.js': ['pointing-selector.js','text/javascript; charset=utf-8'],
     '/accessible-gestures.js': ['accessible-gestures.js', 'text/javascript; charset=utf-8'],
+    '/motion-gestures.js': ['motion-gestures.js', 'text/javascript; charset=utf-8'],
     '/gesture-engine.js': ['gesture-engine.js', 'text/javascript; charset=utf-8'],
     '/gesture-preview.js': ['gesture-preview.js', 'text/javascript; charset=utf-8'],
     '/gesture-preview.css': ['gesture-preview.css', 'text/css; charset=utf-8'],
@@ -73,7 +74,7 @@ export function createAlexaBridge({port = 8877, login = new AlexaLogin(), cloud 
       if (path === '/api/gestures/arm') return send(200,commands.arm(payload.cameraId,payload.manualTargetId));
       if (path === '/api/gestures/stop') return send(200,await commands.stop());
       if (path === '/api/gestures/execute') return send(200,await commands.execute(payload));
-      if (path === '/api/gestures/report') {if(payload.phase==='stopped'||payload.phase==='error')await commands.stop();else commands.heartbeat(payload.sessionId);return send(200, gestures.update(payload));}
+      if (path === '/api/gestures/report') {if(payload.phase==='stopped'||payload.phase==='error')await commands.stop();else commands.heartbeat(payload.sessionId);return send(200, {...gestures.update(payload),...commands.status()});}
       if (path === '/api/discover') return send(200, await cloud.discover());
       if (path === '/api/channel') return send(200, await cloud.openChannel(payload.profile));
       if (path === '/api/camera/start') return send(200, await cloud.startCamera(payload.id));

@@ -27,3 +27,9 @@ test('image continuity expires and cannot survive a cut to another image',()=>{
   for(let t=1300;t<=3000;t+=100)flow.update(image(),width,height,null,t);
   assert.equal(flow.update(image(),width,height,null,3100),null);
 });
+test('independent image motion rejects a model jump but accepts an agreeing pose',()=>{
+  const flow=context.CasaWristFlow.create(cv);flow.update(image(),width,height,{x:70/width,y:58/height},1000);
+  const point=flow.update(image(3,-2),width,height,{x:.9,y:.9},1100);
+  assert.ok(point);assert.ok(Math.abs(point.x-73/width)<.01);assert.ok(Math.abs(point.y-56/height)<.01);
+  assert.equal(flow.update(image(6,-4),width,height,{x:76/width,y:54/height},1200),null);
+});

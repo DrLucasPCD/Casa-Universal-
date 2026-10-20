@@ -8,3 +8,4 @@
 #auto-target{font-size:1.5rem}#manual-target-row[hidden]{display:none}
 
 .direction-readout{border:1px solid var(--line);border-radius:16px;padding:14px;margin:18px 0;background:#151c11}.direction-readout canvas{width:240px;max-width:100%;height:150px;display:block;margin:auto}#direction-values{font-variant-numeric:tabular-nums;font-size:13px;line-height:1.5}
+.gesture-guide{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:18px 0}.gesture-guide>div{padding:15px;border:1px solid var(--line);border-radius:14px;background:#171f13}.gesture-guide strong{color:var(--green);font-size:15px}.gesture-guide p{font-size:12px;line-height:1.6;margin:10px 0 0}@media(max-width:520px){.gesture-guide{grid-template-columns:1fr}}

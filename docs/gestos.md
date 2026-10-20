@@ -35,6 +35,13 @@ dos ombros e correção da proporção da imagem. A referência neutra é suaviz
 durante a seleção. Uma mediana de três observações e confirmação temporal reduzem
 oscilações isoladas. Saltos grandes precisam de outra observação consistente.
 
+“Lado do corpo” escolhe qual braço controla. O painel informa “Punho esquerdo”
+ou “Punho direito” quando o acompanha. Cada lado guarda suas próprias direções
+3D: ao trocar de braço, as direções desse lado são recuperadas sem apagar as do
+outro. Um lado ainda não calibrado pode ser acompanhado na prévia, mas precisa
+aprender suas direções antes de selecionar aparelhos em 3D. Trocar a câmera
+invalida os perfis de ambos os lados.
+
 O rastreio visual compara o movimento medido na imagem com a nova estimativa do
 modelo antes de aceitar um salto do punho. Essa continuidade dura no máximo
 1,8 segundo e não inventa direção ou profundidade. O OK por avanço usa extensão

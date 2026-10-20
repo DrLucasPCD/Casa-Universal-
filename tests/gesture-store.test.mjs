@@ -15,6 +15,23 @@ test('old calibration gains stroke/push defaults without losing learned directio
   assert.equal(accessibility({motionMode:'continuous',projectorConfirm:'dwell'}).projectorConfirm,'dwell');
   assert.throws(()=>accessibility({projectorConfirm:'guess'}));assert.throws(()=>accessibility({motionMode:'guess'}));
 });
+test('arm direction profiles preserve the right arm while the left remains uncalibrated',async()=>{
+  const value=config();value.targets[0].tracker='arm';
+  const right=validateCalibration(value),original=right.targets[0].direction;
+  assert.deepEqual(right.targets[0].directionProfiles.arm_right.direction,original);
+  right.settings.side='left';right.targets[0].direction=null;
+  const directory=await mkdtemp(join(tmpdir(),'casa-sides-'));
+  try{
+    const store=new GestureStore({directory});await store.save(right);
+    const loaded=await new GestureStore({directory}).load();
+    assert.equal(loaded.settings.side,'left');assert.equal(loaded.targets[0].direction,null);
+    assert.deepEqual(loaded.targets[0].directionProfiles.arm_right.direction,original);
+    loaded.targets[0].directionProfiles.arm_left={direction:{x:1,y:0,z:0},tolerance:28};
+    const both=validateCalibration(loaded);assert.equal(both.targets[0].directionProfiles.arm_left.tolerance,28);
+    both.targets[0].directionProfiles.arm_left.direction.x=3;assert.throws(()=>validateCalibration(both));
+    const invalid=config();invalid.targets[0].directionProfiles={unexpected:{direction:original}};assert.throws(()=>validateCalibration(invalid));
+  }finally{await rm(directory,{recursive:true,force:true});}
+});
 test('calibration validates every target and strips unrelated data',()=>{
   const value=config();value.accessToken='must-not-save';value.targets[0].frame='must-not-save';
   const clean=validateCalibration(value);assert.equal(clean.targets[0].name,'Cortina');assert.ok(!JSON.stringify(clean).includes('must-not-save'));

@@ -63,6 +63,20 @@ test('one-time location setup persists all marks without sending device commands
   assert.equal(saved.settings.selection,'point');assert.ok(!h.requests.some(r=>r.path==='/api/gestures/execute'));
   assert.match(h.nodes.get('setup-status').textContent,/2 aparelhos/);
 });
+test('switching arms restores each learned direction and saves the inactive profile',async()=>{
+  const target={id:'cover',name:'Cortina',type:'curtain',tracker:'arm',anchor:{x:.5,y:.2},direction:{x:0,y:-1,z:0},tolerance:30,binding:{deviceId:'cover'}};
+  const h=harness({targets:[target],settings:{tracker:'arm',side:'right',selection:'direction'}});await flush();
+  const side=h.nodes.get('tracking-side');side.value='left';side.change();await flush();
+  assert.equal(target.direction,null);assert.match(h.nodes.get('setup-status').textContent,/0\/1/);
+  await h.click('save-calibration');
+  let saved=h.requests.filter(r=>r.path==='/api/gestures/config'&&r.body).at(-1).body;
+  assert.equal(saved.settings.side,'left');assert.equal(saved.targets[0].directionProfiles.arm_right.direction.y,-1);
+  side.value='right';side.change();await flush();
+  assert.match(h.nodes.get('setup-status').textContent,/1\/1/);
+  await h.click('save-calibration');saved=h.requests.filter(r=>r.path==='/api/gestures/config'&&r.body).at(-1).body;
+  assert.equal(saved.targets[0].direction.y,-1);assert.equal(saved.targets[0].tolerance,30);
+  assert.ok(!h.requests.some(r=>r.path==='/api/gestures/execute'));
+});
 test('an appliance outside the camera remains unmarked when explicitly skipped',async()=>{
   const h=harness({targets:[{id:'lamp',name:'Lamp',type:'switch',anchor:null,binding:{deviceId:'lamp'}}],settings:{tracker:'arm',selection:'point',motionMode:'continuous'}});await flush();
   await h.click('setup-locations');await h.click('skip-location');await flush();

@@ -61,6 +61,17 @@ function pose(){const points=Array.from({length:33},()=>({x:.5,y:.5,z:0,visibili
 test('arm tracking does not require detected hand landmarks or fingers',()=>{
   const result=features(pose(),{tracker:'arm',side:'right'});assert.equal(result.present,true);assert.equal(result.arm.length,2);assert.equal(result.visibleHands.length,0);assert.equal(result.y,.4);
 });
+test('left arm uses its own shoulder, elbow and wrist even when the right arm is absent',()=>{
+  const data=pose(),p=data.poseLandmarks[0];
+  p[11]={x:.65,y:.4,z:0,visibility:.95};p[12]={x:.35,y:.4,z:0,visibility:.95};
+  p[13]={x:.7,y:.65,z:0,visibility:.95};p[15]={x:.8,y:.3,z:0,visibility:.95};
+  p[14].visibility=p[16].visibility=0;
+  data.poseWorldLandmarks=[structuredClone(p)];
+  const result=features(data,{tracker:'arm',side:'left'});
+  assert.equal(result.present,true);assert.equal(result.x,.8);assert.equal(result.arm[0].x,.7);
+  assert.ok(result.direction.y<0);assert.ok(result.motion.x>0);
+  assert.equal(features(data,{tracker:'arm',side:'right'}).present,false);
+});
 test('arm tracking rejects an occluded wrist and multiple people',()=>{
   const data=pose();data.poseLandmarks[0][16].visibility=.1;assert.equal(features(data,{tracker:'arm',side:'right'}).present,false);
   data.poseLandmarks.push(data.poseLandmarks[0]);assert.equal(features(data,{tracker:'arm',side:'right'}).reason,'multiple-people');

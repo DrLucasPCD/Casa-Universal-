@@ -4,7 +4,7 @@ const TYPES = new Set(['switch','projector','curtain']);
 const REASONS=new Set(['tracked','no-hand','multiple-hands','incomplete-hand','too-small','no-direction','no-arm','no-wrist','wrist-only','image-flow','multiple-people']);
 const ID = /^[a-zA-Z0-9_-]{1,100}$/;
 const coordinate = x => Number.isFinite(x) && x >= 0 && x <= 1;
-const PROFILE_KEYS=new Set(['arm_right','arm_left','palm','finger']);
+const PROFILE_KEYS=new Set(['arm_right','arm_left','palm','finger','mac_arm_right','mac_arm_left','mac_palm','mac_finger']);
 function unitDirection(value){
   if(!value||!['x','y','z'].every(k=>Number.isFinite(value[k]))||Math.abs(Math.hypot(value.x,value.y,value.z)-1)>.01)throw new Error('Direção de calibração inválida.');
   return {x:value.x,y:value.y,z:value.z};
@@ -29,6 +29,8 @@ function binding(value) {
 export function validateCalibration(value) {
   if (!value || value.version!==1 || !Array.isArray(value.targets) || value.targets.length>12 || (value.cameraId!==null && (typeof value.cameraId!=='string'||!ID.test(value.cameraId)))) throw new Error('Calibração inválida.');
   const ids=new Set(),settings=accessibility(value.settings);
+  const secondaryCameraId=value.secondaryCameraId??null;
+  if(secondaryCameraId!==null&&(typeof secondaryCameraId!=='string'||secondaryCameraId.length>256||!/^[a-zA-Z0-9_=-]+$/.test(secondaryCameraId)))throw new Error('Calibração inválida: câmera secundária.');
   const targets=value.targets.map(target=>{
     if (!target || typeof target.id!=='string' || !ID.test(target.id) || ids.has(target.id) || !TYPES.has(target.type) || typeof target.name!=='string' || !target.name.trim() || target.name.trim().length>60) throw new Error('Alvo de calibração inválido.');
     ids.add(target.id);if(target.tracker!=null&&!['arm','palm','finger'].includes(target.tracker))throw new Error('Gestos: fonte de calibração inválida.');
@@ -50,7 +52,7 @@ export function validateCalibration(value) {
     if(target.position!==null&&(!Number.isFinite(target.position)||target.position<0||target.position>100))throw new Error('Abertura inicial inválida.');
     return {id:target.id,name:target.name.trim(),type:target.type,anchor:target.anchor===null?null:point(target.anchor),direction,directionProfiles,position:target.position===null?null:target.position,binding:binding(target.binding),tracker:target.tracker??null,radius:Number.isFinite(target.radius)?Math.min(.16,Math.max(.025,target.radius)):.085,tolerance:Number.isFinite(target.tolerance)?Math.min(36,Math.max(12,target.tolerance)):24};
   });
-  return {version:1,cameraId:value.cameraId,targets,settings};
+  return {version:1,cameraId:value.cameraId,secondaryCameraId,targets,settings};
 }
 export class GestureStore {
   constructor({directory=resolve('data/gestures')}={}) {

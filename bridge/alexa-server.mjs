@@ -22,6 +22,8 @@ export function createAlexaBridge({port = 8877, login = new AlexaLogin(), cloud 
     '/motion-gestures.js': ['motion-gestures.js', 'text/javascript; charset=utf-8'],
     '/gesture-engine.js': ['gesture-engine.js', 'text/javascript; charset=utf-8'],
     '/gesture-preview.js': ['gesture-preview.js', 'text/javascript; charset=utf-8'],
+    '/camera-comparison.js': ['camera-comparison.js','text/javascript; charset=utf-8'],
+    '/dual-camera.js': ['dual-camera.js','text/javascript; charset=utf-8'],
     '/gesture-preview.css': ['gesture-preview.css', 'text/css; charset=utf-8'],
     '/alexa-setup.css': ['echo-camera.css', 'text/css; charset=utf-8']};
   const visionAssets = {'/vision/jsfeat.js': [resolve(ROOT,'data/vision/jsfeat.js'),'text/javascript; charset=utf-8'],'/vision/vision_bundle.js': [resolve(ROOT, 'data/vision/vision_bundle.js'), 'text/javascript; charset=utf-8'],

@@ -1,7 +1,9 @@
 (() => {
   'use strict';
   const byId = id => document.getElementById(id);
-  const gestures = window.CasaGesturePreview.create({video: byId('echo-video'), canvas: byId('hand-overlay')});
+  let comparison=null;
+  const gestures = window.CasaGesturePreview.create({video: byId('echo-video'), canvas: byId('hand-overlay'),onObservation:value=>comparison?.primary(value)});
+  if(window.CasaDualCamera)comparison=window.CasaDualCamera.create({client:gestures});
   const rtc = window.CasaAlexaRTC.create({video: byId('echo-video'), message: byId('rtc-status'), onStop: () => gestures.stop()});
   const messages = {disconnected: 'Conexão ainda não iniciada.', starting: 'Preparando a página de login…', awaiting_login: 'A página de login está pronta. Toque em Continuar login e entre na sua conta Amazon.', authenticated: 'Login concluído. Cliente Amazon registrado; o vídeo ainda será verificado.', authenticated_memory: 'Login concluído. Sessão disponível apenas na memória.', refreshing: 'Renovando a conexão salva…', login_expired: 'A Amazon não renovou o acesso. Reinicie a ponte para entrar novamente.', login_failed: 'O login não foi concluído. Você pode tentar novamente.'};
   let opening = false, busy = false, operationId = 0, deviceFingerprint = '', lastAuthenticated = null, latestState = {};

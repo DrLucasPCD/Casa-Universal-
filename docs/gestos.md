@@ -71,3 +71,37 @@ O pulso de um segundo foi testado fisicamente com confirmação de abertura curt
 e parada. O fluxo ao vivo pela Echo — apontar para a cortina, subir o punho e
 retornar sem fechar na volta — também foi confirmado no teste de uso.
 Mudar a câmera ou a posição de uso pode exigir reaprender direções.
+
+
+## Duas câmeras: Echo e MacBook
+
+Em “Segunda câmera · MacBook”, inicie a câmera integrada e ensine suas direções
+usando o mesmo braço escolhido para a Echo. As duas imagens precisam mostrar o
+punho e o cotovelo. Mantenha as câmeras e sua posição de uso fixas após aprender.
+Os perfis do MacBook ficam separados dos perfis da Echo, por câmera e por braço.
+Não é necessário reaprender a Echo ao configurar o MacBook.
+
+O ensaio de dez segundos compara a seleção da Echo, a do MacBook e a concordância
+das duas com o aparelho indicado pelo usuário. Ele conta seleções corretas,
+outros alvos e ausências. Essas observações consecutivas não são amostras
+independentes nem uma estimativa geral da precisão. Um resultado sem seleções
+erradas, mas também sem seleções corretas, não representa uma melhoria.
+Os comandos reais ficam bloqueados durante aprendizado e medição e não são
+reativados automaticamente. É possível cancelar sem apagar os perfis anteriores.
+
+Se um aparelho ficar errado no MacBook, escolha-o no campo do ensaio e use
+“Reaprender só este aparelho no MacBook”. Os outros aparelhos são preservados.
+Se mudar a posição física de uma câmera, refaça suas direções. Trocar a câmera
+selecionada invalida o uso dos perfis da câmera anterior.
+
+“Exigir concordância” é opcional e começa desligado. Só permite uma nova seleção
+quando as câmeras concordam sobre o mesmo aparelho com leituras recentes. Sem
+concordância, a seleção fica bloqueada. Os movimentos após selecionar a cortina
+ou o projetor continuam sendo acompanhados pela Echo. Não há triangulação ou
+profundidade estéreo medida: cada modelo estima a direção no seu próprio sistema
+de coordenadas, sem misturar os vetores das duas câmeras. As leituras são
+aproximadas por tempo local e não têm sincronização física de captura.
+
+A câmera integrada usa somente vídeo, sem áudio. O modelo roda localmente e não
+grava imagens ou trajetórias. Ocultar a aba ou encerrar a câmera libera o acesso
+à câmera integrada. A sessão de imagem da Echo continua usando a ponte Amazon.

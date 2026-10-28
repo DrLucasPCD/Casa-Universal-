@@ -32,6 +32,11 @@ test('arm direction profiles preserve the right arm while the left remains uncal
     const invalid=config();invalid.targets[0].directionProfiles={unexpected:{direction:original}};assert.throws(()=>validateCalibration(invalid));
   }finally{await rm(directory,{recursive:true,force:true});}
 });
+test('secondary camera calibration keeps distinct world directions and rejects malformed camera identifiers',()=>{
+  const value=config();value.secondaryCameraId='mac-camera-123';value.targets[0].directionProfiles={mac_arm_left:{direction:{x:1,y:0,z:0},tolerance:28}};
+  const clean=validateCalibration(value);assert.equal(clean.secondaryCameraId,'mac-camera-123');assert.equal(clean.targets[0].direction.y,1);assert.equal(clean.targets[0].directionProfiles.mac_arm_left.direction.x,1);
+  value.secondaryCameraId='https://invalid/camera';assert.throws(()=>validateCalibration(value));
+});
 test('calibration validates every target and strips unrelated data',()=>{
   const value=config();value.accessToken='must-not-save';value.targets[0].frame='must-not-save';
   const clean=validateCalibration(value);assert.equal(clean.targets[0].name,'Cortina');assert.ok(!JSON.stringify(clean).includes('must-not-save'));

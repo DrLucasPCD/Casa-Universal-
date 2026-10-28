@@ -5,7 +5,7 @@
 <title>Casa · Visão e gestos</title>
 <link rel="stylesheet" href="/alexa-setup.css"><link rel="stylesheet" href="/gesture-preview.css">
 <script src="/hand-features.js" defer></script><script src="/gesture-engine.js" defer></script>
-<script src="/pointing-selector.js" defer></script><script src="/motion-gestures.js" defer></script><script src="/accessible-gestures.js" defer></script><script src="/gesture-preview.js" defer></script><script src="/alexa-webrtc.js" defer></script><script src="/alexa-setup.js" defer></script>
+<script src="/pointing-selector.js" defer></script><script src="/motion-gestures.js" defer></script><script src="/accessible-gestures.js" defer></script><script src="/gesture-preview.js" defer></script><script src="/camera-comparison.js" defer></script><script src="/dual-camera.js" defer></script><script src="/alexa-webrtc.js" defer></script><script src="/alexa-setup.js" defer></script>
 </head>
 <body><main>
 <header><span class="brand">casa.</span><span class="tag">VISÃO LOCAL · ECHO SHOW</span></header>
@@ -24,7 +24,21 @@
 <p id="rtc-status" role="status">Nenhuma imagem recebida.</p><p id="video" class="small">Vídeo: ainda não conectado.</p>
 <div class="selection-readout"><span>ALVO SELECIONADO</span><strong id="selected-target">Nenhum aparelho selecionado</strong></div>
 <details class="camera-options"><summary>Fonte de vídeo e diagnóstico</summary><div class="actions"><button id="discover" disabled>Buscar câmeras da conta</button><select id="gateway" aria-label="Canal Amazon"><option value="modern">Canal atual · América</option><option value="legacy">Canal anterior · América</option><option value="push">Notificações · diagnóstico</option></select><button id="channel" disabled>Testar canal de vídeo</button></div><p id="channel-status"></p><div id="devices"></div><pre id="diagnostic"></pre></details>
-</section>
+<details class="dual-panel" open><summary>Segunda câmera · MacBook</summary>
+<p>Vamos comparar a Echo e o MacBook observando o mesmo gesto. Posicione o MacBook de lado, com ombro, cotovelo e punho no enquadramento das duas câmeras.</p>
+<label>Câmera do Mac<select id="mac-camera"><option value="">Câmera integrada · automática</option></select></label>
+<div class="actions"><button id="mac-start">Abrir câmera do MacBook</button><button id="mac-stop" class="secondary" disabled>Encerrar câmera do MacBook</button></div>
+<div class="preview"><video id="mac-video" autoplay muted playsinline></video><canvas id="mac-overlay" aria-label="Punho e antebraço vistos pela câmera do MacBook"></canvas></div>
+<p id="mac-status" role="status">Câmera do MacBook desligada. Somente vídeo; nenhum acesso ao microfone.</p>
+<button id="mac-calibrate" class="secondary" disabled>Ensinar direções na câmera do MacBook</button><button id="camera-experiment-cancel" class="secondary" hidden>Cancelar ensaio / aprendizado</button><p id="mac-learning" role="status">Cada câmera aprende suas próprias direções. As direções da Echo permanecem salvas.</p>
+<div class="camera-comparison"><p><strong>Echo</strong><span id="echo-observation">Sem leitura recente</span></p><p><strong>MacBook</strong><span id="mac-observation">Sem leitura recente</span></p><p id="camera-consensus" role="status">Aguardando as câmeras.</p></div>
+<label><input id="require-consensus" type="checkbox" disabled> Exigir concordância das duas câmeras para selecionar um aparelho.</label>
+<p class="small">A seleção pode usar a concordância entre as câmeras. Depois de selecionar, o movimento de controle continua sendo acompanhado pela Echo. Não fazemos uma média dos eixos 3D de câmeras em posições diferentes.</p>
+<h3>Ensaio de precisão · sem acionar aparelhos</h3><label>Para qual aparelho vou apontar<select id="camera-test-target"></select></label><button id="mac-calibrate-target" class="secondary" disabled>Reaprender só este aparelho no MacBook</button><button id="camera-test" class="secondary" disabled>Medir por 10 segundos</button>
+<p id="camera-test-status" role="status">Ensine o MacBook, escolha um alvo e mantenha a direção durante o ensaio. Os comandos reais ficam desativados.</p>
+<table class="camera-results"><thead><tr><th>Modo</th><th>Leituras no ensaio</th></tr></thead><tbody><tr><th>Echo</th><td id="test-echo">—</td></tr><tr><th>MacBook</th><td id="test-mac">—</td></tr><tr><th>Concordância</th><td id="test-both">—</td></tr></tbody></table>
+<p class="small">Resultados deste ensaio, sem estimativa de precisão geral. As imagens são processadas localmente e não são gravadas. As câmeras não têm sincronização de hardware; teste apontando com calma.</p>
+</details></section>
 <section class="panel gesture-panel"><p class="eyebrow">02 · ENSINE O SEU GESTO</p><h2>Da mão à intenção.</h2>
 <p class="small">O reconhecimento acontece neste navegador. Não identifica objetos sozinho: ele acompanha o antebraço e destaca o aparelho para o qual você aponta. Marque os locais uma vez na imagem. Não é preciso esticar os dedos ou fazer pinça.</p>
 <details class="accessibility-settings"><summary>Do seu jeito · ajustes do reconhecimento</summary>

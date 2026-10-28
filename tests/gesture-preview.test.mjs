@@ -11,7 +11,7 @@ function harness({targets=[],settings={tracker:'palm'},reportStatus=null,armSess
   const video={readyState:4,videoWidth:1280,videoHeight:720,srcObject:{getVideoTracks:()=>[{readyState:'live'}]},addEventListener(){},requestVideoFrameCallback(fn){frames.set(++id,fn);return id;},cancelVideoFrameCallback(id){frames.delete(id);}};
   const ctx=new Proxy({arc(){arcs++;}},{get:(o,k)=>o[k]??(()=>{})});
   const canvas={...element(),getContext:()=>ctx,getBoundingClientRect:()=>({left:0,top:0,width:1280,height:720})};
-  const context={window:{},document,performance:{now:()=>now},crypto:{randomUUID:()=>'target'},addEventListener(){},setInterval(fn){tick=fn;return 1;},clearInterval(){tick=null;},
+  const context={structuredClone,window:{},document,performance:{now:()=>now},crypto:{randomUUID:()=>'target'},addEventListener(){},setInterval(fn){tick=fn;return 1;},clearInterval(){tick=null;},
     createImageBitmap:async()=>({close(){}}),Worker:class {constructor(){workers.push(this);}postMessage(){}terminate(){this.terminated=true;}},
     fetch:async(path,options)=>{requests.push({path,body:options?.body?JSON.parse(options.body):null});return{ok:true,json:async()=>path==='/api/gestures/config'?(options?.body?JSON.parse(options.body):{version:1,cameraId:null,targets,settings}):path==='/api/gestures/arm'?{sessionId:armSession}:path==='/api/gestures/report'&&reportStatus?reportStatus:path==='/api/gestures/central'?{address:'http://192.168.68.117',devices:[]}:{}};}};
   vm.createContext(context);for(const file of ['pointing-selector.js','motion-gestures.js','accessible-gestures.js','hand-features.js','gesture-preview.js'])vm.runInContext(source(file),context);
@@ -88,6 +88,22 @@ function armFrame(timestamp,{elbow=true,y=.4}={}){
   return {type:'result',timestamp,elapsedMs:50,poseLandmarks:[points],poseWorldLandmarks:[structuredClone(points)]};
 }
 function pointedTarget(type='curtain'){return{id:'appliance',name:'Aparelho',type,anchor:{x:.5,y:.1},binding:{deviceId:'appliance'}};}
+test('experiment interlock prevents arming and a secondary-camera veto prevents dwell activation',async()=>{
+  const h=harness({targets:[pointedTarget('switch')],settings:{tracker:'arm',selection:'point'},armSession:'session'});
+  await flush();h.client.setCamera('camera');await h.click('hand-start');h.result({type:'ready'});
+  h.client.setExperimentLock(true);await h.click('enable-control');
+  assert.ok(!h.requests.some(r=>r.path==='/api/gestures/arm'));assert.equal(h.nodes.get('enable-control').disabled,true);
+  h.client.setExperimentLock(false);h.client.setSelectionValidator(()=>false);
+  for(let now=1000;now<=2500;now+=100){h.setNow(now);h.result(armFrame(now));}
+  assert.equal((h.nodes.get('gesture-events')?.children||[]).length,0);h.client.stop();
+});
+test('saving MacBook directions never overwrites either Echo arm profile',async()=>{
+  const target={...pointedTarget(),tracker:'arm',direction:{x:0,y:-1,z:0},directionProfiles:{arm_left:{direction:{x:0,y:-1,z:0},tolerance:30},arm_right:{direction:{x:1,y:0,z:0},tolerance:26}}};
+  const h=harness({targets:[target],settings:{tracker:'arm',side:'left',selection:'direction'}});await flush();
+  await h.client.saveSecondary('mac-device',{appliance:{direction:{x:0,y:0,z:-1},tolerance:28}});
+  const saved=h.requests.filter(r=>r.path==='/api/gestures/config'&&r.body).at(-1).body;
+  assert.equal(saved.secondaryCameraId,'mac-device');assert.equal(saved.targets[0].direction.y,-1);assert.equal(saved.targets[0].directionProfiles.arm_right.direction.x,1);assert.equal(saved.targets[0].directionProfiles.mac_arm_left.direction.z,-1);
+});
 test('new preview recognizes a projector stroke once, ignores its return, and never sends dwell OK',async()=>{
   const h=harness({targets:[pointedTarget('projector')],settings:{tracker:'arm',selection:'point'}});
   await flush();await h.click('hand-start');h.result({type:'ready'});
